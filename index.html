@@ -18,7 +18,6 @@
         .action-btn {
             @apply py-8 rounded-[2rem] font-black text-white transition-all active:scale-95 shadow-lg text-xl uppercase tracking-widest;
         }
-        /* Verhindert Textauswahl beim schnellen Tippen */
         .no-select {
             -webkit-user-select: none;
             user-select: none;
@@ -53,7 +52,7 @@
 
         <!-- Verkauf View -->
         <div id="tab-sell" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <!-- linke Seite: Auswahl -->
+            <!-- linke Seite -->
             <div class="lg:col-span-5 space-y-6">
                 <div class="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-200">
                     <h2 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Marken Anzahl</h2>
@@ -77,7 +76,7 @@
                 </div>
             </div>
 
-            <!-- rechte Seite: Numpad & Zahlung -->
+            <!-- rechte Seite: Numpad -->
             <div class="lg:col-span-7 bg-white p-8 rounded-[3rem] shadow-sm border border-slate-200">
                 <div class="flex justify-between items-end mb-6">
                     <h2 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Gegebenes Bargeld</h2>
@@ -87,7 +86,6 @@
                     </div>
                 </div>
 
-                <!-- Optimiertes Numpad -->
                 <div class="grid grid-cols-3 gap-4 mb-8">
                     <button onclick="addDigit('1')" class="numpad-btn">1</button>
                     <button onclick="addDigit('2')" class="numpad-btn">2</button>
@@ -103,7 +101,7 @@
                     <button onclick="addDigit('00')" class="numpad-btn text-2xl">00</button>
                 </div>
 
-                <div id="changeBox" class="bg-green-600 p-6 rounded-[2rem] mb-8 hidden shadow-xl shadow-green-100 animate-bounce-short">
+                <div id="changeBox" class="bg-green-600 p-6 rounded-[2rem] mb-8 hidden shadow-xl shadow-green-100">
                     <div class="flex justify-between items-center text-white">
                         <span class="font-bold uppercase text-xs tracking-widest">Wechselgeld</span>
                         <span id="changeAmount" class="text-4xl font-black tabular-nums">0,00 €</span>
@@ -111,8 +109,8 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
-                    <button onclick="processTransaction('buy')" id="buyBtn" class="action-btn bg-green-600 hover:bg-green-700 disabled:opacity-20 disabled:grayscale" disabled>KASSIEREN</button>
-                    <button onclick="processTransaction('return')" id="returnBtn" class="action-btn bg-orange-500 hover:bg-orange-600 disabled:opacity-20 disabled:grayscale" disabled>RETOURE</button>
+                    <button onclick="processTransaction('buy')" id="buyBtn" class="action-btn bg-green-600 hover:bg-green-700 disabled:opacity-20" disabled>KASSIEREN</button>
+                    <button onclick="processTransaction('return')" id="returnBtn" class="action-btn bg-orange-500 hover:bg-orange-600 disabled:opacity-20" disabled>RETOURE</button>
                 </div>
             </div>
         </div>
@@ -158,7 +156,7 @@
         <div id="settings-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[110] flex items-center justify-center p-4 hidden">
             <div class="bg-white rounded-[3rem] p-10 max-w-md w-full shadow-2xl">
                 <h2 class="text-2xl font-black text-slate-800 mb-2">Markenpreis ⚙️</h2>
-                <p class="text-slate-400 text-xs font-bold uppercase mb-8">Einstellung wird für alle synchronisiert</p>
+                <p class="text-slate-400 text-xs font-bold uppercase mb-8">Synchronisierte Einstellung</p>
                 <div class="relative mb-10">
                     <input type="number" id="markenWertInput" step="0.10" class="w-full bg-slate-100 border-2 border-slate-200 rounded-3xl p-6 text-5xl font-black text-center outline-none focus:border-blue-500">
                     <span class="absolute right-8 top-1/2 -translate-y-1/2 text-slate-300 font-black text-2xl">€</span>
@@ -171,14 +169,14 @@
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-10 py-5 rounded-full shadow-2xl transition-all opacity-0 pointer-events-none z-[200] font-black uppercase text-xs tracking-widest"></div>
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-10 py-5 rounded-full shadow-2xl transition-all opacity-0 pointer-events-none z-[200] font-black uppercase text-xs tracking-widest text-center"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, doc, setDoc, onSnapshot, updateDoc, arrayUnion, arrayRemove, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        const firebaseConfig = {
+       const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
@@ -186,48 +184,58 @@
   messagingSenderId: "899854905140",
   appId: "1:899854905140:web:94be886a048356c7fb3f61"
 };
-
         let user = null;
         let MARKEN_WERT = 0.50;
         let currentQuantity = 0;
         let cashTyped = "0";
         let stats = { sold: 0, returned: 0, cash: 0, markenWert: 0.50, history: [] };
 
-        // Firebase Auth
+        // Firebase Auth & Init
         const initSession = async () => {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (e) {
+                showToast("Login Fehler!");
+                console.error(e);
             }
         };
 
         onAuthStateChanged(auth, (u) => {
-            user = u;
-            if (user) {
+            if (u) {
+                user = u;
                 document.getElementById('syncStatus').classList.replace('bg-red-500', 'bg-green-500');
                 document.getElementById('statusText').innerText = "LIVE";
                 startSync();
             }
         });
 
-        function startSync() {
+        async function startSync() {
             if (!user) return;
             const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
             
+            // Erst prüfen ob Doc existiert, sonst anlegen
+            const initialCheck = await getDoc(statsRef);
+            if (!initialCheck.exists()) {
+                await setDoc(statsRef, stats);
+            }
+
             onSnapshot(statsRef, (snap) => {
                 if (snap.exists()) {
                     stats = snap.data();
                     MARKEN_WERT = stats.markenWert || 0.50;
                     document.getElementById('valLabel').innerText = MARKEN_WERT.toFixed(2).replace('.', ',');
                     updateUI();
-                } else {
-                    setDoc(statsRef, stats);
                 }
-            }, (err) => showToast("Cloud-Fehler!"));
+            }, (err) => {
+                showToast("Cloud-Sync Fehler!");
+                console.error(err);
+            });
         }
 
-        // Logic
         window.switchTab = (tab) => {
             document.getElementById('tab-sell').classList.toggle('hidden', tab !== 'sell');
             document.getElementById('tab-stats').classList.toggle('hidden', tab !== 'stats');
@@ -259,7 +267,7 @@
         window.addDigit = (digit) => {
             if (cashTyped === "0" && digit !== '00') cashTyped = digit;
             else if (cashTyped !== "0") {
-                if (cashTyped.length < 8) cashTyped += digit; // Limit input
+                if (cashTyped.length < 8) cashTyped += digit;
             }
             updateCashDisplay();
         };
@@ -301,18 +309,17 @@
 
             const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
             try {
-                // Lokale Optimierung: Wir holen den aktuellsten Stand kurz vor dem Update
                 const docSnap = await getDoc(statsRef);
                 const currentData = docSnap.data();
 
                 await updateDoc(statsRef, {
-                    sold: type === 'buy' ? currentData.sold + currentQuantity : currentData.sold,
-                    returned: type === 'return' ? currentData.returned + currentQuantity : currentData.returned,
-                    cash: type === 'buy' ? currentData.cash + total : currentData.cash - total,
+                    sold: type === 'buy' ? (currentData.sold || 0) + currentQuantity : (currentData.sold || 0),
+                    returned: type === 'return' ? (currentData.returned || 0) + currentQuantity : (currentData.returned || 0),
+                    cash: type === 'buy' ? (currentData.cash || 0) + total : (currentData.cash || 0) - total,
                     history: arrayUnion(transaction)
                 });
                 
-                showToast(type === 'buy' ? 'GELDEINGANG ✅' : 'RÜCKGABE ↩️');
+                showToast(type === 'buy' ? 'ERFOLG ✅' : 'RETOURE ✅');
                 currentQuantity = 0;
                 cashTyped = "0";
                 updatePrice();
@@ -321,7 +328,7 @@
         };
 
         window.deleteTransaction = async (id) => {
-            if (!user || !confirm('Buchung wirklich stornieren?')) return;
+            if (!user || !confirm('Buchung stornieren?')) return;
             const item = stats.history.find(h => h.id === id);
             if (!item) return;
             
@@ -335,7 +342,6 @@
             showToast('STORNIERT 🗑️');
         };
 
-        // Admin & Settings
         window.requestSettingsAccess = () => {
             document.getElementById('pinInput').value = "";
             document.getElementById('auth-modal').classList.remove('hidden');
@@ -348,8 +354,7 @@
                 document.getElementById('markenWertInput').value = MARKEN_WERT;
                 document.getElementById('settings-modal').classList.remove('hidden');
             } else {
-                showToast("FALSCHE PIN!");
-                document.getElementById('pinInput').value = "";
+                showToast("PIN FALSCH!");
             }
         };
 
@@ -358,40 +363,33 @@
 
         window.saveMarkenWert = async () => {
             if (!user) return;
-            const valStr = document.getElementById('markenWertInput').value;
-            const newVal = parseFloat(valStr.replace(',', '.'));
-            
-            if (isNaN(newVal) || newVal <= 0) {
-                showToast("Ungültiger Preis!");
-                return;
-            }
+            const newVal = parseFloat(document.getElementById('markenWertInput').value);
+            if (isNaN(newVal) || newVal <= 0) return;
 
             try {
                 const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
                 await updateDoc(statsRef, { markenWert: newVal });
                 closeSettings();
-                showToast("PREIS AKTUALISIERT ⚙️");
-            } catch(e) {
-                showToast("Fehler beim Speichern!");
-            }
+                showToast("PREIS GEÄNDERT ⚙️");
+            } catch(e) { showToast("Fehler!"); }
         };
 
         window.resetStats = async () => {
-            if (!user || !confirm('KOMPLETTE DATENBANK LÖSCHEN?')) return;
+            if (!user || !confirm('ALLES LÖSCHEN?')) return;
             const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
             await setDoc(statsRef, { sold: 0, returned: 0, cash: 0, markenWert: MARKEN_WERT, history: [] });
         };
 
         function updateUI() {
-            document.getElementById('statMarken').innerText = stats.sold;
-            document.getElementById('statReturns').innerText = stats.returned;
-            document.getElementById('statTotal').innerText = stats.cash.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
+            document.getElementById('statMarken').innerText = stats.sold || 0;
+            document.getElementById('statReturns').innerText = stats.returned || 0;
+            document.getElementById('statTotal').innerText = (stats.cash || 0).toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
             
             const historyDiv = document.getElementById('history');
             const sorted = [...(stats.history || [])].sort((a,b) => b.id - a.id);
             
             if (sorted.length === 0) {
-                historyDiv.innerHTML = '<div class="py-20 text-center text-slate-300 font-bold uppercase tracking-widest text-xs">Noch keine Buchungen</div>';
+                historyDiv.innerHTML = '<div class="py-20 text-center text-slate-300 font-bold text-xs">Keine Daten</div>';
                 return;
             }
 
@@ -408,8 +406,8 @@
                     </div>
                     <div class="flex items-center gap-6">
                         <p class="font-black text-slate-800 tabular-nums">${item.money.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'})}</p>
-                        <button onclick="deleteTransaction(${item.id})" class="p-2 text-slate-300 hover:text-red-500 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                        <button onclick="deleteTransaction(${item.id})" class="p-2 text-slate-300 hover:text-red-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
                         </button>
                     </div>
                 </div>
@@ -424,7 +422,6 @@
         }
 
         initSession();
-        switchTab('sell');
     </script>
 </body>
 </html>
