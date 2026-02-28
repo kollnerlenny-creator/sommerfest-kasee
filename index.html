@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kasse Sommerfest - Cloud Edition</title>
+    <title>Kasse Sommerfest - Touch-Optimiert</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
@@ -11,12 +11,17 @@
             font-family: 'Inter', sans-serif; 
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
+            overscroll-behavior: none;
         }
+        /* Massive Touch Buttons */
         .numpad-btn {
-            @apply bg-white hover:bg-slate-50 text-3xl md:text-4xl font-black py-8 md:py-10 rounded-[2rem] transition-all active:scale-95 shadow-sm border-2 border-slate-200 active:border-blue-500 flex items-center justify-center text-slate-700;
+            @apply bg-white active:bg-blue-600 active:text-white text-4xl font-black py-10 rounded-[2.5rem] transition-all shadow-md border-2 border-slate-200 flex items-center justify-center text-slate-700 select-none;
         }
         .action-btn {
-            @apply py-8 rounded-[2rem] font-black text-white transition-all active:scale-95 shadow-lg text-xl uppercase tracking-widest;
+            @apply py-10 rounded-[2.5rem] font-black text-white transition-all active:scale-95 shadow-xl text-xl uppercase tracking-widest select-none;
+        }
+        .quantity-btn {
+            @apply w-24 h-24 rounded-[2rem] flex items-center justify-center text-4xl font-black transition-all active:scale-90 select-none;
         }
         .no-select {
             -webkit-user-select: none;
@@ -28,60 +33,58 @@
 
     <div id="app" class="max-w-6xl mx-auto p-4 md:p-6">
         <!-- Header -->
-        <header class="flex flex-col md:flex-row justify-between items-center mb-6 bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-200 gap-4">
+        <header class="flex justify-between items-center mb-6 bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-200">
             <div class="flex items-center gap-4">
                 <div class="bg-blue-600 p-4 rounded-3xl shadow-blue-200 shadow-lg">
                     <span class="text-2xl">☀️</span>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-black text-slate-800 tracking-tight">Kasse Sommerfest</h1>
+                    <h1 class="text-2xl font-black text-slate-800 tracking-tight">Kasse</h1>
                     <div class="flex items-center gap-2">
-                        <span id="syncStatus" class="w-3 h-3 rounded-full bg-red-500 transition-colors duration-500"></span>
-                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Cloud: <span id="statusText">Verbinde...</span></p>
+                        <span id="syncStatus" class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                        <p id="statusText" class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Lokal-Modus</p>
                     </div>
                 </div>
             </div>
             <nav class="flex gap-2 bg-slate-100 p-2 rounded-[2rem]">
-                <button onclick="switchTab('sell')" id="nav-sell" class="px-8 py-3 rounded-[1.5rem] font-black transition-all">Verkauf</button>
-                <button onclick="switchTab('stats')" id="nav-stats" class="px-8 py-3 rounded-[1.5rem] font-black transition-all">Bilanz</button>
-                <button onclick="requestSettingsAccess()" class="p-3 text-slate-500 hover:text-blue-600 transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                </button>
+                <button onclick="switchTab('sell')" id="nav-sell" class="px-8 py-3 rounded-[1.5rem] font-black transition-all bg-white text-slate-800 shadow-sm">Verkauf</button>
+                <button onclick="switchTab('stats')" id="nav-stats" class="px-8 py-3 rounded-[1.5rem] font-black transition-all text-slate-400">Bilanz</button>
+                <button onclick="requestSettingsAccess()" class="p-3 text-slate-400">⚙️</button>
             </nav>
         </header>
 
         <!-- Verkauf View -->
         <div id="tab-sell" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <!-- linke Seite -->
+            <!-- Linke Seite: Menge -->
             <div class="lg:col-span-5 space-y-6">
                 <div class="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-200">
-                    <h2 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Marken Anzahl</h2>
+                    <h2 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6 text-center">Marken Anzahl</h2>
                     <div class="flex items-center justify-between gap-4 mb-8">
-                        <button onclick="changeQuantity(-1)" class="w-20 h-20 rounded-3xl bg-slate-100 text-slate-800 text-4xl font-black shadow-inner">-</button>
+                        <button onclick="changeQuantity(-1)" class="quantity-btn bg-slate-100 text-slate-800">－</button>
                         <div class="text-center flex-1">
-                            <span id="quantity" class="text-8xl font-black text-slate-800 tabular-nums">0</span>
+                            <span id="quantity" class="text-9xl font-black text-slate-800 tabular-nums">0</span>
                         </div>
-                        <button onclick="changeQuantity(1)" class="w-20 h-20 rounded-3xl bg-blue-100 text-blue-600 text-4xl font-black shadow-inner">+</button>
+                        <button onclick="changeQuantity(1)" class="quantity-btn bg-blue-100 text-blue-600">＋</button>
                     </div>
-                    <div class="grid grid-cols-3 gap-3">
-                        <button onclick="setQuantity(5)" class="bg-slate-50 py-4 rounded-2xl font-black text-slate-600 border border-slate-100">+5</button>
-                        <button onclick="setQuantity(10)" class="bg-slate-50 py-4 rounded-2xl font-black text-slate-600 border border-slate-100">+10</button>
-                        <button onclick="setQuantity(20)" class="bg-slate-50 py-4 rounded-2xl font-black text-slate-600 border border-slate-100">+20</button>
+                    <div class="grid grid-cols-3 gap-4">
+                        <button onclick="setQuantity(5)" class="bg-slate-50 py-6 rounded-3xl font-black text-slate-600 border-2 border-slate-100 active:bg-slate-200">+5</button>
+                        <button onclick="setQuantity(10)" class="bg-slate-50 py-6 rounded-3xl font-black text-slate-600 border-2 border-slate-100 active:bg-slate-200">+10</button>
+                        <button onclick="setQuantity(20)" class="bg-slate-50 py-6 rounded-3xl font-black text-slate-600 border-2 border-slate-100 active:bg-slate-200">+20</button>
                     </div>
                 </div>
 
-                <div class="bg-slate-900 p-8 rounded-[3rem] shadow-2xl text-center">
+                <div class="bg-slate-900 p-10 rounded-[3rem] shadow-2xl text-center">
                     <p class="text-slate-400 font-bold uppercase text-[10px] tracking-widest mb-2">Gesamtbetrag (á <span id="valLabel">0,50</span>€)</p>
-                    <h2 id="totalPrice" class="text-6xl font-black text-white tabular-nums">0,00 €</h2>
+                    <h2 id="totalPrice" class="text-7xl font-black text-white tabular-nums">0,00 €</h2>
                 </div>
             </div>
 
-            <!-- rechte Seite: Numpad -->
+            <!-- Rechte Seite: Numpad -->
             <div class="lg:col-span-7 bg-white p-8 rounded-[3rem] shadow-sm border border-slate-200">
-                <div class="flex justify-between items-end mb-6">
-                    <h2 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Gegebenes Bargeld</h2>
+                <div class="flex justify-between items-center mb-8 bg-slate-50 p-6 rounded-[2rem]">
+                    <h2 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Gegeben:</h2>
                     <div class="text-right">
-                        <span id="cashInput" class="text-6xl font-black text-slate-800 tabular-nums">0.00</span>
+                        <span id="cashInput" class="text-6xl font-black text-slate-800 tabular-nums">0,00</span>
                         <span class="text-2xl text-slate-400 font-bold">€</span>
                     </div>
                 </div>
@@ -101,16 +104,16 @@
                     <button onclick="addDigit('00')" class="numpad-btn text-2xl">00</button>
                 </div>
 
-                <div id="changeBox" class="bg-green-600 p-6 rounded-[2rem] mb-8 hidden shadow-xl shadow-green-100">
+                <div id="changeBox" class="bg-green-600 p-8 rounded-[2.5rem] mb-8 hidden shadow-xl shadow-green-200">
                     <div class="flex justify-between items-center text-white">
                         <span class="font-bold uppercase text-xs tracking-widest">Wechselgeld</span>
-                        <span id="changeAmount" class="text-4xl font-black tabular-nums">0,00 €</span>
+                        <span id="changeAmount" class="text-5xl font-black tabular-nums">0,00 €</span>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
-                    <button onclick="processTransaction('buy')" id="buyBtn" class="action-btn bg-green-600 hover:bg-green-700 disabled:opacity-20" disabled>KASSIEREN</button>
-                    <button onclick="processTransaction('return')" id="returnBtn" class="action-btn bg-orange-500 hover:bg-orange-600 disabled:opacity-20" disabled>RETOURE</button>
+                    <button onclick="processTransaction('buy')" id="buyBtn" class="action-btn bg-green-600 hover:bg-green-700 disabled:opacity-30" disabled>KASSIEREN</button>
+                    <button onclick="processTransaction('return')" id="returnBtn" class="action-btn bg-orange-500 hover:bg-orange-600 disabled:opacity-30" disabled>RETOURE</button>
                 </div>
             </div>
         </div>
@@ -119,64 +122,62 @@
         <div id="tab-stats" class="hidden">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
-                    <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Marken Verkauf</p>
+                    <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Verkauft</p>
                     <h3 id="statMarken" class="text-5xl font-black text-slate-800">0</h3>
                 </div>
                 <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
-                    <p class="text-[10px] text-orange-400 font-black uppercase tracking-widest mb-2">Marken Retoure</p>
+                    <p class="text-[10px] text-orange-400 font-black uppercase tracking-widest mb-2">Retouren</p>
                     <h3 id="statReturns" class="text-5xl font-black text-orange-600">0</h3>
                 </div>
                 <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200 bg-blue-50/30">
-                    <p class="text-[10px] text-blue-600 font-black uppercase tracking-widest mb-2">Kassenbestand</p>
+                    <p class="text-[10px] text-blue-600 font-black uppercase tracking-widest mb-2">Kasse</p>
                     <h3 id="statTotal" class="text-5xl font-black text-blue-800">0,00 €</h3>
                 </div>
             </div>
             
             <div class="bg-white rounded-[3rem] shadow-sm border border-slate-200 overflow-hidden">
                 <div class="p-8 border-b flex justify-between items-center">
-                    <h2 class="font-black text-slate-800 text-xl uppercase tracking-tighter">Journal (Cloud-Live)</h2>
-                    <button onclick="resetStats()" class="text-xs font-black text-red-500 uppercase tracking-widest p-2">Reset</button>
+                    <h2 class="font-black text-slate-800 text-xl">JOURNAL</h2>
+                    <button onclick="resetStats()" class="text-xs font-black text-red-500 uppercase p-2">Reset</button>
                 </div>
                 <div id="history" class="max-h-[60vh] overflow-y-auto divide-y divide-slate-50"></div>
             </div>
         </div>
 
-        <!-- Modals -->
-        <div id="auth-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[110] flex items-center justify-center p-4 hidden">
-            <div class="bg-white rounded-[3rem] p-10 max-w-sm w-full shadow-2xl">
-                <h2 class="text-2xl font-black text-slate-800 mb-6 text-center">Admin PIN 🔒</h2>
-                <input type="password" id="pinInput" class="w-full bg-slate-100 border-2 border-slate-200 rounded-3xl p-6 text-center text-4xl font-black tracking-[0.5em] focus:border-blue-500 outline-none" maxlength="4" inputmode="numeric">
+        <!-- PIN Modal -->
+        <div id="auth-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[110] flex items-center justify-center p-4 hidden">
+            <div class="bg-white rounded-[3rem] p-10 max-w-sm w-full">
+                <h2 class="text-2xl font-black text-slate-800 mb-6 text-center">PIN 🔒</h2>
+                <input type="password" id="pinInput" class="w-full bg-slate-100 border-2 border-slate-200 rounded-3xl p-6 text-center text-4xl font-black focus:border-blue-500 outline-none" maxlength="4" inputmode="numeric">
                 <div class="flex gap-4 mt-8">
-                    <button onclick="closeAuth()" class="flex-1 py-4 font-black uppercase text-xs text-slate-400">Zurück</button>
-                    <button onclick="checkPin()" class="flex-1 py-4 bg-slate-800 text-white rounded-2xl font-black uppercase text-xs">OK</button>
+                    <button onclick="closeAuth()" class="flex-1 py-4 font-black text-slate-400">ABBRECHEN</button>
+                    <button onclick="checkPin()" class="flex-1 py-4 bg-slate-800 text-white rounded-2xl font-black">OK</button>
                 </div>
             </div>
         </div>
 
-        <div id="settings-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[110] flex items-center justify-center p-4 hidden">
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[110] flex items-center justify-center p-4 hidden">
             <div class="bg-white rounded-[3rem] p-10 max-w-md w-full shadow-2xl">
-                <h2 class="text-2xl font-black text-slate-800 mb-2">Markenpreis ⚙️</h2>
-                <p class="text-slate-400 text-xs font-bold uppercase mb-8">Synchronisierte Einstellung</p>
-                <div class="relative mb-10">
-                    <input type="number" id="markenWertInput" step="0.10" class="w-full bg-slate-100 border-2 border-slate-200 rounded-3xl p-6 text-5xl font-black text-center outline-none focus:border-blue-500">
-                    <span class="absolute right-8 top-1/2 -translate-y-1/2 text-slate-300 font-black text-2xl">€</span>
-                </div>
+                <h2 class="text-2xl font-black text-slate-800 mb-2 text-center">PREIS ⚙️</h2>
+                <input type="number" id="markenWertInput" step="0.10" class="w-full bg-slate-100 border-2 border-slate-200 rounded-3xl p-8 text-6xl font-black text-center outline-none focus:border-blue-500 my-8">
                 <div class="flex gap-4">
-                    <button onclick="closeSettings()" class="flex-1 py-5 font-black uppercase text-slate-400">Abbruch</button>
-                    <button onclick="saveMarkenWert()" class="flex-1 py-5 bg-blue-600 text-white rounded-2xl font-black uppercase shadow-lg">Speichern</button>
+                    <button onclick="closeSettings()" class="flex-1 py-6 font-black text-slate-400 uppercase">Zurück</button>
+                    <button onclick="saveMarkenWert()" class="flex-1 py-6 bg-blue-600 text-white rounded-3xl font-black uppercase shadow-lg">Speichern</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-10 py-5 rounded-full shadow-2xl transition-all opacity-0 pointer-events-none z-[200] font-black uppercase text-xs tracking-widest text-center"></div>
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-12 py-6 rounded-full shadow-2xl transition-all opacity-0 pointer-events-none z-[200] font-black uppercase text-center"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, doc, setDoc, onSnapshot, updateDoc, arrayUnion, arrayRemove, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-       const firebaseConfig = {
+        // Firebase Config
+        const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
@@ -184,106 +185,29 @@
   messagingSenderId: "899854905140",
   appId: "1:899854905140:web:94be886a048356c7fb3f61"
 };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'kasse-summer-24';
+
+        // State
         let user = null;
         let MARKEN_WERT = 0.50;
         let currentQuantity = 0;
         let cashTyped = "0";
         let stats = { sold: 0, returned: 0, cash: 0, markenWert: 0.50, history: [] };
 
-        // Firebase Auth & Init
-        const initSession = async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (e) {
-                showToast("Login Fehler!");
-                console.error(e);
-            }
-        };
-
-        onAuthStateChanged(auth, (u) => {
-            if (u) {
-                user = u;
-                document.getElementById('syncStatus').classList.replace('bg-red-500', 'bg-green-500');
-                document.getElementById('statusText').innerText = "LIVE";
-                startSync();
-            }
-        });
-
-        async function startSync() {
-            if (!user) return;
-            const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
-            
-            // Erst prüfen ob Doc existiert, sonst anlegen
-            const initialCheck = await getDoc(statsRef);
-            if (!initialCheck.exists()) {
-                await setDoc(statsRef, stats);
-            }
-
-            onSnapshot(statsRef, (snap) => {
-                if (snap.exists()) {
-                    stats = snap.data();
-                    MARKEN_WERT = stats.markenWert || 0.50;
-                    document.getElementById('valLabel').innerText = MARKEN_WERT.toFixed(2).replace('.', ',');
-                    updateUI();
-                }
-            }, (err) => {
-                showToast("Cloud-Sync Fehler!");
-                console.error(err);
-            });
-        }
-
-        window.switchTab = (tab) => {
-            document.getElementById('tab-sell').classList.toggle('hidden', tab !== 'sell');
-            document.getElementById('tab-stats').classList.toggle('hidden', tab !== 'stats');
-            const active = 'bg-white text-slate-800 shadow-sm';
-            const inactive = 'text-slate-400 hover:text-slate-600';
-            document.getElementById('nav-sell').className = `px-8 py-3 rounded-[1.5rem] font-black transition-all ${tab === 'sell' ? active : inactive}`;
-            document.getElementById('nav-stats').className = `px-8 py-3 rounded-[1.5rem] font-black transition-all ${tab === 'stats' ? active : inactive}`;
-        };
-
-        window.changeQuantity = (val) => {
-            currentQuantity = Math.max(0, currentQuantity + val);
-            updatePrice();
-        };
-
-        window.setQuantity = (val) => {
-            currentQuantity += val;
-            updatePrice();
-        };
-
-        function updatePrice() {
+        // 1. Sofort UI laden (Standardwerte)
+        const updatePrice = () => {
             document.getElementById('quantity').innerText = currentQuantity;
             const total = currentQuantity * MARKEN_WERT;
             document.getElementById('totalPrice').innerText = total.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
             document.getElementById('buyBtn').disabled = currentQuantity <= 0;
             document.getElementById('returnBtn').disabled = currentQuantity <= 0;
             calculateChange();
-        }
-
-        window.addDigit = (digit) => {
-            if (cashTyped === "0" && digit !== '00') cashTyped = digit;
-            else if (cashTyped !== "0") {
-                if (cashTyped.length < 8) cashTyped += digit;
-            }
-            updateCashDisplay();
         };
 
-        window.clearCash = () => {
-            cashTyped = "0";
-            updateCashDisplay();
-        };
-
-        function updateCashDisplay() {
-            const val = parseFloat(cashTyped) / 100;
-            document.getElementById('cashInput').innerText = val.toFixed(2);
-            calculateChange();
-        }
-
-        function calculateChange() {
+        const calculateChange = () => {
             const given = parseFloat(cashTyped) / 100;
             const price = currentQuantity * MARKEN_WERT;
             const change = given - price;
@@ -294,124 +218,145 @@
             } else {
                 box.classList.add('hidden');
             }
-        }
+        };
+
+        // 2. Button Handler
+        window.switchTab = (tab) => {
+            document.getElementById('tab-sell').classList.toggle('hidden', tab !== 'sell');
+            document.getElementById('tab-stats').classList.toggle('hidden', tab !== 'stats');
+            const btns = { 'sell': document.getElementById('nav-sell'), 'stats': document.getElementById('nav-stats') };
+            Object.keys(btns).forEach(k => {
+                btns[k].className = `px-8 py-3 rounded-[1.5rem] font-black transition-all ${k === tab ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400'}`;
+            });
+        };
+
+        window.changeQuantity = (val) => { currentQuantity = Math.max(0, currentQuantity + val); updatePrice(); };
+        window.setQuantity = (val) => { currentQuantity += val; updatePrice(); };
+
+        window.addDigit = (digit) => {
+            if (cashTyped === "0" && digit !== '00') cashTyped = digit;
+            else if (cashTyped !== "0" && cashTyped.length < 9) cashTyped += digit;
+            const val = parseFloat(cashTyped) / 100;
+            document.getElementById('cashInput').innerText = val.toLocaleString('de-DE', { minimumFractionDigits: 2 });
+            calculateChange();
+        };
+
+        window.clearCash = () => { cashTyped = "0"; document.getElementById('cashInput').innerText = "0,00"; calculateChange(); };
 
         window.processTransaction = async (type) => {
-            if (!user) return;
+            if (!user) { showToast("Nicht verbunden!"); return; }
             const total = currentQuantity * MARKEN_WERT;
-            const transaction = {
+            const item = {
                 id: Date.now(),
-                time: new Date().toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit', second:'2-digit'}),
+                time: new Date().toLocaleTimeString('de-DE'),
                 type: type === 'buy' ? 'VERKAUF' : 'RETOURE',
                 amount: currentQuantity,
                 money: type === 'buy' ? total : -total
             };
 
-            const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
+            const ref = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
             try {
-                const docSnap = await getDoc(statsRef);
-                const currentData = docSnap.data();
-
-                await updateDoc(statsRef, {
-                    sold: type === 'buy' ? (currentData.sold || 0) + currentQuantity : (currentData.sold || 0),
-                    returned: type === 'return' ? (currentData.returned || 0) + currentQuantity : (currentData.returned || 0),
-                    cash: type === 'buy' ? (currentData.cash || 0) + total : (currentData.cash || 0) - total,
-                    history: arrayUnion(transaction)
+                await updateDoc(ref, {
+                    sold: type === 'buy' ? (stats.sold || 0) + currentQuantity : (stats.sold || 0),
+                    returned: type === 'return' ? (stats.returned || 0) + currentQuantity : (stats.returned || 0),
+                    cash: type === 'buy' ? (stats.cash || 0) + total : (stats.cash || 0) - total,
+                    history: arrayUnion(item)
                 });
+                showToast("ERFOLGREICH ✅");
+                currentQuantity = 0; window.clearCash(); updatePrice();
+            } catch(e) { showToast("Fehler!"); }
+        };
+
+        // 3. Auth & Sync
+        const init = async () => {
+            updatePrice(); // Initial UI
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch(e) { showToast("Login fehlgeschlagen"); }
+        };
+
+        onAuthStateChanged(auth, (u) => {
+            if (u) {
+                user = u;
+                document.getElementById('syncStatus').classList.replace('bg-yellow-500', 'bg-green-500');
+                document.getElementById('statusText').innerText = "VERBUNDEN";
                 
-                showToast(type === 'buy' ? 'ERFOLG ✅' : 'RETOURE ✅');
-                currentQuantity = 0;
-                cashTyped = "0";
-                updatePrice();
-                updateCashDisplay();
-            } catch(e) { showToast("Speicherfehler!"); }
-        };
+                const ref = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
+                onSnapshot(ref, (s) => {
+                    if (s.exists()) {
+                        stats = s.data();
+                        MARKEN_WERT = stats.markenWert || 0.50;
+                        document.getElementById('valLabel').innerText = MARKEN_WERT.toFixed(2).replace('.', ',');
+                        updateUI();
+                        updatePrice();
+                    } else {
+                        setDoc(ref, stats);
+                    }
+                }, (e) => showToast("Sync Fehler"));
+            }
+        });
 
-        window.deleteTransaction = async (id) => {
-            if (!user || !confirm('Buchung stornieren?')) return;
-            const item = stats.history.find(h => h.id === id);
-            if (!item) return;
-            
-            const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
-            await updateDoc(statsRef, {
-                sold: item.type === 'VERKAUF' ? stats.sold - item.amount : stats.sold,
-                returned: item.type === 'RETOURE' ? stats.returned - item.amount : stats.returned,
-                cash: stats.cash - item.money,
-                history: arrayRemove(item)
-            });
-            showToast('STORNIERT 🗑️');
-        };
-
-        window.requestSettingsAccess = () => {
-            document.getElementById('pinInput').value = "";
-            document.getElementById('auth-modal').classList.remove('hidden');
-            document.getElementById('pinInput').focus();
-        };
-
+        // Modals
+        window.requestSettingsAccess = () => { document.getElementById('pinInput').value = ""; document.getElementById('auth-modal').classList.remove('hidden'); };
+        window.closeAuth = () => document.getElementById('auth-modal').classList.add('hidden');
         window.checkPin = () => {
             if (document.getElementById('pinInput').value === "5657") {
                 document.getElementById('auth-modal').classList.add('hidden');
                 document.getElementById('markenWertInput').value = MARKEN_WERT;
                 document.getElementById('settings-modal').classList.remove('hidden');
-            } else {
-                showToast("PIN FALSCH!");
-            }
+            } else { showToast("PIN FALSCH"); }
         };
-
-        window.closeAuth = () => document.getElementById('auth-modal').classList.add('hidden');
-        window.closeSettings = () => document.getElementById('settings-modal').classList.add('hidden');
 
         window.saveMarkenWert = async () => {
-            if (!user) return;
-            const newVal = parseFloat(document.getElementById('markenWertInput').value);
-            if (isNaN(newVal) || newVal <= 0) return;
-
-            try {
-                const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
-                await updateDoc(statsRef, { markenWert: newVal });
-                closeSettings();
-                showToast("PREIS GEÄNDERT ⚙️");
-            } catch(e) { showToast("Fehler!"); }
+            const val = parseFloat(document.getElementById('markenWertInput').value);
+            if (isNaN(val) || val <= 0) return;
+            const ref = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
+            await updateDoc(ref, { markenWert: val });
+            document.getElementById('settings-modal').classList.add('hidden');
+            showToast("GESPEICHERT");
         };
 
+        window.closeSettings = () => document.getElementById('settings-modal').classList.add('hidden');
+
         window.resetStats = async () => {
-            if (!user || !confirm('ALLES LÖSCHEN?')) return;
-            const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
-            await setDoc(statsRef, { sold: 0, returned: 0, cash: 0, markenWert: MARKEN_WERT, history: [] });
+            if (!confirm('ALLES LÖSCHEN?')) return;
+            const ref = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
+            await setDoc(ref, { sold: 0, returned: 0, cash: 0, markenWert: MARKEN_WERT, history: [] });
+        };
+
+        window.deleteTransaction = async (item) => {
+            if (!confirm('Löschen?')) return;
+            const ref = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
+            await updateDoc(ref, {
+                sold: item.type === 'VERKAUF' ? stats.sold - item.amount : stats.sold,
+                returned: item.type === 'RETOURE' ? stats.returned - item.amount : stats.returned,
+                cash: stats.cash - item.money,
+                history: arrayRemove(item)
+            });
         };
 
         function updateUI() {
             document.getElementById('statMarken').innerText = stats.sold || 0;
             document.getElementById('statReturns').innerText = stats.returned || 0;
             document.getElementById('statTotal').innerText = (stats.cash || 0).toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
-            
-            const historyDiv = document.getElementById('history');
-            const sorted = [...(stats.history || [])].sort((a,b) => b.id - a.id);
-            
-            if (sorted.length === 0) {
-                historyDiv.innerHTML = '<div class="py-20 text-center text-slate-300 font-bold text-xs">Keine Daten</div>';
-                return;
-            }
-
-            historyDiv.innerHTML = sorted.map(item => `
+            const hist = document.getElementById('history');
+            const data = [...(stats.history || [])].reverse();
+            hist.innerHTML = data.length ? data.map(i => `
                 <div class="flex justify-between items-center p-6 bg-white">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-full flex items-center justify-center font-black text-xs ${item.type === 'VERKAUF' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}">
-                            ${item.type === 'VERKAUF' ? 'V' : 'R'}
-                        </div>
-                        <div>
-                            <p class="font-black text-slate-800">${item.amount}x ${item.type}</p>
-                            <span class="text-[10px] text-slate-400 font-bold">${item.time}</span>
-                        </div>
+                    <div>
+                        <p class="font-black text-slate-800">${i.amount}x ${i.type}</p>
+                        <p class="text-[10px] text-slate-400 font-bold">${i.time}</p>
                     </div>
-                    <div class="flex items-center gap-6">
-                        <p class="font-black text-slate-800 tabular-nums">${item.money.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'})}</p>
-                        <button onclick="deleteTransaction(${item.id})" class="p-2 text-slate-300 hover:text-red-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-                        </button>
+                    <div class="flex items-center gap-4">
+                        <p class="font-black text-slate-800 tabular-nums">${i.money.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'})}</p>
+                        <button onclick='deleteTransaction(${JSON.stringify(i)})' class="text-slate-300 hover:text-red-500">🗑️</button>
                     </div>
                 </div>
-            `).join('');
+            `).join('') : '<div class="p-20 text-center text-slate-300 font-bold">Keine Daten</div>';
         }
 
         function showToast(msg) {
@@ -421,7 +366,7 @@
             setTimeout(() => t.classList.replace('opacity-100', 'opacity-0'), 2500);
         }
 
-        initSession();
+        init();
     </script>
 </body>
 </html>
