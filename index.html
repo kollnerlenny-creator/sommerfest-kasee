@@ -13,10 +13,12 @@
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior: none;
         }
-        /* Massive Touch Buttons mit Zahlen-Fokus */
-        .numpad-btn {
-            @apply bg-white active:bg-blue-600 active:text-white text-5xl font-black py-10 rounded-[2.5rem] transition-all shadow-md border-2 border-slate-200 flex items-center justify-center text-slate-700 select-none;
+        
+        /* Neues Numpad-Design orientiert am Bild */
+        .numpad-dark-btn {
+            @apply bg-[#2c2c2e] hover:bg-[#3c3c3e] active:bg-blue-600 text-white text-5xl font-black py-8 rounded-[2rem] transition-all shadow-lg flex items-center justify-center select-none;
         }
+        
         .action-btn {
             @apply py-10 rounded-[2.5rem] font-black text-white transition-all active:scale-95 shadow-xl text-xl uppercase tracking-widest select-none;
         }
@@ -49,14 +51,15 @@
             <nav class="flex gap-2 bg-slate-100 p-2 rounded-[2rem]">
                 <button onclick="switchTab('sell')" id="nav-sell" class="px-8 py-3 rounded-[1.5rem] font-black transition-all bg-white text-slate-800 shadow-sm">Verkauf</button>
                 <button onclick="switchTab('stats')" id="nav-stats" class="px-8 py-3 rounded-[1.5rem] font-black transition-all text-slate-400">Bilanz</button>
-                <button onclick="requestSettingsAccess()" class="p-3 text-slate-400">⚙️</button>
+                <button onclick="openCustomerView()" class="p-3 text-slate-400 hover:text-blue-500 transition-colors" title="Kundenansicht öffnen">🖥️</button>
+                <button onclick="requestSettingsAccess()" class="p-3 text-slate-400 hover:text-slate-800 transition-colors">⚙️</button>
             </nav>
         </header>
 
         <!-- Verkauf View -->
         <div id="tab-sell" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- Linke Seite: Menge -->
-            <div class="lg:col-span-5 space-y-6">
+            <div class="lg:col-span-6 space-y-6">
                 <div class="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-200">
                     <h2 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6 text-center">Marken Anzahl</h2>
                     <div class="flex items-center justify-between gap-4 mb-8">
@@ -80,40 +83,40 @@
             </div>
 
             <!-- Rechte Seite: Numpad -->
-            <div class="lg:col-span-7 bg-white p-8 rounded-[3rem] shadow-sm border border-slate-200">
-                <div class="flex justify-between items-center mb-8 bg-slate-50 p-6 rounded-[2rem]">
+            <div class="lg:col-span-6 bg-white p-8 rounded-[3rem] shadow-sm border border-slate-200 bg-slate-800">
+                <div class="flex justify-between items-center mb-8 bg-slate-900 p-6 rounded-[2rem] border border-slate-700">
                     <h2 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Gegeben:</h2>
                     <div class="text-right">
-                        <span id="cashInput" class="text-6xl font-black text-slate-800 tabular-nums">0,00</span>
-                        <span class="text-2xl text-slate-400 font-bold">€</span>
+                        <span id="cashInput" class="text-6xl font-black text-white tabular-nums">0,00</span>
+                        <span class="text-2xl text-slate-500 font-bold">€</span>
                     </div>
                 </div>
 
+                <!-- Neues Numpad Layout -->
                 <div class="grid grid-cols-3 gap-4 mb-8">
-                    <button onclick="addDigit('1')" class="numpad-btn">1</button>
-                    <button onclick="addDigit('2')" class="numpad-btn">2</button>
-                    <button onclick="addDigit('3')" class="numpad-btn">3</button>
-                    <button onclick="addDigit('4')" class="numpad-btn">4</button>
-                    <button onclick="addDigit('5')" class="numpad-btn">5</button>
-                    <button onclick="addDigit('6')" class="numpad-btn">6</button>
-                    <button onclick="addDigit('7')" class="numpad-btn">7</button>
-                    <button onclick="addDigit('8')" class="numpad-btn">8</button>
-                    <button onclick="addDigit('9')" class="numpad-btn">9</button>
-                    <button onclick="clearCash()" class="numpad-btn text-red-500 bg-red-50 border-red-100">C</button>
-                    <button onclick="addDigit('0')" class="numpad-btn">0</button>
-                    <button onclick="addDigit('00')" class="numpad-btn text-3xl">00</button>
+                    <button onclick="addDigit('7')" class="numpad-dark-btn">7</button>
+                    <button onclick="addDigit('8')" class="numpad-dark-btn">8</button>
+                    <button onclick="addDigit('9')" class="numpad-dark-btn">9</button>
+                    <button onclick="addDigit('4')" class="numpad-dark-btn">4</button>
+                    <button onclick="addDigit('5')" class="numpad-dark-btn">5</button>
+                    <button onclick="addDigit('6')" class="numpad-dark-btn">6</button>
+                    <button onclick="addDigit('1')" class="numpad-dark-btn">1</button>
+                    <button onclick="addDigit('2')" class="numpad-dark-btn">2</button>
+                    <button onclick="addDigit('3')" class="numpad-dark-btn">3</button>
+                    <button onclick="clearCash()" class="numpad-dark-btn text-red-400 text-4xl">C</button>
+                    <button onclick="addDigit('0')" class="numpad-dark-btn col-span-2">0</button>
                 </div>
 
-                <div id="changeBox" class="bg-green-600 p-8 rounded-[2.5rem] mb-8 hidden shadow-xl shadow-green-200">
+                <div id="changeBox" class="bg-green-600 p-6 rounded-[2rem] mb-8 hidden shadow-xl shadow-green-900/50">
                     <div class="flex justify-between items-center text-white">
                         <span class="font-bold uppercase text-xs tracking-widest">Wechselgeld</span>
-                        <span id="changeAmount" class="text-5xl font-black tabular-nums">0,00 €</span>
+                        <span id="changeAmount" class="text-4xl font-black tabular-nums">0,00 €</span>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
-                    <button onclick="processTransaction('buy')" id="buyBtn" class="action-btn bg-green-600 hover:bg-green-700 disabled:opacity-30" disabled>KASSIEREN</button>
-                    <button onclick="processTransaction('return')" id="returnBtn" class="action-btn bg-orange-500 hover:bg-orange-600 disabled:opacity-30" disabled>RETOURE</button>
+                    <button onclick="processTransaction('buy')" id="buyBtn" class="action-btn bg-green-500 hover:bg-green-600 disabled:opacity-30 disabled:hover:bg-green-500" disabled>KASSIEREN</button>
+                    <button onclick="processTransaction('return')" id="returnBtn" class="action-btn bg-orange-500 hover:bg-orange-600 disabled:opacity-30 disabled:hover:bg-orange-500" disabled>RETOURE</button>
                 </div>
             </div>
         </div>
@@ -144,40 +147,153 @@
             </div>
         </div>
 
-        <!-- PIN Modal -->
-        <div id="auth-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[110] flex items-center justify-center p-4 hidden">
-            <div class="bg-white rounded-[3rem] p-10 max-w-sm w-full">
-                <h2 class="text-2xl font-black text-slate-800 mb-6 text-center">PIN 🔒</h2>
-                <input type="password" id="pinInput" class="w-full bg-slate-100 border-2 border-slate-200 rounded-3xl p-6 text-center text-5xl font-black focus:border-blue-500 outline-none" maxlength="4" inputmode="numeric">
-                <div class="flex gap-4 mt-8">
-                    <button onclick="closeAuth()" class="flex-1 py-4 font-black text-slate-400 uppercase">Zurück</button>
-                    <button onclick="checkPin()" class="flex-1 py-4 bg-slate-800 text-white rounded-2xl font-black uppercase">OK</button>
+        <!-- PIN Modal mit eigenem Numpad -->
+        <div id="auth-modal" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-[110] flex items-center justify-center p-4 hidden">
+            <div class="bg-slate-800 rounded-[3rem] p-8 max-w-sm w-full shadow-2xl border border-slate-700">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-2xl font-black text-white">PIN 🔒</h2>
+                    <button onclick="closeAuth()" class="text-slate-400 hover:text-white font-black uppercase text-xs">Abbrechen</button>
+                </div>
+                
+                <div class="flex justify-center gap-4 mb-8">
+                    <div id="pin-dot-1" class="w-6 h-6 rounded-full bg-slate-600 transition-colors"></div>
+                    <div id="pin-dot-2" class="w-6 h-6 rounded-full bg-slate-600 transition-colors"></div>
+                    <div id="pin-dot-3" class="w-6 h-6 rounded-full bg-slate-600 transition-colors"></div>
+                    <div id="pin-dot-4" class="w-6 h-6 rounded-full bg-slate-600 transition-colors"></div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="addPinDigit('7')" class="numpad-dark-btn !py-6 !text-4xl">7</button>
+                    <button onclick="addPinDigit('8')" class="numpad-dark-btn !py-6 !text-4xl">8</button>
+                    <button onclick="addPinDigit('9')" class="numpad-dark-btn !py-6 !text-4xl">9</button>
+                    <button onclick="addPinDigit('4')" class="numpad-dark-btn !py-6 !text-4xl">4</button>
+                    <button onclick="addPinDigit('5')" class="numpad-dark-btn !py-6 !text-4xl">5</button>
+                    <button onclick="addPinDigit('6')" class="numpad-dark-btn !py-6 !text-4xl">6</button>
+                    <button onclick="addPinDigit('1')" class="numpad-dark-btn !py-6 !text-4xl">1</button>
+                    <button onclick="addPinDigit('2')" class="numpad-dark-btn !py-6 !text-4xl">2</button>
+                    <button onclick="addPinDigit('3')" class="numpad-dark-btn !py-6 !text-4xl">3</button>
+                    <button onclick="clearPin()" class="numpad-dark-btn !py-6 !text-3xl text-red-400">C</button>
+                    <button onclick="addPinDigit('0')" class="numpad-dark-btn col-span-2 !py-6 !text-4xl">0</button>
                 </div>
             </div>
         </div>
 
-        <!-- Settings Modal -->
-        <div id="settings-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[110] flex items-center justify-center p-4 hidden">
-            <div class="bg-white rounded-[3rem] p-10 max-w-md w-full shadow-2xl">
-                <h2 class="text-2xl font-black text-slate-800 mb-2 text-center">PREIS ⚙️</h2>
-                <input type="number" id="markenWertInput" step="0.10" class="w-full bg-slate-100 border-2 border-slate-200 rounded-3xl p-8 text-6xl font-black text-center outline-none focus:border-blue-500 my-8">
-                <div class="flex gap-4">
-                    <button onclick="closeSettings()" class="flex-1 py-6 font-black text-slate-400 uppercase">Zurück</button>
-                    <button onclick="saveMarkenWert()" class="flex-1 py-6 bg-blue-600 text-white rounded-3xl font-black uppercase shadow-lg">Speichern</button>
+        <!-- Settings Modal mit eigenem Numpad -->
+        <div id="settings-modal" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-[110] flex items-center justify-center p-4 hidden">
+            <div class="bg-slate-800 rounded-[3rem] p-8 max-w-sm w-full shadow-2xl border border-slate-700">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-black text-white">PREIS ⚙️</h2>
+                    <button onclick="closeSettings()" class="text-slate-400 hover:text-white font-black uppercase text-xs">Zurück</button>
                 </div>
+                
+                <div class="text-center mb-8 bg-slate-900 p-6 rounded-3xl border border-slate-700">
+                    <span id="settingsPriceDisplay" class="text-6xl font-black text-white tabular-nums">0,00</span>
+                    <span class="text-2xl text-slate-500 font-bold">€</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3 mb-6">
+                    <button onclick="addSettingsDigit('7')" class="numpad-dark-btn !py-6 !text-4xl">7</button>
+                    <button onclick="addSettingsDigit('8')" class="numpad-dark-btn !py-6 !text-4xl">8</button>
+                    <button onclick="addSettingsDigit('9')" class="numpad-dark-btn !py-6 !text-4xl">9</button>
+                    <button onclick="addSettingsDigit('4')" class="numpad-dark-btn !py-6 !text-4xl">4</button>
+                    <button onclick="addSettingsDigit('5')" class="numpad-dark-btn !py-6 !text-4xl">5</button>
+                    <button onclick="addSettingsDigit('6')" class="numpad-dark-btn !py-6 !text-4xl">6</button>
+                    <button onclick="addSettingsDigit('1')" class="numpad-dark-btn !py-6 !text-4xl">1</button>
+                    <button onclick="addSettingsDigit('2')" class="numpad-dark-btn !py-6 !text-4xl">2</button>
+                    <button onclick="addSettingsDigit('3')" class="numpad-dark-btn !py-6 !text-4xl">3</button>
+                    <button onclick="clearSettings()" class="numpad-dark-btn !py-6 !text-3xl text-red-400">C</button>
+                    <button onclick="addSettingsDigit('0')" class="numpad-dark-btn col-span-2 !py-6 !text-4xl">0</button>
+                </div>
+                
+                <button onclick="saveMarkenWert()" class="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black uppercase tracking-widest active:bg-blue-700 transition-colors">Speichern</button>
             </div>
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-12 py-6 rounded-full shadow-2xl transition-all opacity-0 pointer-events-none z-[200] font-black uppercase text-center"></div>
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-white text-slate-900 px-12 py-6 rounded-full shadow-2xl transition-all opacity-0 pointer-events-none z-[200] font-black uppercase text-center border border-slate-200"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, doc, setDoc, onSnapshot, updateDoc, arrayUnion, arrayRemove, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // Firebase Config
-        const firebaseConfig = {
+        // BroadcastChannel für Kundenansicht-Sync
+        const bc = new BroadcastChannel('pos-sync');
+
+        // Check if this is the Customer View
+        const urlParams = new URLSearchParams(window.location.search);
+        const isCustomerView = urlParams.get('mode') === 'customer';
+
+        if (isCustomerView) {
+            // RENDER KUNDENANSICHT
+            document.title = "Kundenansicht - Sommerfest";
+            document.body.innerHTML = `
+                <div class="h-screen bg-slate-900 text-white flex flex-col justify-center items-center p-10 font-black relative overflow-hidden">
+                    <h1 class="text-4xl md:text-6xl text-slate-500 mb-12 uppercase tracking-widest opacity-50">Ihre Bestellung</h1>
+                    
+                    <div class="bg-slate-800 p-12 md:p-20 rounded-[4rem] w-full max-w-5xl shadow-2xl flex flex-col gap-12 border border-slate-700 relative z-10">
+                        <div class="flex justify-between items-center text-4xl md:text-6xl">
+                            <span class="text-slate-400">Marken</span>
+                            <span id="c-quantity">0x</span>
+                        </div>
+                        <hr class="border-slate-700">
+                        <div class="flex justify-between items-center text-6xl md:text-8xl text-blue-400">
+                            <span>Summe</span>
+                            <span id="c-total">0,00 €</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center text-4xl md:text-5xl mt-12">
+                            <span class="text-slate-400">Gegeben</span>
+                            <span id="c-given">0,00 €</span>
+                        </div>
+                        <div id="c-change-box" class="flex justify-between items-center text-5xl md:text-7xl text-green-400 mt-6 opacity-0 transition-opacity duration-300">
+                            <span>Zurück</span>
+                            <span id="c-change">0,00 €</span>
+                        </div>
+                    </div>
+
+                    <div id="c-success" class="absolute inset-0 bg-green-500 z-50 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500">
+                        <span class="text-8xl md:text-[10rem] text-white drop-shadow-lg mb-8">🎉</span>
+                        <span class="text-5xl md:text-7xl text-white font-black drop-shadow-md">VIELEN DANK!</span>
+                    </div>
+                </div>
+            `;
+
+            bc.onmessage = (e) => {
+                if (e.data.type === 'STATE') {
+                    const p = e.data.payload;
+                    document.getElementById('c-quantity').innerText = p.quantity + 'x';
+                    document.getElementById('c-total').innerText = p.total.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
+                    document.getElementById('c-given').innerText = (parseFloat(p.cashTyped)/100).toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
+                    
+                    const changeBox = document.getElementById('c-change-box');
+                    if (p.change >= 0 && parseFloat(p.cashTyped) > 0 && p.quantity > 0) {
+                        changeBox.classList.remove('opacity-0');
+                        document.getElementById('c-change').innerText = p.change.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
+                    } else {
+                        changeBox.classList.add('opacity-0');
+                    }
+                } else if (e.data.type === 'SUCCESS') {
+                    const s = document.getElementById('c-success');
+                    s.classList.replace('opacity-0', 'opacity-100');
+                    setTimeout(() => {
+                        s.classList.replace('opacity-100', 'opacity-0');
+                        document.getElementById('c-quantity').innerText = '0x';
+                        document.getElementById('c-total').innerText = '0,00 €';
+                        document.getElementById('c-given').innerText = '0,00 €';
+                        document.getElementById('c-change-box').classList.add('opacity-0');
+                    }, 4000);
+                }
+            };
+            
+            // Beende Ausführung des restlichen Codes für die Kundenansicht
+            throw new Error("Customer View initialized."); 
+        }
+
+        // --- HIER STARTET DIE NORMALE KASSEN-LOGIK ---
+
+       const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
@@ -196,8 +312,31 @@
         let currentQuantity = 0;
         let cashTyped = "0";
         let stats = { sold: 0, returned: 0, cash: 0, markenWert: 0.50, history: [] };
+        
+        // Modal States
+        let pinTyped = "";
+        let settingsTyped = "0";
 
-        // 1. Sofort UI laden (Standardwerte)
+        // Sync Helper for Customer Display
+        const syncCustomerScreen = () => {
+            const total = currentQuantity * MARKEN_WERT;
+            const given = parseFloat(cashTyped) / 100;
+            bc.postMessage({
+                type: 'STATE',
+                payload: {
+                    quantity: currentQuantity,
+                    markenWert: MARKEN_WERT,
+                    cashTyped: cashTyped,
+                    total: total,
+                    change: given - total
+                }
+            });
+        };
+
+        window.openCustomerView = () => {
+            window.open(window.location.href.split('?')[0] + '?mode=customer', '_blank');
+        };
+
         const updatePrice = () => {
             document.getElementById('quantity').innerText = currentQuantity;
             const total = currentQuantity * MARKEN_WERT;
@@ -205,6 +344,7 @@
             document.getElementById('buyBtn').disabled = currentQuantity <= 0;
             document.getElementById('returnBtn').disabled = currentQuantity <= 0;
             calculateChange();
+            syncCustomerScreen();
         };
 
         const calculateChange = () => {
@@ -220,7 +360,6 @@
             }
         };
 
-        // 2. Button Handler
         window.switchTab = (tab) => {
             document.getElementById('tab-sell').classList.toggle('hidden', tab !== 'sell');
             document.getElementById('tab-stats').classList.toggle('hidden', tab !== 'stats');
@@ -239,9 +378,15 @@
             const val = parseFloat(cashTyped) / 100;
             document.getElementById('cashInput').innerText = val.toLocaleString('de-DE', { minimumFractionDigits: 2 });
             calculateChange();
+            syncCustomerScreen();
         };
 
-        window.clearCash = () => { cashTyped = "0"; document.getElementById('cashInput').innerText = "0,00"; calculateChange(); };
+        window.clearCash = () => { 
+            cashTyped = "0"; 
+            document.getElementById('cashInput').innerText = "0,00"; 
+            calculateChange(); 
+            syncCustomerScreen();
+        };
 
         window.processTransaction = async (type) => {
             if (!user) { showToast("Warte auf Cloud..."); return; }
@@ -262,72 +407,99 @@
                     cash: type === 'buy' ? (stats.cash || 0) + total : (stats.cash || 0) - total,
                     history: arrayUnion(item)
                 });
+                
+                // Erfolgsmeldung an Kundenansicht senden
+                bc.postMessage({ type: 'SUCCESS' });
                 showToast("ERFOLGREICH ✅");
-                currentQuantity = 0; window.clearCash(); updatePrice();
+                
+                currentQuantity = 0; 
+                window.clearCash(); 
+                updatePrice();
             } catch(e) { showToast("Cloud-Fehler!"); }
         };
 
-        // 3. Auth & Sync mit Exponential Backoff
-        const initSession = async (retries = 5, delay = 1000) => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                if (retries > 0) {
-                    setTimeout(() => initSession(retries - 1, delay * 2), delay);
-                } else {
-                    document.getElementById('statusText').innerText = "LOGIN FEHLER";
-                    showToast("Fehler: Anonymous Login in Firebase aktivieren!");
-                }
+        // --- PIN LOGIC ---
+        window.requestSettingsAccess = () => { 
+            pinTyped = "";
+            updatePinUI();
+            document.getElementById('auth-modal').classList.remove('hidden'); 
+        };
+        
+        window.closeAuth = () => {
+            document.getElementById('auth-modal').classList.add('hidden');
+        };
+
+        window.addPinDigit = (d) => {
+            if (pinTyped.length < 4) pinTyped += d;
+            updatePinUI();
+            if (pinTyped.length === 4) {
+                setTimeout(window.checkPin, 100);
             }
         };
 
-        onAuthStateChanged(auth, (u) => {
-            if (u) {
-                user = u;
-                document.getElementById('syncStatus').classList.replace('bg-yellow-500', 'bg-green-500');
-                document.getElementById('statusText').innerText = "VERBUNDEN";
-                
-                const ref = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
-                onSnapshot(ref, (s) => {
-                    if (s.exists()) {
-                        stats = s.data();
-                        MARKEN_WERT = stats.markenWert || 0.50;
-                        document.getElementById('valLabel').innerText = MARKEN_WERT.toFixed(2).replace('.', ',');
-                        updateUI();
-                        updatePrice();
-                    } else {
-                        setDoc(ref, stats);
-                    }
-                }, (e) => showToast("Sync Fehler"));
-            }
-        });
+        window.clearPin = () => {
+            pinTyped = "";
+            updatePinUI();
+        };
 
-        // Modals
-        window.requestSettingsAccess = () => { document.getElementById('pinInput').value = ""; document.getElementById('auth-modal').classList.remove('hidden'); };
-        window.closeAuth = () => document.getElementById('auth-modal').classList.add('hidden');
+        window.updatePinUI = () => {
+            for(let i=1; i<=4; i++) {
+                const dot = document.getElementById(`pin-dot-${i}`);
+                if(i <= pinTyped.length) dot.classList.replace('bg-slate-600', 'bg-blue-400');
+                else dot.classList.replace('bg-blue-400', 'bg-slate-600');
+            }
+        };
+
         window.checkPin = () => {
-            if (document.getElementById('pinInput').value === "5657") {
-                document.getElementById('auth-modal').classList.add('hidden');
-                document.getElementById('markenWertInput').value = MARKEN_WERT;
-                document.getElementById('settings-modal').classList.remove('hidden');
-            } else { showToast("PIN FALSCH"); }
+            if (pinTyped === "5657") { // Standard PIN
+                closeAuth();
+                openSettings();
+            } else { 
+                showToast("PIN FALSCH"); 
+                clearPin();
+            }
+        };
+
+        // --- SETTINGS LOGIC ---
+        window.openSettings = () => {
+            settingsTyped = Math.round(MARKEN_WERT * 100).toString();
+            updateSettingsUI();
+            document.getElementById('settings-modal').classList.remove('hidden');
+        };
+
+        window.closeSettings = () => {
+            document.getElementById('settings-modal').classList.add('hidden');
+        };
+
+        window.addSettingsDigit = (d) => {
+            if (settingsTyped === "0") settingsTyped = d;
+            else if (settingsTyped.length < 6) settingsTyped += d;
+            updateSettingsUI();
+        };
+
+        window.clearSettings = () => {
+            settingsTyped = "0";
+            updateSettingsUI();
+        };
+
+        window.updateSettingsUI = () => {
+            const val = parseFloat(settingsTyped) / 100;
+            document.getElementById('settingsPriceDisplay').innerText = val.toLocaleString('de-DE', { minimumFractionDigits: 2 });
         };
 
         window.saveMarkenWert = async () => {
-            const val = parseFloat(document.getElementById('markenWertInput').value);
-            if (isNaN(val) || val <= 0) return;
+            const val = parseFloat(settingsTyped) / 100;
+            if (isNaN(val) || val <= 0) {
+                showToast("Ungültiger Preis");
+                return;
+            }
             const ref = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
             await updateDoc(ref, { markenWert: val });
-            document.getElementById('settings-modal').classList.add('hidden');
+            closeSettings();
             showToast("GESPEICHERT");
         };
 
-        window.closeSettings = () => document.getElementById('settings-modal').classList.add('hidden');
-
+        // --- GENERAL LOGIC ---
         window.resetStats = async () => {
             if (!confirm('ALLES LÖSCHEN?')) return;
             const ref = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
@@ -371,6 +543,45 @@
             t.classList.replace('opacity-0', 'opacity-100');
             setTimeout(() => t.classList.replace('opacity-100', 'opacity-0'), 2500);
         }
+
+        // 3. Auth & Sync mit Exponential Backoff
+        const initSession = async (retries = 5, delay = 1000) => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                if (retries > 0) {
+                    setTimeout(() => initSession(retries - 1, delay * 2), delay);
+                } else {
+                    document.getElementById('statusText').innerText = "LOGIN FEHLER";
+                    showToast("Fehler: Anonymous Login in Firebase aktivieren!");
+                }
+            }
+        };
+
+        onAuthStateChanged(auth, (u) => {
+            if (u) {
+                user = u;
+                document.getElementById('syncStatus').classList.replace('bg-yellow-500', 'bg-green-500');
+                document.getElementById('statusText').innerText = "VERBUNDEN";
+                
+                const ref = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
+                onSnapshot(ref, (s) => {
+                    if (s.exists()) {
+                        stats = s.data();
+                        MARKEN_WERT = stats.markenWert || 0.50;
+                        document.getElementById('valLabel').innerText = MARKEN_WERT.toFixed(2).replace('.', ',');
+                        updateUI();
+                        updatePrice();
+                    } else {
+                        setDoc(ref, stats);
+                    }
+                }, (e) => showToast("Sync Fehler"));
+            }
+        });
 
         // Starte alles
         updatePrice();
