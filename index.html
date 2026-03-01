@@ -3,343 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kasse Sommerfest - Modern UI</title>
+    <title>Sommerfest Kasse - Premium Edition</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Firebase SDKs (Compat Versionen für globalen Zugriff) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;600;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600;700&family=Inter:wght@400;600;900&display=swap');
         
         :root {
-            --apple-bg: #f5f5f7;
-            --apple-card: #ffffff;
-            --apple-blue: #007aff;
-            --apple-green: #34c759;
-            --apple-orange: #ff9500;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.3);
         }
 
         body { 
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif; 
-            background-color: var(--apple-bg);
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-            overscroll-behavior: none;
-            color: #1d1d1f;
+            font-family: 'SF Pro Display', 'Inter', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #fcefe8 0%, #fff5f0 100%);
+            overflow: hidden;
         }
-        
+
         .glass-card {
-            background: rgba(255, 255, 255, 0.8);
+            background: var(--glass-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
         }
 
-        /* Ultra-runde Buttons */
-        .btn-round {
-            @apply rounded-full transition-all active:scale-95 flex items-center justify-center select-none font-semibold;
+        .apple-button {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .numpad-btn {
-            @apply bg-white hover:bg-slate-50 active:bg-slate-200 text-slate-800 text-3xl font-bold py-6 shadow-sm border border-slate-100;
-        }
-        
-        .action-btn {
-            @apply py-6 text-white text-lg font-bold shadow-lg uppercase tracking-wider;
+        .apple-button:active {
+            transform: scale(0.92);
+            filter: brightness(0.9);
         }
 
-        .quantity-display {
-            font-size: 8rem;
-            line-height: 1;
-            font-weight: 900;
-            background: linear-gradient(180deg, #1d1d1f 0%, #434345 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        @keyframes success-pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
         }
 
-        @keyframes sun-glow {
-            0% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.8; }
-        }
-        .animate-sun {
-            animation: sun-glow 4s ease-in-out infinite;
-        }
+        .animate-success { animation: success-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
 
-        /* Custom Scrollbar */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #d1d1d6; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="text-slate-900">
+    <div id="root"></div>
 
-    <div id="app" class="max-w-5xl mx-auto p-4 md:p-8">
-        <!-- Modern Header -->
-        <header class="flex justify-between items-center mb-8 px-2">
-            <div>
-                <h1 class="text-3xl font-black tracking-tight text-slate-900">Sommerkasse</h1>
-                <div class="flex items-center gap-2 mt-1">
-                    <div id="syncStatus" class="w-2 h-2 rounded-full bg-yellow-400"></div>
-                    <span id="statusText" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Wird geladen...</span>
-                </div>
-            </div>
-            <div class="flex items-center gap-3 bg-white/50 p-2 rounded-full border border-white/20 shadow-sm">
-                <button onclick="switchTab('sell')" id="nav-sell" class="px-6 py-2 btn-round bg-white text-slate-900 shadow-sm">Verkauf</button>
-                <button onclick="switchTab('stats')" id="nav-stats" class="px-6 py-2 btn-round text-slate-400">Bilanz</button>
-                <div class="w-px h-6 bg-slate-200 mx-1"></div>
-                <button onclick="openCustomerView()" class="p-2 text-slate-400 hover:text-blue-500 transition-colors">🖥️</button>
-                <button onclick="requestSettingsAccess()" class="p-2 text-slate-400 hover:text-slate-800 transition-colors">⚙️</button>
-            </div>
-        </header>
-
-        <!-- Verkauf Ansicht -->
-        <div id="tab-sell" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
-            <!-- Linke Spalte: Mengensteuerung -->
-            <div class="space-y-6">
-                <div class="bg-white rounded-[3rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-50 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
-                        <span class="text-9xl">☀️</span>
-                    </div>
-                    
-                    <h2 class="text-center text-xs font-black text-slate-300 uppercase tracking-[0.3em] mb-4">Anzahl Marken</h2>
-                    
-                    <div class="flex items-center justify-between mb-8">
-                        <button onclick="changeQuantity(-1)" class="w-20 h-20 btn-round bg-slate-100 text-slate-800 text-3xl">－</button>
-                        <div class="text-center">
-                            <span id="quantity" class="quantity-display tabular-nums">0</span>
-                        </div>
-                        <button onclick="changeQuantity(1)" class="w-20 h-20 btn-round bg-blue-50 text-blue-600 text-3xl">＋</button>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-3">
-                        <button onclick="setQuantity(5)" class="py-4 btn-round bg-slate-50 text-slate-600 border border-slate-100 font-bold">+5</button>
-                        <button onclick="setQuantity(10)" class="py-4 btn-round bg-slate-50 text-slate-600 border border-slate-100 font-bold">+10</button>
-                        <button onclick="setQuantity(20)" class="py-4 btn-round bg-slate-50 text-slate-600 border border-slate-100 font-bold">+20</button>
-                    </div>
-                </div>
-
-                <div class="bg-blue-600 rounded-[3rem] p-10 shadow-2xl shadow-blue-200 text-center text-white">
-                    <p class="text-blue-200 font-bold uppercase text-[11px] tracking-widest mb-1">Zu zahlen (á <span id="valLabel">0,50</span>€)</p>
-                    <h2 id="totalPrice" class="text-6xl font-black tabular-nums">0,00 €</h2>
-                </div>
-            </div>
-
-            <!-- Rechte Spalte: Numpad & Bezahlung -->
-            <div class="bg-white rounded-[3rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-50 flex flex-col">
-                <div class="mb-6 bg-slate-50 rounded-[2.5rem] p-6 border border-slate-100">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Gegeben</span>
-                        <div class="flex items-baseline gap-1">
-                            <span id="cashInput" class="text-5xl font-black text-slate-800 tabular-nums">0,00</span>
-                            <span class="text-xl font-bold text-slate-400">€</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Helles Numpad -->
-                <div class="grid grid-cols-3 gap-3 mb-6">
-                    <button onclick="addDigit('7')" class="btn-round numpad-btn">7</button>
-                    <button onclick="addDigit('8')" class="btn-round numpad-btn">8</button>
-                    <button onclick="addDigit('9')" class="btn-round numpad-btn">9</button>
-                    <button onclick="addDigit('4')" class="btn-round numpad-btn">4</button>
-                    <button onclick="addDigit('5')" class="btn-round numpad-btn">5</button>
-                    <button onclick="addDigit('6')" class="btn-round numpad-btn">6</button>
-                    <button onclick="addDigit('1')" class="btn-round numpad-btn">1</button>
-                    <button onclick="addDigit('2')" class="btn-round numpad-btn">2</button>
-                    <button onclick="addDigit('3')" class="btn-round numpad-btn">3</button>
-                    <button onclick="clearCash()" class="btn-round numpad-btn text-red-500">C</button>
-                    <button onclick="addDigit('0')" class="btn-round numpad-btn col-span-2">0</button>
-                </div>
-
-                <div id="changeBox" class="bg-green-50 rounded-[2rem] p-5 mb-6 hidden border border-green-100">
-                    <div class="flex justify-between items-center text-green-700">
-                        <span class="font-bold uppercase text-[10px] tracking-widest">Wechselgeld</span>
-                        <span id="changeAmount" class="text-3xl font-black tabular-nums">0,00 €</span>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4 mt-auto">
-                    <button onclick="processTransaction('buy')" id="buyBtn" class="btn-round action-btn bg-green-500 active:bg-green-600 disabled:bg-slate-100 disabled:text-slate-300 disabled:shadow-none" disabled>KASSIEREN</button>
-                    <button onclick="processTransaction('return')" id="returnBtn" class="btn-round action-btn bg-orange-500 active:bg-orange-600 disabled:bg-slate-100 disabled:text-slate-300 disabled:shadow-none" disabled>RETOURE</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bilanz Ansicht -->
-        <div id="tab-stats" class="hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-                    <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Gesamt Verkauft</p>
-                    <h3 id="statMarken" class="text-5xl font-black text-slate-800">0</h3>
-                </div>
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-                    <p class="text-[10px] text-orange-400 font-black uppercase tracking-widest mb-2">Retouren</p>
-                    <h3 id="statReturns" class="text-5xl font-black text-orange-500">0</h3>
-                </div>
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 bg-blue-50/20">
-                    <p class="text-[10px] text-blue-500 font-black uppercase tracking-widest mb-2">Kassenstand</p>
-                    <h3 id="statTotal" class="text-5xl font-black text-blue-600">0,00 €</h3>
-                </div>
-            </div>
-            
-            <div class="bg-white rounded-[3rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
-                <div class="p-8 border-b flex justify-between items-center">
-                    <h2 class="font-black text-slate-800 text-xl tracking-tight">Journal</h2>
-                    <button onclick="resetStats()" class="text-[10px] font-black text-red-400 uppercase tracking-widest bg-red-50 px-4 py-2 btn-round">Reset</button>
-                </div>
-                <div id="history" class="max-h-[50vh] overflow-y-auto divide-y divide-slate-50"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modals (PIN & Settings) -->
-    <div id="auth-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xl z-[110] flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-[3rem] p-8 max-w-sm w-full shadow-2xl animate-in zoom-in-95 duration-200">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-2xl font-black text-slate-800">Sicherheit</h2>
-                <button onclick="closeAuth()" class="text-slate-400 font-bold text-sm">X</button>
-            </div>
-            <div class="flex justify-center gap-4 mb-8">
-                <div id="pin-dot-1" class="w-4 h-4 rounded-full bg-slate-100 transition-colors"></div>
-                <div id="pin-dot-2" class="w-4 h-4 rounded-full bg-slate-100 transition-colors"></div>
-                <div id="pin-dot-3" class="w-4 h-4 rounded-full bg-slate-100 transition-colors"></div>
-                <div id="pin-dot-4" class="w-4 h-4 rounded-full bg-slate-100 transition-colors"></div>
-            </div>
-            <div class="grid grid-cols-3 gap-3">
-                <button onclick="addPinDigit('7')" class="btn-round numpad-btn !text-2xl !py-4">7</button>
-                <button onclick="addPinDigit('8')" class="btn-round numpad-btn !text-2xl !py-4">8</button>
-                <button onclick="addPinDigit('9')" class="btn-round numpad-btn !text-2xl !py-4">9</button>
-                <button onclick="addPinDigit('4')" class="btn-round numpad-btn !text-2xl !py-4">4</button>
-                <button onclick="addPinDigit('5')" class="btn-round numpad-btn !text-2xl !py-4">5</button>
-                <button onclick="addPinDigit('6')" class="btn-round numpad-btn !text-2xl !py-4">6</button>
-                <button onclick="addPinDigit('1')" class="btn-round numpad-btn !text-2xl !py-4">1</button>
-                <button onclick="addPinDigit('2')" class="btn-round numpad-btn !text-2xl !py-4">2</button>
-                <button onclick="addPinDigit('3')" class="btn-round numpad-btn !text-2xl !py-4">3</button>
-                <button onclick="clearPin()" class="btn-round numpad-btn !text-xl !py-4 text-red-500">C</button>
-                <button onclick="addPinDigit('0')" class="btn-round numpad-btn col-span-2 !text-2xl !py-4">0</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="settings-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xl z-[110] flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-[3rem] p-8 max-w-sm w-full shadow-2xl">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-black text-slate-800">Preis/Marke</h2>
-                <button onclick="closeSettings()" class="text-slate-400 font-bold text-sm">X</button>
-            </div>
-            <div class="text-center mb-8 bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
-                <span id="settingsPriceDisplay" class="text-6xl font-black text-slate-800 tabular-nums">0,00</span>
-                <span class="text-2xl text-slate-400 font-bold">€</span>
-            </div>
-            <div class="grid grid-cols-3 gap-3 mb-6">
-                <button onclick="addSettingsDigit('7')" class="btn-round numpad-btn !text-2xl !py-4">7</button>
-                <button onclick="addSettingsDigit('8')" class="btn-round numpad-btn !text-2xl !py-4">8</button>
-                <button onclick="addSettingsDigit('9')" class="btn-round numpad-btn !text-2xl !py-4">9</button>
-                <button onclick="addSettingsDigit('4')" class="btn-round numpad-btn !text-2xl !py-4">4</button>
-                <button onclick="addSettingsDigit('5')" class="btn-round numpad-btn !text-2xl !py-4">5</button>
-                <button onclick="addSettingsDigit('6')" class="btn-round numpad-btn !text-2xl !py-4">6</button>
-                <button onclick="addSettingsDigit('1')" class="btn-round numpad-btn !text-2xl !py-4">1</button>
-                <button onclick="addSettingsDigit('2')" class="btn-round numpad-btn !text-2xl !py-4">2</button>
-                <button onclick="addSettingsDigit('3')" class="btn-round numpad-btn !text-2xl !py-4">3</button>
-                <button onclick="clearSettings()" class="btn-round numpad-btn !text-xl !py-4 text-red-500">C</button>
-                <button onclick="addSettingsDigit('0')" class="btn-round numpad-btn col-span-2 !text-2xl !py-4">0</button>
-            </div>
-            <button onclick="saveMarkenWert()" class="w-full py-5 bg-blue-600 text-white btn-round text-lg font-bold">Speichern</button>
-        </div>
-    </div>
-
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-8 py-4 rounded-full shadow-2xl transition-all opacity-0 pointer-events-none z-[200] font-bold text-center"></div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot, updateDoc, arrayUnion, arrayRemove, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
-        const bc = new BroadcastChannel('pos-sync');
-        const urlParams = new URLSearchParams(window.location.search);
-        const isCustomerView = urlParams.get('mode') === 'customer';
-
-        if (isCustomerView) {
-            document.title = "Kundenansicht";
-            document.body.innerHTML = `
-                <div class="h-screen flex flex-col items-center justify-center p-6 font-semibold overflow-hidden transition-colors duration-1000" id="c-bg" style="background-color: #f5f5f7;">
-                    
-                    <!-- Bildschirmschoner -->
-                    <div id="c-screensaver" class="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-orange-400 to-yellow-300 z-0">
-                        <div class="text-[12rem] animate-sun drop-shadow-2xl">☀️</div>
-                        <h1 class="text-white text-6xl font-black mt-8 tracking-tighter text-center">Sommerfest<br><span class="opacity-80">Marken-Kasse</span></h1>
-                    </div>
-
-                    <!-- Aktive Bestellung -->
-                    <div id="c-order-ui" class="relative z-10 w-full max-w-4xl bg-white rounded-[4rem] p-12 shadow-2xl border border-white opacity-0 scale-95 transition-all duration-500">
-                        <div class="flex justify-between items-center mb-10">
-                            <span class="text-4xl text-slate-300 font-black uppercase tracking-widest">Marken</span>
-                            <span id="c-quantity" class="text-8xl font-black text-slate-800">0</span>
-                        </div>
-                        <div class="h-px bg-slate-100 mb-10"></div>
-                        <div class="flex justify-between items-center mb-12">
-                            <span class="text-4xl text-slate-300 font-black uppercase tracking-widest">Summe</span>
-                            <span id="c-total" class="text-9xl font-black text-blue-600">0,00 €</span>
-                        </div>
-                        <div id="c-given-row" class="flex justify-between items-center mb-6 opacity-0 transition-all">
-                            <span class="text-2xl text-slate-300 font-bold uppercase">Gegeben</span>
-                            <span id="c-given" class="text-4xl font-bold text-slate-400">0,00 €</span>
-                        </div>
-                        <div id="c-change-box" class="bg-green-500 rounded-[2.5rem] p-8 text-white flex justify-between items-center opacity-0 translate-y-4 transition-all">
-                            <span class="text-3xl font-bold">Rückgeld</span>
-                            <span id="c-change" class="text-6xl font-black">0,00 €</span>
-                        </div>
-                    </div>
-
-                    <div id="c-success" class="absolute inset-0 bg-green-500 z-50 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500">
-                        <span class="text-[15rem] drop-shadow-2xl mb-4">☀️</span>
-                        <span class="text-6xl text-white font-black text-center">VIELEN DANK!<br><span class="text-2xl opacity-80">Genießen Sie das Fest!</span></span>
-                    </div>
-                </div>
-            `;
-
-            bc.onmessage = (e) => {
-                const saver = document.getElementById('c-screensaver');
-                const orderUI = document.getElementById('c-order-ui');
-                
-                if (e.data.type === 'STATE') {
-                    const p = e.data.payload;
-                    if (p.quantity > 0) {
-                        saver.classList.add('opacity-0', 'pointer-events-none');
-                        orderUI.classList.remove('opacity-0', 'scale-95');
-                        document.getElementById('c-quantity').innerText = p.quantity;
-                        document.getElementById('c-total').innerText = p.total.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
-                        
-                        const given = parseFloat(p.cashTyped) / 100;
-                        if (given > 0) {
-                            document.getElementById('c-given-row').classList.remove('opacity-0');
-                            document.getElementById('c-given').innerText = given.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
-                            
-                            if (p.change >= 0) {
-                                document.getElementById('c-change-box').classList.remove('opacity-0', 'translate-y-4');
-                                document.getElementById('c-change').innerText = p.change.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
-                            }
-                        } else {
-                            document.getElementById('c-given-row').classList.add('opacity-0');
-                            document.getElementById('c-change-box').classList.add('opacity-0', 'translate-y-4');
-                        }
-                    } else {
-                        saver.classList.remove('opacity-0', 'pointer-events-none');
-                        orderUI.classList.add('opacity-0', 'scale-95');
-                    }
-                } else if (e.data.type === 'SUCCESS') {
-                    const s = document.getElementById('c-success');
-                    s.classList.replace('opacity-0', 'opacity-100');
-                    setTimeout(() => {
-                        s.classList.replace('opacity-100', 'opacity-0');
-                    }, 3500);
-                }
-            };
-            throw new Error("Customer View initialized."); 
-        }
-
-        // --- KASSEN LOGIK ---
-      const firebaseConfig = {
+    <script type="text/babel">
+        // Firebase Konfiguration aus der Umgebung
+        const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
@@ -347,241 +79,443 @@
   messagingSenderId: "899854905140",
   appId: "1:899854905140:web:94be886a048356c7fb3f61"
 };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'kasse-summer-modern';
+        
+        // Initialisierung mit der Compat-Syntax
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sommerfest-kasse';
 
-        let user = null;
-        let MARKEN_WERT = 0.50;
-        let currentQuantity = 0;
-        let cashTyped = "0";
-        let stats = { sold: 0, returned: 0, cash: 0, markenWert: 0.50, history: [] };
-        let pinTyped = "";
-        let settingsTyped = "0";
+        const { useState, useEffect, useMemo, useRef } = React;
 
-        const syncCustomerScreen = () => {
-            const total = currentQuantity * MARKEN_WERT;
-            const given = parseFloat(cashTyped) / 100;
-            bc.postMessage({
-                type: 'STATE',
-                payload: {
-                    quantity: currentQuantity,
-                    cashTyped: cashTyped,
-                    total: total,
-                    change: given - total
+        const SYNC_CHANNEL_NAME = 'sommerfest_kasse_sync';
+
+        const formatCurrency = (amount) => {
+            return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
+        };
+
+        const Icon = ({ name, color = "currentColor", size = 24, className = "" }) => {
+            const iconRef = useRef(null);
+            useEffect(() => {
+                if (window.lucide && iconRef.current) {
+                    iconRef.current.innerHTML = '';
+                    const iconName = name.charAt(0).toLowerCase() + name.slice(1).replace(/([A-Z])/g, '-$1').toLowerCase();
+                    const iconElement = document.createElement('i');
+                    iconElement.setAttribute('data-lucide', iconName);
+                    iconRef.current.appendChild(iconElement);
+                    window.lucide.createIcons({
+                        attrs: { stroke: color, 'stroke-width': 2, width: size, height: size },
+                        nameAttr: 'data-lucide'
+                    });
                 }
-            });
+            }, [name, color, size]);
+            return <span ref={iconRef} className={`inline-flex items-center justify-center ${className}`}></span>;
         };
 
-        window.openCustomerView = () => window.open(window.location.href.split('?')[0] + '?mode=customer', '_blank');
+        // --- SUB-KOMPONENTEN ---
 
-        const updatePrice = () => {
-            document.getElementById('quantity').innerText = currentQuantity;
-            const total = currentQuantity * MARKEN_WERT;
-            document.getElementById('totalPrice').innerText = total.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
-            document.getElementById('buyBtn').disabled = currentQuantity <= 0;
-            document.getElementById('returnBtn').disabled = currentQuantity <= 0;
-            
-            const given = parseFloat(cashTyped) / 100;
-            const change = given - total;
-            const box = document.getElementById('changeBox');
-            if (given > 0 && change >= 0 && currentQuantity > 0) {
-                box.classList.remove('hidden');
-                document.getElementById('changeAmount').innerText = change.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
-            } else {
-                box.classList.add('hidden');
-            }
-            syncCustomerScreen();
-        };
-
-        window.changeQuantity = (val) => { currentQuantity = Math.max(0, currentQuantity + val); updatePrice(); };
-        window.setQuantity = (val) => { currentQuantity += val; updatePrice(); };
-
-        window.addDigit = (digit) => {
-            if (cashTyped === "0") cashTyped = digit;
-            else if (cashTyped.length < 8) cashTyped += digit;
-            document.getElementById('cashInput').innerText = (parseFloat(cashTyped)/100).toLocaleString('de-DE', { minimumFractionDigits: 2 });
-            updatePrice();
-        };
-
-        window.clearCash = () => { cashTyped = "0"; document.getElementById('cashInput').innerText = "0,00"; updatePrice(); };
-
-        window.processTransaction = async (type) => {
-            if (!user) return showToast("Bitte warten...");
-            const total = currentQuantity * MARKEN_WERT;
-            const item = {
-                id: Date.now(),
-                time: new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'}),
-                type: type === 'buy' ? 'VERKAUF' : 'RETOURE',
-                amount: currentQuantity,
-                money: type === 'buy' ? total : -total
-            };
-
-            const ref = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
-            try {
-                // Sicherstellen dass Document existiert
-                const snap = await getDoc(ref);
-                if (!snap.exists()) {
-                    await setDoc(ref, stats);
-                }
-
-                await updateDoc(ref, {
-                    sold: type === 'buy' ? (stats.sold || 0) + currentQuantity : (stats.sold || 0),
-                    returned: type === 'return' ? (stats.returned || 0) + currentQuantity : (stats.returned || 0),
-                    cash: type === 'buy' ? (stats.cash || 0) + total : (stats.cash || 0) - total,
-                    history: arrayUnion(item)
-                });
-                
-                bc.postMessage({ type: 'SUCCESS' });
-                showToast("ERLEDIGT ✅");
-                currentQuantity = 0; clearCash();
-            } catch(e) { 
-                console.error(e);
-                showToast("Fehler beim Speichern"); 
-            }
-        };
-
-        // UI Tabs
-        window.switchTab = (tab) => {
-            document.getElementById('tab-sell').classList.toggle('hidden', tab !== 'sell');
-            document.getElementById('tab-stats').classList.toggle('hidden', tab !== 'stats');
-            const btns = { 'sell': document.getElementById('nav-sell'), 'stats': document.getElementById('nav-stats') };
-            Object.keys(btns).forEach(k => {
-                btns[k].className = `px-6 py-2 btn-round transition-all ${k === tab ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'}`;
-            });
-        };
-
-        // PIN & Settings
-        window.requestSettingsAccess = () => { pinTyped = ""; updatePinUI(); document.getElementById('auth-modal').classList.remove('hidden'); };
-        window.closeAuth = () => document.getElementById('auth-modal').classList.add('hidden');
-        window.addPinDigit = (d) => {
-            if (pinTyped.length < 4) pinTyped += d;
-            updatePinUI();
-            if (pinTyped.length === 4) {
-                if (pinTyped === "5657") { closeAuth(); openSettings(); }
-                else { showToast("PIN FALSCH"); pinTyped = ""; updatePinUI(); }
-            }
-        };
-        window.updatePinUI = () => {
-            for(let i=1; i<=4; i++) {
-                const dot = document.getElementById(`pin-dot-${i}`);
-                dot.className = `w-4 h-4 rounded-full transition-all ${i <= pinTyped.length ? 'bg-blue-500 scale-125' : 'bg-slate-100'}`;
-            }
-        };
-        window.clearPin = () => { pinTyped = ""; updatePinUI(); };
-
-        window.openSettings = () => {
-            settingsTyped = Math.round(MARKEN_WERT * 100).toString();
-            updateSettingsUI();
-            document.getElementById('settings-modal').classList.remove('hidden');
-        };
-        window.closeSettings = () => document.getElementById('settings-modal').classList.add('hidden');
-        window.addSettingsDigit = (d) => {
-            if (settingsTyped === "0") settingsTyped = d;
-            else if (settingsTyped.length < 5) settingsTyped += d;
-            updateSettingsUI();
-        };
-        window.clearSettings = () => { settingsTyped = "0"; updateSettingsUI(); };
-        window.updateSettingsUI = () => {
-            document.getElementById('settingsPriceDisplay').innerText = (parseFloat(settingsTyped)/100).toLocaleString('de-DE', { minimumFractionDigits: 2 });
-        };
-        window.saveMarkenWert = async () => {
-            const val = parseFloat(settingsTyped) / 100;
-            const ref = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
-            try {
-                const snap = await getDoc(ref);
-                if (!snap.exists()) {
-                    await setDoc(ref, {...stats, markenWert: val});
-                } else {
-                    await updateDoc(ref, { markenWert: val });
-                }
-                closeSettings();
-                showToast("Preis aktualisiert");
-            } catch(e) { showToast("Fehler!"); }
-        };
-
-        window.resetStats = async () => {
-            if (!confirm('Wirklich alles auf Null setzen?')) return;
-            const ref = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
-            await setDoc(ref, { sold: 0, returned: 0, cash: 0, markenWert: MARKEN_WERT, history: [] });
-            showToast("Journal geleert");
-        };
-
-        window.deleteTransaction = async (item) => {
-            if (!confirm('Eintrag löschen?')) return;
-            const ref = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
-            await updateDoc(ref, {
-                sold: item.type === 'VERKAUF' ? stats.sold - item.amount : stats.sold,
-                returned: item.type === 'RETOURE' ? stats.returned - item.amount : stats.returned,
-                cash: stats.cash - item.money,
-                history: arrayRemove(item)
-            });
-        };
-
-        function updateUI() {
-            document.getElementById('statMarken').innerText = stats.sold || 0;
-            document.getElementById('statReturns').innerText = stats.returned || 0;
-            document.getElementById('statTotal').innerText = (stats.cash || 0).toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
-            const hist = document.getElementById('history');
-            const data = [...(stats.history || [])].reverse();
-            hist.innerHTML = data.length ? data.map(i => `
-                <div class="flex justify-between items-center p-6 bg-white hover:bg-slate-50 transition-colors">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-full flex items-center justify-center ${i.type === 'VERKAUF' ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-orange-600'}">
-                            ${i.type === 'VERKAUF' ? '↓' : '↑'}
+        function SettingsModal({ tokenPrice, onSave, onClose }) {
+            const [localPrice, setLocalPrice] = useState(tokenPrice.toString().replace('.', ','));
+            return (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/40 backdrop-blur-md">
+                    <div className="glass-card w-full max-w-md rounded-[2.5rem] p-8 flex flex-col shadow-2xl">
+                        <h2 className="text-2xl font-bold mb-6">Einstellungen</h2>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Markenwert (€)</label>
+                                <input 
+                                    type="text" 
+                                    value={localPrice}
+                                    onChange={(e) => setLocalPrice(e.target.value)}
+                                    className="w-full bg-black/5 p-4 rounded-2xl text-2xl font-black outline-none border-2 border-transparent focus:border-orange-400 transition-all"
+                                    placeholder="0,50"
+                                />
+                            </div>
                         </div>
-                        <div>
-                            <p class="font-bold text-slate-800">${i.amount}x ${i.type}</p>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">${i.time}</p>
+                        <div className="mt-8 flex gap-3">
+                            <button onClick={onClose} className="flex-1 py-4 bg-black/5 rounded-2xl font-bold">Abbrechen</button>
+                            <button 
+                                onClick={() => {
+                                    const p = parseFloat(localPrice.replace(',', '.'));
+                                    if (!isNaN(p)) onSave(p);
+                                }}
+                                className="flex-1 py-4 bg-orange-500 text-white rounded-2xl font-bold shadow-lg shadow-orange-200"
+                            >
+                                Speichern
+                            </button>
                         </div>
-                    </div>
-                    <div class="flex items-center gap-6">
-                        <p class="font-black text-slate-800 tabular-nums text-lg">${i.money.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'})}</p>
-                        <button onclick='deleteTransaction(${JSON.stringify(i)})' class="text-slate-200 hover:text-red-400 transition-colors">🗑️</button>
                     </div>
                 </div>
-            `).join('') : '<div class="p-20 text-center text-slate-300 font-bold">Noch keine Buchungen</div>';
+            );
         }
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.classList.replace('opacity-0', 'opacity-100');
-            setTimeout(() => t.classList.replace('opacity-100', 'opacity-0'), 2500);
+        function JournalModal({ journal, onDelete, onClose }) {
+            const stats = useMemo(() => {
+                let sales = 0, revenue = 0;
+                journal.forEach(item => { 
+                    sales += item.quantity; 
+                    revenue += item.amount; 
+                });
+                return { sales, revenue };
+            }, [journal]);
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/20 backdrop-blur-md">
+                    <div className="glass-card w-full max-w-4xl max-h-[85vh] rounded-[2.5rem] flex flex-col overflow-hidden">
+                        <div className="flex justify-between items-center p-8 border-b border-white/20">
+                            <h2 className="text-3xl font-bold tracking-tight">Journal</h2>
+                            <button onClick={onClose} className="p-3 bg-black/5 rounded-full apple-button"><Icon name="X" color="#000" /></button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-6 p-8 bg-white/30">
+                            <div className="glass-card p-6 rounded-3xl text-center">
+                                <p className="text-sm font-semibold text-slate-500 uppercase tracking-widest">Marken Bilanz</p>
+                                <p className="text-4xl font-black">{stats.sales}</p>
+                            </div>
+                            <div className="glass-card p-6 rounded-3xl text-center border-orange-200/50">
+                                <p className="text-sm font-semibold text-orange-600 uppercase tracking-widest">Kassenstand</p>
+                                <p className="text-4xl font-black text-orange-500">{formatCurrency(stats.revenue)}</p>
+                            </div>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-8 pt-0">
+                            <table className="w-full">
+                                <thead className="sticky top-0 bg-white/80 backdrop-blur-md text-xs font-bold text-slate-400 uppercase tracking-tighter z-10">
+                                    <tr>
+                                        <th className="py-4 text-left">Zeit</th>
+                                        <th className="py-4 text-left">Typ</th>
+                                        <th className="py-4 text-right">Menge</th>
+                                        <th className="py-4 text-right">Summe</th>
+                                        <th className="py-4 text-right">Aktion</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-black/5">
+                                    {journal.map(item => (
+                                        <tr key={item.id} className="group transition-colors hover:bg-white/40">
+                                            <td className="py-5 font-medium">{new Date(item.timestamp).toLocaleTimeString()}</td>
+                                            <td className="py-5">
+                                                <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${item.type === 'sale' ? 'bg-green-500/10 text-green-600' : 'bg-rose-500/10 text-rose-600'}`}>
+                                                    {item.type === 'sale' ? 'Verkauf' : 'Retoure'}
+                                                </span>
+                                            </td>
+                                            <td className="py-5 text-right font-semibold">{item.quantity}</td>
+                                            <td className="py-5 text-right font-black">{formatCurrency(item.amount)}</td>
+                                            <td className="py-5 text-right">
+                                                <button onClick={() => onDelete(item.id)} className="text-slate-300 hover:text-rose-500 transition-colors">
+                                                    <Icon name="Trash2" size={18} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            );
         }
 
-        // Firebase Auth & Listener
-        const start = async () => {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
-            }
-        };
+        function CashierApp() {
+            const [user, setUser] = useState(null);
+            const [tokenPrice, setTokenPrice] = useState(0.50);
+            const [quantity, setQuantity] = useState(0);
+            const [givenCashStr, setGivenCashStr] = useState("");
+            const [journal, setJournal] = useState([]);
+            const [showJournal, setShowJournal] = useState(false);
+            const [showSettings, setShowSettings] = useState(false);
+            const channelRef = useRef(null);
 
-        onAuthStateChanged(auth, (u) => {
-            if (u) {
-                user = u;
-                document.getElementById('syncStatus').classList.replace('bg-yellow-400', 'bg-green-500');
-                document.getElementById('statusText').innerText = "Online";
-                
-                const ref = doc(db, 'artifacts', appId, 'public', 'data', 'kassenbestand');
-                onSnapshot(ref, (s) => {
-                    if (s.exists()) {
-                        stats = s.data();
-                        MARKEN_WERT = stats.markenWert || 0.50;
-                        document.getElementById('valLabel').innerText = MARKEN_WERT.toFixed(2).replace('.', ',');
-                        updateUI();
-                        updatePrice();
-                    } else {
-                        setDoc(ref, stats);
+            // Auth Initialisierung (Regel 3)
+            useEffect(() => {
+                const initAuth = async () => {
+                    try {
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await auth.signInWithCustomToken(__initial_auth_token);
+                        } else {
+                            await auth.signInAnonymously();
+                        }
+                    } catch (e) {
+                        console.error("Auth Error", e);
                     }
-                }, (e) => showToast("Sync Fehler"));
-            }
-        });
+                };
+                initAuth();
+                const unsubscribe = auth.onAuthStateChanged(setUser);
+                channelRef.current = new BroadcastChannel(SYNC_CHANNEL_NAME);
+                return () => {
+                    unsubscribe();
+                    channelRef.current.close();
+                };
+            }, []);
 
-        start();
+            // Firestore Echtzeit-Sync & Settings Sync (Regel 1 & 2)
+            useEffect(() => {
+                if (!user) return;
+
+                const journalRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('journal');
+                const settingsRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('settings');
+                
+                // Sync Journal
+                const unsubJournal = journalRef.onSnapshot((snapshot) => {
+                    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setJournal(data.sort((a, b) => b.timestamp.localeCompare(a.timestamp)));
+                });
+
+                // Sync Settings (Markenwert)
+                const unsubSettings = settingsRef.onSnapshot((doc) => {
+                    if (doc.exists && doc.data().tokenPrice) {
+                        setTokenPrice(doc.data().tokenPrice);
+                    }
+                });
+
+                return () => {
+                    unsubJournal();
+                    unsubSettings();
+                };
+            }, [user]);
+
+            const total = quantity * tokenPrice;
+            const given = parseFloat(givenCashStr.replace(',', '.')) || 0;
+            const change = given > 0 ? Math.max(0, given - total) : 0;
+
+            useEffect(() => {
+                if (channelRef.current) {
+                    channelRef.current.postMessage({
+                        type: 'STATE_UPDATE',
+                        payload: { quantity, total, status: quantity > 0 ? 'active' : 'idle' }
+                    });
+                }
+            }, [quantity, total]);
+
+            const updateSettings = async (newPrice) => {
+                if (!user) return;
+                await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('settings').set({
+                    tokenPrice: newPrice,
+                    updatedAt: new Date().toISOString()
+                }, { merge: true });
+                setShowSettings(false);
+            };
+
+            const handleCheckout = async (type = 'sale') => {
+                if (!user) return;
+
+                const amount = type === 'sale' ? total : -total;
+                const qty = type === 'sale' ? quantity : -quantity;
+                
+                const entry = {
+                    type,
+                    quantity: qty,
+                    amount: amount,
+                    timestamp: new Date().toISOString(),
+                    userId: user.uid
+                };
+
+                try {
+                    await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('journal').add(entry);
+                    
+                    channelRef.current.postMessage({ 
+                        type: 'STATE_UPDATE', 
+                        payload: { quantity: 0, total: 0, status: 'success', change: type === 'sale' ? change : 0 } 
+                    });
+                    
+                    setQuantity(0); 
+                    setGivenCashStr("");
+                    setTimeout(() => channelRef.current.postMessage({ type: 'STATE_UPDATE', payload: { status: 'idle' } }), 4000);
+                } catch (e) {
+                    console.error("Checkout Error", e);
+                }
+            };
+
+            const deleteEntry = async (id) => {
+                if (!user) return;
+                try {
+                    await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('journal').doc(id).delete();
+                } catch (e) {
+                    console.error("Delete Error", e);
+                }
+            };
+
+            return (
+                <div className="h-screen w-screen p-6 md:p-10 flex flex-col gap-8">
+                    <header className="flex justify-between items-center px-4">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 glass-card rounded-2xl flex items-center justify-center animate-float">
+                                <Icon name="Sun" color="#f97316" size={28} />
+                            </div>
+                            <div>
+                                <h1 className="text-2xl font-black tracking-tight">Kasse</h1>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                    {user ? `Verbunden: ${user.uid.substring(0,6)}...` : 'Verbinde...'}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex gap-3">
+                            <button onClick={() => window.open('?view=customer', '_blank')} className="glass-card p-4 rounded-2xl apple-button" title="Kundenanzeige">
+                                <Icon name="ScreenShare" color="#3b82f6" />
+                            </button>
+                            <button onClick={() => setShowJournal(true)} className="glass-card p-4 rounded-2xl apple-button" title="Journal">
+                                <Icon name="History" color="#a855f7" />
+                            </button>
+                            <button onClick={() => setShowSettings(true)} className="glass-card p-4 rounded-2xl apple-button" title="Einstellungen">
+                                <Icon name="Settings" color="#64748b" />
+                            </button>
+                        </div>
+                    </header>
+
+                    <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 overflow-hidden">
+                        <section className="lg:col-span-7 glass-card rounded-[3rem] p-10 flex flex-col items-center justify-center relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent opacity-20"></div>
+                            <div className="text-[12rem] font-black tracking-tighter leading-none mb-4 tabular-nums">
+                                {quantity}
+                            </div>
+                            <p className="text-xl font-bold text-slate-300 uppercase tracking-[0.5rem] mb-12">Wertmarken</p>
+                            
+                            <div className="flex gap-8 items-center mb-12">
+                                <button onClick={() => setQuantity(q => Math.max(0, q-1))} className="w-24 h-24 glass-card rounded-full flex items-center justify-center apple-button text-3xl font-light">
+                                    <Icon name="Minus" size={32} />
+                                </button>
+                                <div className="glass-card px-10 py-5 rounded-[2rem] border-orange-200">
+                                    <span className="text-4xl font-black text-orange-500 tabular-nums">{formatCurrency(total)}</span>
+                                </div>
+                                <button onClick={() => setQuantity(q => q+1)} className="w-24 h-24 bg-orange-500 text-white rounded-full flex items-center justify-center apple-button shadow-xl shadow-orange-200">
+                                    <Icon name="Plus" size={32} />
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-4 w-full max-w-md">
+                                {[5, 10, 20].map(n => (
+                                    <button key={n} onClick={() => setQuantity(q => q+n)} className="glass-card py-6 rounded-3xl font-black text-xl apple-button hover:bg-white transition-all">
+                                        +{n}
+                                    </button>
+                                ))}
+                            </div>
+                        </section>
+
+                        <section className="lg:col-span-5 glass-card rounded-[3rem] p-10 flex flex-col shadow-inner">
+                            <div className="grid grid-cols-2 gap-4 mb-8">
+                                <div className="bg-black/5 p-6 rounded-3xl">
+                                    <span className="text-[10px] block font-black text-slate-400 uppercase mb-1">Gegeben</span>
+                                    <span className="text-3xl font-black tabular-nums">{formatCurrency(given)}</span>
+                                </div>
+                                <div className="bg-green-500/10 p-6 rounded-3xl border border-green-200/50">
+                                    <span className="text-[10px] block font-black text-green-600 uppercase mb-1">Rückgeld</span>
+                                    <span className="text-3xl font-black text-green-600 tabular-nums">{formatCurrency(change)}</span>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-4 gap-3 flex-1">
+                                {['1','2','3','5€','4','5','6','10€','7','8','9','20€',',','0','C','50€'].map((k, idx) => (
+                                    <button key={idx} onClick={() => {
+                                        if (k === 'C') setGivenCashStr("");
+                                        else if (k.includes('€')) setGivenCashStr(k.replace('€',''));
+                                        else setGivenCashStr(s => s + k);
+                                    }} className={`rounded-2xl font-bold text-xl apple-button transition-all flex items-center justify-center ${k === 'C' ? 'bg-rose-50 text-rose-500' : 'glass-card hover:bg-white'}`}>
+                                        {k}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="mt-8 flex flex-col gap-3">
+                                <button 
+                                    onClick={() => handleCheckout('sale')} 
+                                    disabled={quantity === 0} 
+                                    className="w-full bg-slate-900 text-white py-6 rounded-3xl font-black text-2xl apple-button shadow-2xl disabled:opacity-20 flex items-center justify-center gap-3"
+                                >
+                                    <Icon name="CreditCard" size={24} color="#fff" /> KASSIEREN
+                                </button>
+                                <button 
+                                    onClick={() => handleCheckout('return')} 
+                                    disabled={quantity === 0} 
+                                    className="w-full bg-rose-500/10 text-rose-600 py-4 rounded-2xl font-bold text-sm apple-button border border-rose-200 disabled:opacity-20"
+                                >
+                                    RETOURE BUCHEN
+                                </button>
+                            </div>
+                        </section>
+                    </main>
+                    {showJournal && <JournalModal journal={journal} onDelete={deleteEntry} onClose={() => setShowJournal(false)} />}
+                    {showSettings && <SettingsModal tokenPrice={tokenPrice} onSave={updateSettings} onClose={() => setShowSettings(false)} />}
+                </div>
+            );
+        }
+
+        function CustomerView() {
+            const [state, setState] = useState({ quantity: 0, total: 0, status: 'idle', change: 0 });
+            useEffect(() => {
+                const channel = new BroadcastChannel(SYNC_CHANNEL_NAME);
+                channel.onmessage = (e) => setState(e.data.payload);
+                return () => channel.close();
+            }, []);
+
+            if (state.status === 'success') {
+                return (
+                    <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#f0f9f4] p-10 overflow-hidden">
+                        <div className="animate-success flex flex-col items-center text-center">
+                            <div className="w-48 h-48 bg-green-500 rounded-full flex items-center justify-center shadow-2xl shadow-green-200 mb-10">
+                                <Icon name="Check" size={100} color="#fff" />
+                            </div>
+                            <h1 className="text-7xl font-black text-green-900 mb-4 tracking-tight">Vielen Dank!</h1>
+                            <p className="text-2xl text-green-700 font-medium mb-12">Ihre Zahlung war erfolgreich.</p>
+                            
+                            {state.change > 0 && (
+                                <div className="glass-card p-10 rounded-[3rem] border-green-200 animate-float">
+                                    <p className="text-xl font-bold text-green-600 uppercase tracking-widest mb-2">Rückgeld</p>
+                                    <p className="text-9xl font-black text-slate-800 tabular-nums">{formatCurrency(state.change)}</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            }
+
+            if (state.status === 'active') {
+                return (
+                    <div className="h-screen w-screen p-10 bg-slate-100 flex flex-col">
+                        <div className="flex-1 glass-card rounded-[4rem] flex flex-col overflow-hidden shadow-2xl border-white">
+                            <div className="bg-orange-500 p-10 text-white flex justify-between items-center">
+                                <span className="text-5xl font-black tracking-tighter">Ihre Bestellung</span>
+                                <Icon name="ShoppingCart" size={48} color="#fff" />
+                            </div>
+                            <div className="flex-1 flex flex-col items-center justify-center">
+                                <span className="text-[25rem] font-black leading-none text-slate-900 tracking-tighter">{state.quantity}</span>
+                                <span className="text-6xl text-slate-300 font-bold uppercase tracking-[1.5rem] mb-20">Wertmarken</span>
+                                <div className="w-full max-w-3xl glass-card rounded-[3rem] p-12 flex justify-between items-center border-orange-200/50 bg-orange-50/50">
+                                    <span className="text-5xl font-bold text-slate-500">Gesamt</span>
+                                    <span className="text-9xl font-black text-orange-500 tabular-nums">{formatCurrency(state.total)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center text-white p-10 overflow-hidden relative">
+                    <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-orange-600 rounded-full blur-[150px] opacity-30 animate-pulse"></div>
+                    <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-rose-600 rounded-full blur-[150px] opacity-20 animate-pulse" style={{animationDelay: '2s'}}></div>
+                    
+                    <div className="relative z-10 text-center">
+                        <div className="mb-10 inline-block p-8 glass-card rounded-[3rem] bg-white/5 border-white/10 animate-float">
+                            <Icon name="Sun" size={120} color="#fff" />
+                        </div>
+                        <h1 className="text-[10rem] font-black tracking-tighter leading-none mb-6">Sommerfest</h1>
+                        <div className="h-1.5 w-64 bg-white/20 mx-auto rounded-full mb-10"></div>
+                        <p className="text-5xl font-light tracking-[1.5rem] opacity-50">WERTMARKEN KASSE</p>
+                    </div>
+                </div>
+            );
+        }
+
+        function App() {
+            const [view, setView] = useState('loading');
+            useEffect(() => {
+                const params = new URLSearchParams(window.location.search);
+                setView(params.get('view') === 'customer' ? 'customer' : 'cashier');
+            }, []);
+
+            if (view === 'loading') return null;
+            return view === 'customer' ? <CustomerView /> : <CashierApp />;
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
 </body>
 </html>
