@@ -446,18 +446,18 @@
 
             if (state.status === 'success') {
                 return (
-                    <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#f0f9f4] p-10 overflow-hidden">
-                        <div className="animate-success flex flex-col items-center text-center">
-                            <div className="w-48 h-48 bg-green-500 rounded-full flex items-center justify-center shadow-2xl shadow-green-200 mb-10">
-                                <Icon name="Check" size={100} color="#fff" />
+                    <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#f0f9f4] p-6 overflow-hidden">
+                        <div className="animate-success flex flex-col items-center text-center max-w-full">
+                            <div className="w-32 h-32 md:w-48 md:h-48 bg-green-500 rounded-full flex items-center justify-center shadow-2xl shadow-green-200 mb-6 md:mb-10">
+                                <Icon name="Check" size={64} color="#fff" className="md:w-[100px] md:h-[100px]" />
                             </div>
-                            <h1 className="text-7xl font-black text-green-900 mb-4 tracking-tight">Vielen Dank!</h1>
-                            <p className="text-2xl text-green-700 font-medium mb-12">Ihre Zahlung war erfolgreich.</p>
+                            <h1 className="text-4xl md:text-7xl font-black text-green-900 mb-2 md:mb-4 tracking-tight">Vielen Dank!</h1>
+                            <p className="text-xl md:text-2xl text-green-700 font-medium mb-6 md:mb-12">Ihre Zahlung war erfolgreich.</p>
                             
                             {state.change > 0 && (
-                                <div className="glass-card p-10 rounded-[3rem] border-green-200 animate-float">
-                                    <p className="text-xl font-bold text-green-600 uppercase tracking-widest mb-2">Rückgeld</p>
-                                    <p className="text-9xl font-black text-slate-800 tabular-nums">{formatCurrency(state.change)}</p>
+                                <div className="glass-card p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] border-green-200 animate-float">
+                                    <p className="text-sm md:text-xl font-bold text-green-600 uppercase tracking-widest mb-1 md:mb-2">Rückgeld</p>
+                                    <p className="text-5xl md:text-9xl font-black text-slate-800 tabular-nums">{formatCurrency(state.change)}</p>
                                 </div>
                             )}
                         </div>
@@ -467,18 +467,18 @@
 
             if (state.status === 'active') {
                 return (
-                    <div className="h-screen w-screen p-10 bg-slate-100 flex flex-col">
-                        <div className="flex-1 glass-card rounded-[4rem] flex flex-col overflow-hidden shadow-2xl border-white">
-                            <div className="bg-orange-500 p-10 text-white flex justify-between items-center">
-                                <span className="text-5xl font-black tracking-tighter">Ihre Bestellung</span>
-                                <Icon name="ShoppingCart" size={48} color="#fff" />
+                    <div className="h-screen w-screen p-4 md:p-10 bg-slate-100 flex flex-col overflow-hidden">
+                        <div className="flex-1 glass-card rounded-[2rem] md:rounded-[4rem] flex flex-col overflow-hidden shadow-2xl border-white max-h-full">
+                            <div className="bg-orange-500 p-6 md:p-10 text-white flex justify-between items-center shrink-0">
+                                <span className="text-2xl md:text-5xl font-black tracking-tighter">Ihre Bestellung</span>
+                                <Icon name="ShoppingCart" size={32} color="#fff" className="md:w-[48px] md:h-[48px]" />
                             </div>
-                            <div className="flex-1 flex flex-col items-center justify-center">
-                                <span className="text-[25rem] font-black leading-none text-slate-900 tracking-tighter">{state.quantity}</span>
-                                <span className="text-6xl text-slate-300 font-bold uppercase tracking-[1.5rem] mb-20">Wertmarken</span>
-                                <div className="w-full max-w-3xl glass-card rounded-[3rem] p-12 flex justify-between items-center border-orange-200/50 bg-orange-50/50">
-                                    <span className="text-5xl font-bold text-slate-500">Gesamt</span>
-                                    <span className="text-9xl font-black text-orange-500 tabular-nums">{formatCurrency(state.total)}</span>
+                            <div className="flex-1 flex flex-col items-center justify-center p-4 min-h-0">
+                                <span className="text-[12rem] md:text-[25rem] font-black leading-none text-slate-900 tracking-tighter shrink-0">{state.quantity}</span>
+                                <span className="text-2xl md:text-6xl text-slate-300 font-bold uppercase tracking-[0.5rem] md:tracking-[1.5rem] mb-8 md:mb-20">Wertmarken</span>
+                                <div className="w-full max-w-3xl glass-card rounded-[1.5rem] md:rounded-[3rem] p-6 md:p-12 flex justify-between items-center border-orange-200/50 bg-orange-50/50 shrink-0">
+                                    <span className="text-xl md:text-5xl font-bold text-slate-500">Gesamt</span>
+                                    <span className="text-4xl md:text-9xl font-black text-orange-500 tabular-nums">{formatCurrency(state.total)}</span>
                                 </div>
                             </div>
                         </div>
@@ -487,17 +487,17 @@
             }
 
             return (
-                <div className="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center text-white p-10 overflow-hidden relative">
+                <div className="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center text-white p-6 overflow-hidden relative">
                     <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-orange-600 rounded-full blur-[150px] opacity-30 animate-pulse"></div>
                     <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-rose-600 rounded-full blur-[150px] opacity-20 animate-pulse" style={{animationDelay: '2s'}}></div>
                     
-                    <div className="relative z-10 text-center">
-                        <div className="mb-10 inline-block p-8 glass-card rounded-[3rem] bg-white/5 border-white/10 animate-float">
-                            <Icon name="Sun" size={120} color="#fff" />
+                    <div className="relative z-10 text-center max-w-full">
+                        <div className="mb-6 md:mb-10 inline-block p-6 md:p-8 glass-card rounded-[2rem] md:rounded-[3rem] bg-white/5 border-white/10 animate-float">
+                            <Icon name="Sun" size={64} color="#fff" className="md:w-[120px] md:h-[120px]" />
                         </div>
-                        <h1 className="text-[10rem] font-black tracking-tighter leading-none mb-6">Sommerfest</h1>
-                        <div className="h-1.5 w-64 bg-white/20 mx-auto rounded-full mb-10"></div>
-                        <p className="text-5xl font-light tracking-[1.5rem] opacity-50">WERTMARKEN KASSE</p>
+                        <h1 className="text-5xl md:text-[10rem] font-black tracking-tighter leading-none mb-4 md:mb-6">Sommerfest</h1>
+                        <div className="h-1 w-32 md:w-64 bg-white/20 mx-auto rounded-full mb-6 md:mb-10"></div>
+                        <p className="text-xl md:text-5xl font-light tracking-[0.5rem] md:tracking-[1.5rem] opacity-50 uppercase">Wertmarken Kasse</p>
                     </div>
                 </div>
             );
