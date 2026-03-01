@@ -11,9 +11,9 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600;700&family=Inter:wght@400;600;900&display=swap');
@@ -21,11 +21,14 @@
         :root {
             --glass-bg: rgba(255, 255, 255, 0.7);
             --glass-border: rgba(255, 255, 255, 0.3);
+            --fest-orange: #f97316;
+            --fest-orange-light: #ffedd5;
+            --fest-orange-dark: #ea580c;
         }
 
         body { 
             font-family: 'SF Pro Display', 'Inter', -apple-system, sans-serif;
-            background: linear-gradient(135deg, #fcefe8 0%, #fff5f0 100%);
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
             overflow: hidden;
             margin: 0;
             padding: 0;
@@ -36,7 +39,7 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            box-shadow: 0 8px 32px 0 rgba(249, 115, 22, 0.05);
         }
 
         .apple-button {
@@ -63,16 +66,23 @@
         }
         .animate-float { animation: float 6s ease-in-out infinite; }
 
+        @keyframes pulse-orange {
+            0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(249, 115, 22, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
+        }
+        .pulse-orange { animation: pulse-orange 2s infinite; }
+
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(249, 115, 22, 0.2); border-radius: 10px; }
     </style>
 </head>
 <body class="text-slate-900">
     <div id="root"></div>
 
     <script type="text/babel">
-        const firebaseConfig = {
+       const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
@@ -115,9 +125,11 @@
         function SettingsModal({ tokenPrice, onSave, onClose }) {
             const [localPrice, setLocalPrice] = useState(tokenPrice.toString().replace('.', ','));
             return (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/40 backdrop-blur-md">
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-orange-900/20 backdrop-blur-md">
                     <div className="glass-card w-full max-w-md rounded-[2.5rem] p-8 flex flex-col shadow-2xl">
-                        <h2 className="text-2xl font-bold mb-6 text-slate-800">Einstellungen</h2>
+                        <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
+                            <Icon name="Settings" color="#f97316" /> Einstellungen
+                        </h2>
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Markenwert (€)</label>
@@ -125,7 +137,7 @@
                                     type="text" 
                                     value={localPrice}
                                     onChange={(e) => setLocalPrice(e.target.value)}
-                                    className="w-full bg-black/5 p-4 rounded-2xl text-2xl font-black outline-none border-2 border-transparent focus:border-orange-400 transition-all"
+                                    className="w-full bg-orange-50 p-4 rounded-2xl text-2xl font-black outline-none border-2 border-transparent focus:border-orange-400 transition-all text-orange-600"
                                 />
                             </div>
                         </div>
@@ -150,8 +162,8 @@
             const stats = useMemo(() => {
                 let sales = 0, revenue = 0;
                 journal.forEach(item => { 
-                    sales += item.quantity; 
-                    revenue += item.amount; 
+                    sales += Number(item.quantity) || 0; 
+                    revenue += Number(item.amount) || 0; 
                 });
                 return { sales, revenue };
             }, [journal]);
@@ -159,14 +171,14 @@
             return (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/20 backdrop-blur-md">
                     <div className="glass-card w-full max-w-4xl max-h-[85vh] rounded-[2.5rem] flex flex-col overflow-hidden">
-                        <div className="flex justify-between items-center p-8 border-b border-white/20">
+                        <div className="flex justify-between items-center p-8 border-b border-orange-100">
                             <h2 className="text-3xl font-bold tracking-tight text-slate-800">Journal</h2>
-                            <button onClick={onClose} className="p-3 bg-black/5 rounded-full apple-button"><Icon name="X" color="#000" /></button>
+                            <button onClick={onClose} className="p-3 bg-orange-50 rounded-full apple-button"><Icon name="X" color="#f97316" /></button>
                         </div>
-                        <div className="grid grid-cols-2 gap-6 p-8 bg-white/30">
+                        <div className="grid grid-cols-2 gap-6 p-8 bg-orange-50/30">
                             <div className="glass-card p-6 rounded-3xl text-center">
                                 <p className="text-sm font-semibold text-slate-500 uppercase tracking-widest">Marken Bilanz</p>
-                                <p className="text-4xl font-black">{stats.sales}</p>
+                                <p className="text-4xl font-black text-slate-800">{stats.sales}</p>
                             </div>
                             <div className="glass-card p-6 rounded-3xl text-center border-orange-200/50">
                                 <p className="text-sm font-semibold text-orange-600 uppercase tracking-widest">Kassenstand</p>
@@ -184,12 +196,12 @@
                                         <th className="py-4 text-right">Aktion</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-black/5">
+                                <tbody className="divide-y divide-orange-50">
                                     {journal.map(item => (
-                                        <tr key={item.id} className="group transition-colors hover:bg-white/40">
+                                        <tr key={item.id} className="group transition-colors hover:bg-orange-50/40">
                                             <td className="py-5 font-medium">{new Date(item.timestamp).toLocaleTimeString()}</td>
                                             <td className="py-5">
-                                                <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${item.type === 'sale' ? 'bg-green-500/10 text-green-600' : 'bg-rose-500/10 text-rose-600'}`}>
+                                                <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${item.type === 'sale' ? 'bg-orange-500/10 text-orange-600' : 'bg-rose-500/10 text-rose-600'}`}>
                                                     {item.type === 'sale' ? 'Verkauf' : 'Retoure'}
                                                 </span>
                                             </td>
@@ -238,17 +250,18 @@
 
             useEffect(() => {
                 if (!user) return;
+                // Correct path for public data
                 const journalRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('journal');
                 const settingsRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('settings');
                 
                 const unsubJournal = journalRef.onSnapshot((snapshot) => {
                     const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setJournal(data.sort((a, b) => b.timestamp.localeCompare(a.timestamp)));
-                });
+                }, (err) => console.error("Journal sync error:", err));
 
                 const unsubSettings = settingsRef.onSnapshot((doc) => {
                     if (doc.exists && doc.data().tokenPrice) setTokenPrice(doc.data().tokenPrice);
-                });
+                }, (err) => console.error("Settings sync error:", err));
 
                 return () => { unsubJournal(); unsubSettings(); };
             }, [user]);
@@ -269,77 +282,102 @@
             const handleCheckout = async (type = 'sale') => {
                 if (!user || quantity === 0) return;
                 const amount = type === 'sale' ? total : -total;
+                const qty = type === 'sale' ? quantity : -quantity;
+                
                 const entry = {
-                    type, quantity: type === 'sale' ? quantity : -quantity,
-                    amount, timestamp: new Date().toISOString(), userId: user.uid
+                    type, 
+                    quantity: qty,
+                    amount: amount, 
+                    timestamp: new Date().toISOString(), 
+                    userId: user.uid
                 };
+
                 try {
+                    // Save to journal
                     await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('journal').add(entry);
+                    
+                    // Trigger animation and update customer display
                     channelRef.current.postMessage({ 
                         type: 'STATE_UPDATE', 
                         payload: { quantity: 0, total: 0, status: 'success', change: type === 'sale' ? change : 0 } 
                     });
-                    setQuantity(0); setGivenCashStr("");
-                    setTimeout(() => channelRef.current.postMessage({ type: 'STATE_UPDATE', payload: { status: 'idle' } }), 4000);
-                } catch (e) { console.error(e); }
+                    
+                    // Reset UI
+                    setQuantity(0); 
+                    setGivenCashStr("");
+                    
+                    setTimeout(() => {
+                        channelRef.current.postMessage({ type: 'STATE_UPDATE', payload: { status: 'idle' } });
+                    }, 4000);
+                } catch (e) { 
+                    console.error("Error saving transaction:", e); 
+                }
             };
 
             return (
-                <div className="h-screen w-screen p-4 md:p-8 flex flex-col gap-4 md:gap-8 overflow-hidden">
+                <div className="h-screen w-screen p-4 md:p-8 flex flex-col gap-4 md:gap-8 overflow-hidden bg-orange-50/20">
                     <header className="flex justify-between items-center px-4 shrink-0">
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 md:w-12 md:h-12 glass-card rounded-2xl flex items-center justify-center animate-float">
+                            <div className="w-10 h-10 md:w-12 md:h-12 glass-card rounded-2xl flex items-center justify-center animate-float shadow-orange-100">
                                 <Icon name="Sun" color="#f97316" size={24} />
                             </div>
                             <div>
-                                <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-800">Kasse</h1>
-                                <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sommerfest</p>
+                                <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-800">Sommer-Kasse</h1>
+                                <p className="text-[8px] md:text-[10px] font-bold text-orange-400 uppercase tracking-widest">Markenverkauf</p>
                             </div>
                         </div>
                         <div className="flex gap-2">
-                            <button onClick={() => window.open('?view=customer', '_blank')} className="glass-card p-3 rounded-xl apple-button"><Icon name="ScreenShare" size={20} color="#3b82f6" /></button>
-                            <button onClick={() => setShowJournal(true)} className="glass-card p-3 rounded-xl apple-button"><Icon name="History" size={20} color="#a855f7" /></button>
-                            <button onClick={() => setShowSettings(true)} className="glass-card p-3 rounded-xl apple-button"><Icon name="Settings" size={20} color="#64748b" /></button>
+                            <button onClick={() => window.open('?view=customer', '_blank')} className="glass-card p-3 rounded-xl apple-button hover:bg-white"><Icon name="ScreenShare" size={20} color="#3b82f6" /></button>
+                            <button onClick={() => setShowJournal(true)} className="glass-card p-3 rounded-xl apple-button hover:bg-white"><Icon name="History" size={20} color="#f97316" /></button>
+                            <button onClick={() => setShowSettings(true)} className="glass-card p-3 rounded-xl apple-button hover:bg-white"><Icon name="Settings" size={20} color="#64748b" /></button>
                         </div>
                     </header>
 
                     <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8 min-h-0">
-                        <section className="lg:col-span-7 glass-card rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 flex flex-col items-center justify-center relative overflow-hidden">
-                            <div className="text-7xl md:text-9xl lg:text-[12rem] font-black tracking-tighter leading-none mb-2 tabular-nums text-slate-900">
+                        {/* Linke Seite: Mengen-Eingabe */}
+                        <section className="lg:col-span-7 glass-card rounded-[2rem] md:rounded-[3.5rem] p-6 md:p-10 flex flex-col items-center justify-center relative overflow-hidden bg-white/40">
+                            <div className="absolute top-0 right-0 p-8">
+                                <span className="px-4 py-2 bg-orange-100 text-orange-600 rounded-full text-xs font-black uppercase tracking-widest">
+                                    Preis/Marke: {formatCurrency(tokenPrice)}
+                                </span>
+                            </div>
+
+                            <div className="text-8xl md:text-9xl lg:text-[13rem] font-black tracking-tighter leading-none mb-2 tabular-nums text-slate-900 drop-shadow-sm">
                                 {quantity}
                             </div>
-                            <p className="text-sm md:text-xl font-bold text-slate-300 uppercase tracking-widest mb-6 md:mb-12">Wertmarken</p>
+                            <p className="text-sm md:text-xl font-bold text-orange-300 uppercase tracking-widest mb-6 md:mb-12">Wertmarken</p>
                             
                             <div className="flex gap-4 md:gap-8 items-center mb-6 md:mb-12">
-                                <button onClick={() => setQuantity(q => Math.max(0, q-1))} className="w-16 h-16 md:w-20 md:h-20 glass-card rounded-full flex items-center justify-center apple-button text-2xl font-light">
-                                    <Icon name="Minus" size={24} />
+                                <button onClick={() => setQuantity(q => Math.max(0, q-1))} className="w-16 h-16 md:w-24 md:h-24 glass-card rounded-full flex items-center justify-center apple-button text-2xl font-light hover:bg-white">
+                                    <Icon name="Minus" size={28} color="#f97316" />
                                 </button>
-                                <div className="glass-card px-6 md:px-10 py-3 md:py-5 rounded-[1.5rem] md:rounded-[2rem] border-orange-200">
-                                    <span className="text-2xl md:text-4xl font-black text-orange-500 tabular-nums">{formatCurrency(total)}</span>
+                                <div className="glass-card px-8 md:px-14 py-4 md:py-8 rounded-[1.5rem] md:rounded-[3rem] border-orange-200 bg-white/80 shadow-xl shadow-orange-500/5">
+                                    <span className="text-3xl md:text-6xl font-black text-orange-500 tabular-nums">{formatCurrency(total)}</span>
                                 </div>
-                                <button onClick={() => setQuantity(q => q+1)} className="w-16 h-16 md:w-20 md:h-20 bg-orange-500 text-white rounded-full flex items-center justify-center apple-button shadow-xl shadow-orange-200">
-                                    <Icon name="Plus" size={24} />
+                                <button onClick={() => setQuantity(q => q+1)} className="w-16 h-16 md:w-24 md:h-24 bg-orange-500 text-white rounded-full flex items-center justify-center apple-button shadow-xl shadow-orange-300">
+                                    <Icon name="Plus" size={28} />
                                 </button>
                             </div>
 
                             <div className="grid grid-cols-3 gap-2 md:gap-4 w-full max-w-sm">
                                 {[5, 10, 20].map(n => (
-                                    <button key={n} onClick={() => setQuantity(q => q+n)} className="glass-card py-4 rounded-2xl font-black text-lg apple-button hover:bg-white transition-all">
+                                    <button key={n} onClick={() => setQuantity(q => q+n)} className="glass-card py-4 rounded-2xl font-black text-lg apple-button hover:bg-orange-500 hover:text-white transition-all border-orange-100">
                                         +{n}
                                     </button>
                                 ))}
                             </div>
                         </section>
 
-                        <section className="lg:col-span-5 glass-card rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 flex flex-col shadow-inner min-h-0">
+                        {/* Rechte Seite: Kasse & Rückgeld */}
+                        <section className="lg:col-span-5 glass-card rounded-[2rem] md:rounded-[3.5rem] p-6 md:p-10 flex flex-col shadow-inner min-h-0 bg-white/60">
                             <div className="grid grid-cols-2 gap-3 mb-4 md:mb-8 shrink-0">
-                                <div className="bg-black/5 p-4 rounded-2xl">
-                                    <span className="text-[8px] md:text-[10px] block font-black text-slate-400 uppercase mb-1">Gegeben</span>
-                                    <span className="text-xl md:text-2xl font-black tabular-nums">{formatCurrency(given)}</span>
+                                <div className="bg-orange-50 p-4 rounded-2xl border border-orange-100">
+                                    <span className="text-[8px] md:text-[10px] block font-black text-slate-400 uppercase mb-1 tracking-widest">Gegeben</span>
+                                    <span className="text-xl md:text-2xl font-black tabular-nums text-slate-700">{formatCurrency(given)}</span>
                                 </div>
-                                <div className="bg-green-500/10 p-4 rounded-2xl border border-green-200/50">
-                                    <span className="text-[8px] md:text-[10px] block font-black text-green-600 uppercase mb-1">Rückgeld</span>
-                                    <span className="text-xl md:text-2xl font-black text-green-600 tabular-nums">{formatCurrency(change)}</span>
+                                <div className="bg-orange-500/10 p-4 rounded-2xl border border-orange-200">
+                                    <span className="text-[8px] md:text-[10px] block font-black text-orange-600 uppercase mb-1 tracking-widest">Rückgeld</span>
+                                    <span className="text-xl md:text-2xl font-black text-orange-600 tabular-nums">{formatCurrency(change)}</span>
                                 </div>
                             </div>
 
@@ -349,35 +387,49 @@
                                         if (k === 'C') setGivenCashStr("");
                                         else if (k.includes('€')) setGivenCashStr(k.replace('€',''));
                                         else setGivenCashStr(s => s + k);
-                                    }} className={`rounded-xl font-bold text-lg apple-button transition-all flex items-center justify-center ${k === 'C' ? 'bg-rose-50 text-rose-500' : 'glass-card hover:bg-white'}`}>
+                                    }} className={`rounded-2xl font-bold text-xl apple-button transition-all flex items-center justify-center ${k === 'C' ? 'bg-rose-50 text-rose-500' : 'glass-card hover:bg-white border-orange-50 shadow-sm'}`}>
                                         {k}
                                     </button>
                                 ))}
                             </div>
 
-                            <div className="mt-4 md:mt-8 flex flex-col gap-2 shrink-0">
+                            <div className="mt-4 md:mt-8 flex flex-col gap-3 shrink-0">
                                 <button 
                                     onClick={() => handleCheckout('sale')} 
                                     disabled={quantity === 0} 
-                                    className="w-full bg-slate-900 text-white py-4 md:py-6 rounded-2xl md:rounded-3xl font-black text-xl md:text-2xl apple-button shadow-2xl disabled:opacity-20 flex items-center justify-center gap-3"
+                                    className="w-full bg-slate-900 text-white py-5 md:py-8 rounded-[1.5rem] md:rounded-[2.5rem] font-black text-xl md:text-2xl apple-button shadow-2xl disabled:opacity-10 flex items-center justify-center gap-3 active:scale-95"
                                 >
-                                    <Icon name="CreditCard" size={20} color="#fff" /> KASSIEREN
+                                    <Icon name="ShoppingCart" size={24} color="#fff" /> KASSIEREN
                                 </button>
                                 <button 
                                     onClick={() => handleCheckout('return')} 
                                     disabled={quantity === 0} 
-                                    className="w-full bg-rose-500/10 text-rose-600 py-3 rounded-xl font-bold text-xs apple-button border border-rose-200 disabled:opacity-20"
+                                    className="w-full bg-rose-50 text-rose-600 py-3 rounded-xl font-bold text-xs apple-button border border-rose-100 disabled:opacity-20"
                                 >
-                                    RETOURE BUCHEN
+                                    FALSCHBUCHUNG / RETOURE
                                 </button>
                             </div>
                         </section>
                     </main>
-                    {showJournal && <JournalModal journal={journal} onDelete={(id) => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('journal').doc(id).delete()} onClose={() => setShowJournal(false)} />}
-                    {showSettings && <SettingsModal tokenPrice={tokenPrice} onSave={(p) => {
-                        db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('settings').set({tokenPrice: p, updatedAt: new Date().toISOString()}, {merge: true});
-                        setShowSettings(false);
-                    }} onClose={() => setShowSettings(false)} />}
+
+                    {showJournal && (
+                        <JournalModal 
+                            journal={journal} 
+                            onDelete={(id) => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('journal').doc(id).delete()} 
+                            onClose={() => setShowJournal(false)} 
+                        />
+                    )}
+                    
+                    {showSettings && (
+                        <SettingsModal 
+                            tokenPrice={tokenPrice} 
+                            onSave={(p) => {
+                                db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('settings').set({tokenPrice: p, updatedAt: new Date().toISOString()}, {merge: true});
+                                setShowSettings(false);
+                            }} 
+                            onClose={() => setShowSettings(false)} 
+                        />
+                    )}
                 </div>
             );
         }
@@ -390,23 +442,23 @@
                 return () => channel.close();
             }, []);
 
-            // Gemeinsame Container-Klasse für Konsistenz
-            const containerClass = "h-screen w-screen flex flex-col items-center justify-center p-4 md:p-8 overflow-hidden bg-slate-50";
+            // Gemeinsame Container-Klasse
+            const containerClass = "h-screen w-screen flex flex-col items-center justify-center p-4 md:p-8 overflow-hidden transition-colors duration-700";
 
             if (state.status === 'success') {
                 return (
-                    <div className={`${containerClass} bg-[#f0f9f4]`}>
+                    <div className={`${containerClass} bg-orange-50`}>
                         <div className="animate-success flex flex-col items-center text-center max-w-full">
-                            <div className="w-24 h-24 md:w-40 md:h-40 bg-green-500 rounded-full flex items-center justify-center shadow-xl mb-6">
-                                <Icon name="Check" size={48} color="#fff" className="md:w-20 md:h-20" />
+                            <div className="w-32 h-32 md:w-56 md:h-56 bg-orange-500 rounded-full flex items-center justify-center shadow-2xl shadow-orange-300 mb-8 pulse-orange">
+                                <Icon name="Heart" size={64} color="#fff" className="md:w-32 md:h-32" />
                             </div>
-                            <h1 className="text-3xl md:text-6xl font-black text-green-900 mb-2 tracking-tight">Fertig!</h1>
-                            <p className="text-lg md:text-2xl text-green-700 font-medium mb-8">Vielen Dank für Ihren Einkauf.</p>
+                            <h1 className="text-4xl md:text-8xl font-black text-orange-900 mb-4 tracking-tighter">Viel Spaß!</h1>
+                            <p className="text-xl md:text-3xl text-orange-600/80 font-semibold mb-12">Genießen Sie das Fest.</p>
                             
                             {state.change > 0 && (
-                                <div className="glass-card p-6 md:p-8 rounded-[2rem] border-green-200 animate-float">
-                                    <p className="text-xs md:text-lg font-bold text-green-600 uppercase tracking-widest mb-2">Rückgeld</p>
-                                    <p className="text-4xl md:text-7xl font-black text-slate-800 tabular-nums">{formatCurrency(state.change)}</p>
+                                <div className="glass-card p-8 md:p-12 rounded-[3rem] border-orange-200 animate-float bg-white/90">
+                                    <p className="text-sm md:text-xl font-bold text-orange-400 uppercase tracking-[0.2em] mb-4">Ihr Rückgeld</p>
+                                    <p className="text-5xl md:text-[8rem] font-black text-orange-600 tabular-nums leading-none">{formatCurrency(state.change)}</p>
                                 </div>
                             )}
                         </div>
@@ -416,18 +468,24 @@
 
             if (state.status === 'active') {
                 return (
-                    <div className={containerClass}>
-                        <div className="w-full max-w-4xl glass-card rounded-[2.5rem] md:rounded-[4rem] flex flex-col overflow-hidden shadow-2xl border-white max-h-full">
-                            <div className="bg-orange-500 p-4 md:p-8 text-white flex justify-between items-center shrink-0">
-                                <span className="text-xl md:text-4xl font-black tracking-tighter uppercase">Ihre Bestellung</span>
-                                <Icon name="ShoppingCart" size={24} color="#fff" className="md:w-10 md:h-10" />
+                    <div className={`${containerClass} bg-orange-500`}>
+                        <div className="w-full max-w-5xl glass-card rounded-[3rem] md:rounded-[5rem] flex flex-col overflow-hidden shadow-2xl border-white/40 bg-white/95 max-h-full">
+                            <div className="bg-orange-600 p-6 md:p-12 text-white flex justify-between items-center shrink-0">
+                                <div className="flex flex-col">
+                                    <span className="text-xl md:text-4xl font-black tracking-tighter uppercase leading-none mb-1">Deine Bestellung</span>
+                                    <span className="text-[10px] md:text-lg opacity-80 font-bold uppercase tracking-widest">Markenverkauf</span>
+                                </div>
+                                <div className="w-12 h-12 md:w-20 md:h-20 bg-white/20 rounded-3xl flex items-center justify-center">
+                                    <Icon name="Ticket" size={32} color="#fff" className="md:w-12 md:h-12" />
+                                </div>
                             </div>
-                            <div className="flex-1 flex flex-col items-center justify-center p-6 min-h-0">
-                                <span className="text-[6rem] md:text-[10rem] lg:text-[14rem] font-black leading-none text-slate-900 tracking-tighter shrink-0">{state.quantity}</span>
-                                <span className="text-lg md:text-4xl text-slate-400 font-bold uppercase tracking-[0.4rem] md:tracking-[1rem] mb-6 md:mb-12">Wertmarken</span>
-                                <div className="w-full glass-card rounded-[1.5rem] md:rounded-[2.5rem] p-5 md:p-10 flex justify-between items-center border-orange-100 bg-orange-50/30 shrink-0">
-                                    <span className="text-lg md:text-3xl font-bold text-slate-500">Summe</span>
-                                    <span className="text-3xl md:text-7xl font-black text-orange-600 tabular-nums">{formatCurrency(state.total)}</span>
+                            <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-16 min-h-0">
+                                <span className="text-[9rem] md:text-[15rem] lg:text-[20rem] font-black leading-none text-orange-600 tracking-tighter shrink-0 animate-float drop-shadow-xl">{state.quantity}</span>
+                                <span className="text-xl md:text-5xl text-orange-300 font-bold uppercase tracking-[0.5rem] md:tracking-[1.2rem] mb-10 md:mb-20">Marken</span>
+                                
+                                <div className="w-full glass-card rounded-[2rem] md:rounded-[4rem] p-8 md:p-14 flex justify-between items-center border-orange-100 bg-orange-50/50 shrink-0">
+                                    <span className="text-2xl md:text-5xl font-black text-slate-400 uppercase tracking-widest">Summe</span>
+                                    <span className="text-4xl md:text-9xl font-black text-orange-600 tabular-nums drop-shadow-sm">{formatCurrency(state.total)}</span>
                                 </div>
                             </div>
                         </div>
@@ -436,15 +494,22 @@
             }
 
             return (
-                <div className="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center text-white p-6 overflow-hidden relative">
-                    <div className="absolute top-[-5%] left-[-5%] w-[40%] h-[40%] bg-orange-600 rounded-full blur-[100px] opacity-20"></div>
+                <div className="h-screen w-screen bg-orange-600 flex flex-col items-center justify-center text-white p-6 overflow-hidden relative">
+                    {/* Dekorative Sonnenstrahlen/Kreise */}
+                    <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-orange-400 rounded-full blur-[120px] opacity-40 animate-float"></div>
+                    <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-yellow-400 rounded-full blur-[100px] opacity-30 animate-pulse"></div>
+                    
                     <div className="relative z-10 text-center max-w-full">
-                        <div className="mb-6 inline-block p-6 glass-card rounded-[2rem] bg-white/5 border-white/10 animate-float">
-                            <Icon name="Sun" size={48} color="#fff" className="md:w-24 md:h-24" />
+                        <div className="mb-10 inline-block p-10 glass-card rounded-[3rem] bg-white/10 border-white/20 animate-float shadow-2xl">
+                            <Icon name="Sun" size={64} color="#fff" className="md:w-40 md:h-40" />
                         </div>
-                        <h1 className="text-4xl md:text-8xl font-black tracking-tighter leading-none mb-4">Sommerfest</h1>
-                        <div className="h-1 w-24 md:w-48 bg-white/20 mx-auto rounded-full mb-6"></div>
-                        <p className="text-lg md:text-3xl font-light tracking-[0.3rem] md:tracking-[0.8rem] opacity-50 uppercase">Herzlich Willkommen</p>
+                        <h1 className="text-5xl md:text-[10rem] font-black tracking-tighter leading-none mb-6 drop-shadow-2xl">Sommerfest</h1>
+                        <div className="h-2 w-32 md:w-64 bg-white/40 mx-auto rounded-full mb-10 shadow-sm"></div>
+                        <p className="text-xl md:text-5xl font-light tracking-[0.5rem] md:tracking-[1.5rem] opacity-90 uppercase leading-relaxed">Willkommen am Stand</p>
+                    </div>
+                    
+                    <div className="absolute bottom-12 left-0 right-0 text-center">
+                        <p className="text-white/40 text-xs md:text-lg font-bold tracking-[0.3em] uppercase">Bitte Marken bereit halten</p>
                     </div>
                 </div>
             );
