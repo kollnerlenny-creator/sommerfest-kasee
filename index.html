@@ -48,62 +48,50 @@
             transform: scale(0.94);
         }
 
-        /* --- STERN DER SHOW: DIE CHECKMARK ANIMATION --- */
-        .checkmark-container {
-            width: 120px;
-            height: 120px;
-            position: relative;
-            margin: 0 auto 2rem;
-        }
-
-        .checkmark-svg {
-            width: 120px;
-            height: 120px;
-            display: block;
-        }
-
-        .checkmark-circle {
-            stroke-dasharray: 166;
-            stroke-dashoffset: 166;
-            stroke-width: 3;
-            stroke-miterlimit: 10;
-            stroke: var(--success-green);
-            fill: none;
-            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
-        }
-
-        .checkmark-check {
-            transform-origin: 50% 50%;
-            stroke-dasharray: 48;
-            stroke-dashoffset: 48;
-            stroke: white;
-            stroke-width: 4;
-            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
-        }
-
-        .checkmark-fill {
-            width: 120px;
-            height: 120px;
+        /* --- NEUE ROBUSTE CHECK-ANIMATION --- */
+        .success-circle {
+            width: 100px;
+            height: 100px;
+            background: var(--success-green);
             border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            animation: circlePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            box-shadow: 0 10px 25px -5px rgba(34, 197, 94, 0.4);
+        }
+
+        .check-icon-svg {
+            width: 50px;
+            height: 50px;
+            stroke: white;
+            stroke-width: 5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+            stroke-dasharray: 80;
+            stroke-dashoffset: 80;
+            animation: checkDraw 0.4s ease-out 0.4s forwards;
+        }
+
+        @keyframes circlePop {
+            from { transform: scale(0); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes checkDraw {
+            from { stroke-dashoffset: 80; }
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* --- MARKEN-SYMBOL IM HINTERGRUND --- */
+        .token-background-icon {
             position: absolute;
-            top: 0;
-            left: 0;
-            z-index: -1;
-            box-shadow: inset 0px 0px 0px var(--success-green);
-            animation: fill 0.4s ease-in-out 0.4s forwards, scale 0.3s ease-in-out 0.9s both;
-        }
-
-        @keyframes stroke {
-            100% { stroke-dashoffset: 0; }
-        }
-
-        @keyframes scale {
-            0%, 100% { transform: none; }
-            50% { transform: scale3d(1.1, 1.1, 1); }
-        }
-
-        @keyframes fill {
-            100% { box-shadow: inset 0px 0px 0px 100px var(--success-green); }
+            z-index: 0;
+            opacity: 0.05;
+            pointer-events: none;
+            transform: rotate(-15deg);
         }
 
         .pop-in { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
@@ -124,7 +112,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-const firebaseConfig = {
+       const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
@@ -359,12 +347,18 @@ const firebaseConfig = {
 
                     <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8 min-h-0">
                         <section className="lg:col-span-7 glass-card rounded-[2.5rem] p-6 flex flex-col items-center justify-center bg-white/60 shadow-xl border-white relative overflow-hidden">
-                            <div className="text-8xl md:text-9xl lg:text-[11rem] font-black tracking-tighter leading-none mb-2 tabular-nums text-slate-900 pop-in">
-                                {quantity}
+                            <div className="token-background-icon">
+                                <Icon name="Ticket" size={400} color="#f97316" />
                             </div>
-                            <p className="text-sm md:text-xl font-bold text-slate-300 uppercase tracking-[0.4em] mb-6 md:mb-12">Wertmarken</p>
                             
-                            <div className="flex gap-4 md:gap-8 items-center mb-6 md:mb-12">
+                            <div className="relative z-10 text-center">
+                                <div className="text-8xl md:text-9xl lg:text-[11rem] font-black tracking-tighter leading-none mb-2 tabular-nums text-slate-900 pop-in">
+                                    {quantity}
+                                </div>
+                                <p className="text-sm md:text-xl font-bold text-slate-300 uppercase tracking-[0.4em] mb-6 md:mb-12">Wertmarken</p>
+                            </div>
+                            
+                            <div className="relative z-10 flex gap-4 md:gap-8 items-center mb-6 md:mb-12">
                                 <button onClick={() => setQuantity(q => Math.max(0, q-1))} className="w-16 h-16 md:w-20 md:h-20 glass-card rounded-full flex items-center justify-center apple-button border-slate-100 shadow-sm">
                                     <Icon name="Minus" size={28} color="#f97316" />
                                 </button>
@@ -376,7 +370,7 @@ const firebaseConfig = {
                                 </button>
                             </div>
 
-                            <div className="grid grid-cols-3 gap-2 md:gap-4 w-full max-w-sm">
+                            <div className="relative z-10 grid grid-cols-3 gap-2 md:gap-4 w-full max-w-sm">
                                 {[5, 10, 20].map(n => (
                                     <button key={n} onClick={() => setQuantity(q => q+n)} className="glass-card py-4 rounded-2xl font-black text-lg apple-button hover:bg-slate-900 hover:text-white transition-all border-white">
                                         +{n}
@@ -432,18 +426,16 @@ const firebaseConfig = {
         const SuccessScreen = ({ state }) => {
             return (
                 <div className="h-screen w-screen flex flex-col items-center justify-center p-8 bg-mesh overflow-hidden text-center">
-                    <div className="checkmark-container">
-                        <div className="checkmark-fill"></div>
-                        <svg className="checkmark-svg" viewBox="0 0 52 52">
-                            <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
-                            <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+                    <div className="success-circle">
+                        <svg className="check-icon-svg" viewBox="0 0 50 50">
+                            <path d="M10 25L20 35L40 15" />
                         </svg>
                     </div>
                     
-                    <h1 className="text-6xl md:text-8xl font-black text-slate-800 mb-2 tracking-tighter pop-in" style={{animationDelay: '0.8s'}}>Zahlung OK</h1>
-                    <p className="text-xl md:text-2xl text-slate-400 font-medium mb-12 slide-up" style={{animationDelay: '1s'}}>Viel Spaß beim Sommerfest!</p>
+                    <h1 className="text-6xl md:text-8xl font-black text-slate-800 mb-2 tracking-tighter pop-in" style={{animationDelay: '0.4s'}}>Zahlung OK</h1>
+                    <p className="text-xl md:text-2xl text-slate-400 font-medium mb-12 slide-up" style={{animationDelay: '0.6s'}}>Viel Spaß beim Sommerfest!</p>
                     
-                    <div className="flex flex-col md:flex-row gap-4 slide-up" style={{animationDelay: '1.2s'}}>
+                    <div className="flex flex-col md:flex-row gap-4 slide-up" style={{animationDelay: '0.8s'}}>
                         <div className="glass-card p-6 md:p-8 rounded-[2rem] border-white shadow-lg bg-white/50 min-w-[200px]">
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Gegeben</p>
                             <p className="text-3xl font-black text-slate-700">{formatCurrency(state.given)}</p>
@@ -477,8 +469,12 @@ const firebaseConfig = {
             if (state.status === 'active') {
                 return (
                     <div className="h-screen w-screen flex flex-col items-center justify-center p-6 bg-mesh">
-                        <div className="w-full max-w-xl glass-card rounded-[3rem] flex flex-col shadow-2xl border-white bg-white/90 p-8 md:p-12 pop-in">
-                            <div className="flex flex-col items-center justify-center text-center">
+                        <div className="w-full max-w-xl glass-card rounded-[3rem] flex flex-col shadow-2xl border-white bg-white/90 p-8 md:p-12 pop-in relative overflow-hidden">
+                            <div className="token-background-icon" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-10deg)', opacity: 0.03 }}>
+                                <Icon name="Ticket" size={450} color="#f97316" />
+                            </div>
+
+                            <div className="flex flex-col items-center justify-center text-center relative z-10">
                                 <span className="text-xs font-bold text-slate-300 uppercase tracking-[0.3em] mb-4">Ihre Bestellung</span>
                                 <div className="mb-2">
                                     <span className="text-[11rem] md:text-[14rem] font-black leading-none text-slate-900 tracking-tighter block">{state.quantity}</span>
@@ -505,8 +501,8 @@ const firebaseConfig = {
 
             return (
                 <div className="h-screen w-screen bg-mesh flex flex-col items-center justify-center text-center p-10 overflow-hidden">
-                    <div className="mb-10 p-10 glass-card rounded-[3rem] bg-white border-white shadow-2xl">
-                        <Icon name="Sun" size={80} color="#f97316" className="md:w-40 md:h-40" />
+                    <div className="mb-10 p-10 glass-card rounded-[3rem] bg-white border-white shadow-2xl relative">
+                        <Icon name="Ticket" size={80} color="#f97316" className="md:w-40 md:h-40" />
                     </div>
                     <h1 className="text-7xl md:text-[9rem] font-black tracking-tighter leading-none text-slate-900 mb-6 pop-in">Sommerfest</h1>
                     <p className="text-xl md:text-3xl font-medium tracking-[0.6rem] text-slate-300 uppercase slide-up">Willkommen am Stand</p>
