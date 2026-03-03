@@ -82,7 +82,8 @@
     <div id="root"></div>
 
     <script type="text/babel">
-       const firebaseConfig = {
+        // Use environment provided config to avoid token audience mismatch
+        const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
@@ -240,26 +241,26 @@
                         } else {
                             await auth.signInAnonymously();
                         }
-                    } catch (e) { console.error(e); }
+                    } catch (e) { console.error("Auth error:", e); }
                 };
                 initAuth();
                 const unsubscribe = auth.onAuthStateChanged(setUser);
                 channelRef.current = new BroadcastChannel(SYNC_CHANNEL_NAME);
-                return () => { unsubscribe(); channelRef.current.close(); };
+                return () => { unsubscribe(); if (channelRef.current) channelRef.current.close(); };
             }, []);
 
             useEffect(() => {
                 if (!user) return;
-                // Correct path for public data
-                const journalRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('journal');
-                const settingsRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('settings');
                 
-                const unsubJournal = journalRef.onSnapshot((snapshot) => {
+                const journalCol = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('journal');
+                const settingsDoc = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('settings');
+                
+                const unsubJournal = journalCol.onSnapshot((snapshot) => {
                     const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    setJournal(data.sort((a, b) => b.timestamp.localeCompare(a.timestamp)));
+                    setJournal(data.sort((a, b) => (b.timestamp || "").localeCompare(a.timestamp || "")));
                 }, (err) => console.error("Journal sync error:", err));
 
-                const unsubSettings = settingsRef.onSnapshot((doc) => {
+                const unsubSettings = settingsDoc.onSnapshot((doc) => {
                     if (doc.exists && doc.data().tokenPrice) setTokenPrice(doc.data().tokenPrice);
                 }, (err) => console.error("Settings sync error:", err));
 
@@ -293,16 +294,13 @@
                 };
 
                 try {
-                    // Save to journal
                     await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('journal').add(entry);
                     
-                    // Trigger animation and update customer display
                     channelRef.current.postMessage({ 
                         type: 'STATE_UPDATE', 
                         payload: { quantity: 0, total: 0, status: 'success', change: type === 'sale' ? change : 0 } 
                     });
                     
-                    // Reset UI
                     setQuantity(0); 
                     setGivenCashStr("");
                     
@@ -334,7 +332,6 @@
                     </header>
 
                     <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8 min-h-0">
-                        {/* Linke Seite: Mengen-Eingabe */}
                         <section className="lg:col-span-7 glass-card rounded-[2rem] md:rounded-[3.5rem] p-6 md:p-10 flex flex-col items-center justify-center relative overflow-hidden bg-white/40">
                             <div className="absolute top-0 right-0 p-8">
                                 <span className="px-4 py-2 bg-orange-100 text-orange-600 rounded-full text-xs font-black uppercase tracking-widest">
@@ -359,7 +356,7 @@
                                 </button>
                             </div>
 
-                            <div className="grid grid-cols-3 gap-2 md:gap-4 w-full max-w-sm">
+                            <div className="grid grid-cols-3 gap-2 md:gap-4 w-full max-sm:max-w-xs">
                                 {[5, 10, 20].map(n => (
                                     <button key={n} onClick={() => setQuantity(q => q+n)} className="glass-card py-4 rounded-2xl font-black text-lg apple-button hover:bg-orange-500 hover:text-white transition-all border-orange-100">
                                         +{n}
@@ -368,7 +365,6 @@
                             </div>
                         </section>
 
-                        {/* Rechte Seite: Kasse & Rückgeld */}
                         <section className="lg:col-span-5 glass-card rounded-[2rem] md:rounded-[3.5rem] p-6 md:p-10 flex flex-col shadow-inner min-h-0 bg-white/60">
                             <div className="grid grid-cols-2 gap-3 mb-4 md:mb-8 shrink-0">
                                 <div className="bg-orange-50 p-4 rounded-2xl border border-orange-100">
@@ -442,7 +438,6 @@
                 return () => channel.close();
             }, []);
 
-            // Gemeinsame Container-Klasse
             const containerClass = "h-screen w-screen flex flex-col items-center justify-center p-4 md:p-8 overflow-hidden transition-colors duration-700";
 
             if (state.status === 'success') {
@@ -495,7 +490,6 @@
 
             return (
                 <div className="h-screen w-screen bg-orange-600 flex flex-col items-center justify-center text-white p-6 overflow-hidden relative">
-                    {/* Dekorative Sonnenstrahlen/Kreise */}
                     <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-orange-400 rounded-full blur-[120px] opacity-40 animate-float"></div>
                     <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-yellow-400 rounded-full blur-[100px] opacity-30 animate-pulse"></div>
                     
