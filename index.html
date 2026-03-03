@@ -19,14 +19,14 @@
         @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600;700&family=Inter:wght@400;600;900&display=swap');
         
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.3);
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.4);
             --fest-orange: #f97316;
         }
 
         body { 
             font-family: 'SF Pro Display', 'Inter', -apple-system, sans-serif;
-            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            background: #fafafa;
             overflow: hidden;
             margin: 0;
             padding: 0;
@@ -37,7 +37,6 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 32px 0 rgba(249, 115, 22, 0.05);
         }
 
         .apple-button {
@@ -45,36 +44,62 @@
         }
 
         .apple-button:active {
-            transform: scale(0.92);
-            filter: brightness(0.9);
+            transform: scale(0.94);
         }
 
-        @keyframes success-pop {
-            0% { transform: scale(0.5); opacity: 0; }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); opacity: 1; }
+        /* Checkmark Animation */
+        .checkmark__circle {
+          stroke-dasharray: 166;
+          stroke-dashoffset: 166;
+          stroke-width: 2;
+          stroke-miterlimit: 10;
+          stroke: #f97316;
+          fill: none;
+          animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
         }
 
-        .animate-success { animation: success-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        .checkmark {
+          width: 120px;
+          height: 120px;
+          border-radius: 50%;
+          display: block;
+          stroke-width: 2;
+          stroke: #fff;
+          stroke-miterlimit: 10;
+          box-shadow: inset 0px 0px 0px #f97316;
+          animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+
+        .checkmark__check {
+          transform-origin: 50% 50%;
+          stroke-dasharray: 48;
+          stroke-dashoffset: 48;
+          animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+
+        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+        @keyframes scale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } }
+        @keyframes fill { 100% { box-shadow: inset 0px 0px 0px 100px #f97316; } }
 
         @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
         }
-        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-float { animation: float 5s ease-in-out infinite; }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(249, 115, 22, 0.2); border-radius: 10px; }
+        .bg-mesh {
+            background-color: #ffffff;
+            background-image: radial-gradient(at 0% 0%, hsla(25,100%,96%,1) 0, transparent 50%), 
+                              radial-gradient(at 50% 0%, hsla(22,100%,98%,1) 0, transparent 50%), 
+                              radial-gradient(at 100% 0%, hsla(30,100%,95%,1) 0, transparent 50%);
+        }
     </style>
 </head>
-<body class="text-slate-900">
+<body class="text-slate-900 bg-mesh">
     <div id="root"></div>
 
     <script type="text/babel">
-        // Firebase Initialisierung
-       const firebaseConfig = {
+      const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
@@ -82,6 +107,7 @@
   messagingSenderId: "899854905140",
   appId: "1:899854905140:web:94be886a048356c7fb3f61"
 };
+
         const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
@@ -90,7 +116,6 @@
         const { useState, useEffect, useMemo, useRef } = React;
         const SYNC_CHANNEL_NAME = 'sommerfest_kasse_sync';
 
-        // Hilfsfunktionen
         const formatCurrency = (amount) => {
             return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
         };
@@ -118,8 +143,8 @@
         function SettingsModal({ tokenPrice, onSave, onClose }) {
             const [localPrice, setLocalPrice] = useState(tokenPrice.toString().replace('.', ','));
             return (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-orange-900/20 backdrop-blur-md">
-                    <div className="glass-card w-full max-w-md rounded-[2.5rem] p-8 flex flex-col shadow-2xl">
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-slate-900/10 backdrop-blur-sm">
+                    <div className="glass-card w-full max-w-md rounded-[2.5rem] p-8 flex flex-col shadow-2xl border-orange-100">
                         <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
                             <Icon name="Settings" color="#f97316" /> Einstellungen
                         </h2>
@@ -130,12 +155,12 @@
                                     type="text" 
                                     value={localPrice}
                                     onChange={(e) => setLocalPrice(e.target.value)}
-                                    className="w-full bg-orange-50 p-4 rounded-2xl text-2xl font-black outline-none border-2 border-transparent focus:border-orange-400 transition-all text-orange-600"
+                                    className="w-full bg-slate-50 p-4 rounded-2xl text-2xl font-black outline-none border-2 border-transparent focus:border-orange-400 transition-all text-orange-600"
                                 />
                             </div>
                         </div>
                         <div className="mt-8 flex gap-3">
-                            <button onClick={onClose} className="flex-1 py-4 bg-black/5 rounded-2xl font-bold">Abbrechen</button>
+                            <button onClick={onClose} className="flex-1 py-4 bg-slate-100 rounded-2xl font-bold text-slate-500">Abbrechen</button>
                             <button 
                                 onClick={() => {
                                     const p = parseFloat(localPrice.replace(',', '.'));
@@ -162,25 +187,25 @@
             }, [journal]);
 
             return (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/20 backdrop-blur-md">
-                    <div className="glass-card w-full max-w-4xl max-h-[85vh] rounded-[2.5rem] flex flex-col overflow-hidden">
-                        <div className="flex justify-between items-center p-8 border-b border-orange-100">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/10 backdrop-blur-sm">
+                    <div className="glass-card w-full max-w-4xl max-h-[85vh] rounded-[2.5rem] flex flex-col overflow-hidden shadow-2xl border-orange-50">
+                        <div className="flex justify-between items-center p-8 border-b border-orange-50 bg-white">
                             <h2 className="text-3xl font-bold tracking-tight text-slate-800">Journal</h2>
-                            <button onClick={onClose} className="p-3 bg-orange-50 rounded-full apple-button"><Icon name="X" color="#f97316" /></button>
+                            <button onClick={onClose} className="p-3 bg-slate-100 rounded-full apple-button"><Icon name="X" color="#64748b" /></button>
                         </div>
-                        <div className="grid grid-cols-2 gap-6 p-8 bg-orange-50/30">
-                            <div className="glass-card p-6 rounded-3xl text-center">
-                                <p className="text-sm font-semibold text-slate-500 uppercase tracking-widest">Marken Bilanz</p>
+                        <div className="grid grid-cols-2 gap-6 p-8 bg-slate-50/50">
+                            <div className="glass-card p-6 rounded-3xl text-center bg-white shadow-sm border-white">
+                                <p className="text-sm font-semibold text-slate-400 uppercase tracking-widest">Verkaufte Marken</p>
                                 <p className="text-4xl font-black text-slate-800">{stats.sales}</p>
                             </div>
-                            <div className="glass-card p-6 rounded-3xl text-center border-orange-200/50">
-                                <p className="text-sm font-semibold text-orange-600 uppercase tracking-widest">Kassenstand</p>
+                            <div className="glass-card p-6 rounded-3xl text-center bg-white shadow-sm border-white">
+                                <p className="text-sm font-semibold text-orange-500 uppercase tracking-widest">Kassenstand</p>
                                 <p className="text-4xl font-black text-orange-500">{formatCurrency(stats.revenue)}</p>
                             </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-8 pt-0">
+                        <div className="flex-1 overflow-y-auto p-8 pt-0 bg-white">
                             <table className="w-full">
-                                <thead className="sticky top-0 bg-white/80 backdrop-blur-md text-xs font-bold text-slate-400 uppercase tracking-tighter z-10">
+                                <thead className="sticky top-0 bg-white text-xs font-bold text-slate-400 uppercase tracking-tighter z-10 border-b border-slate-50">
                                     <tr>
                                         <th className="py-4 text-left">Zeit</th>
                                         <th className="py-4 text-left">Typ</th>
@@ -189,19 +214,19 @@
                                         <th className="py-4 text-right">Aktion</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-orange-50">
+                                <tbody className="divide-y divide-slate-50">
                                     {journal.map(item => (
-                                        <tr key={item.id} className="group transition-colors hover:bg-orange-50/40">
-                                            <td className="py-5 font-medium">{new Date(item.timestamp).toLocaleTimeString()}</td>
+                                        <tr key={item.id} className="group transition-colors hover:bg-slate-50/50">
+                                            <td className="py-5 font-medium text-slate-500">{new Date(item.timestamp).toLocaleTimeString()}</td>
                                             <td className="py-5">
-                                                <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${item.type === 'sale' ? 'bg-orange-500/10 text-orange-600' : 'bg-rose-500/10 text-rose-600'}`}>
+                                                <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${item.type === 'sale' ? 'bg-orange-50 text-orange-600' : 'bg-rose-50 text-rose-600'}`}>
                                                     {item.type === 'sale' ? 'Verkauf' : 'Retoure'}
                                                 </span>
                                             </td>
                                             <td className="py-5 text-right font-semibold">{item.quantity}</td>
                                             <td className="py-5 text-right font-black">{formatCurrency(item.amount)}</td>
                                             <td className="py-5 text-right">
-                                                <button onClick={() => onDelete(item.id)} className="text-slate-300 hover:text-rose-500 transition-colors">
+                                                <button onClick={() => onDelete(item.id)} className="text-slate-200 hover:text-rose-500 transition-colors">
                                                     <Icon name="Trash2" size={18} />
                                                 </button>
                                             </td>
@@ -225,7 +250,6 @@
             const [showSettings, setShowSettings] = useState(false);
             const channelRef = useRef(null);
 
-            // Auth Initialisierung (Regel 3)
             useEffect(() => {
                 const initAuth = async () => {
                     try {
@@ -234,9 +258,7 @@
                         } else {
                             await auth.signInAnonymously();
                         }
-                    } catch (e) {
-                        console.error("Auth error:", e);
-                    }
+                    } catch (e) { console.error("Auth error:", e); }
                 };
                 initAuth();
                 const unsubscribe = auth.onAuthStateChanged(setUser);
@@ -247,23 +269,18 @@
                 };
             }, []);
 
-            // Firestore Pfade (Regel 1) - Muss auf Collection enden (ungerade Anzahl Segmente)
             const getJournalCol = () => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('journal');
             const getSettingsDoc = () => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('settings');
 
             useEffect(() => {
                 if (!user) return;
-                
-                // Realtime Sync
                 const unsubJournal = getJournalCol().onSnapshot((snapshot) => {
                     const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setJournal(data.sort((a, b) => (b.timestamp || "").localeCompare(a.timestamp || "")));
                 }, (err) => console.error("Journal sync error:", err));
-
                 const unsubSettings = getSettingsDoc().onSnapshot((doc) => {
                     if (doc.exists && doc.data().tokenPrice) setTokenPrice(doc.data().tokenPrice);
                 }, (err) => console.error("Settings sync error:", err));
-
                 return () => { unsubJournal(); unsubSettings(); };
             }, [user, appId]);
 
@@ -284,66 +301,42 @@
                 if (!user || quantity === 0) return;
                 const amount = type === 'sale' ? total : -total;
                 const qty = type === 'sale' ? quantity : -quantity;
-                
-                const entry = {
-                    type, 
-                    quantity: qty,
-                    amount: amount, 
-                    timestamp: new Date().toISOString(), 
-                    userId: user.uid
-                };
+                const entry = { type, quantity: qty, amount, timestamp: new Date().toISOString(), userId: user.uid };
 
                 try {
                     await getJournalCol().add(entry);
-                    
                     channelRef.current.postMessage({ 
                         type: 'STATE_UPDATE', 
                         payload: { quantity: 0, total: 0, status: 'success', change: type === 'sale' ? change : 0 } 
                     });
-                    
-                    setQuantity(0); 
-                    setGivenCashStr("");
-                    
-                    setTimeout(() => {
-                        channelRef.current.postMessage({ type: 'STATE_UPDATE', payload: { status: 'idle' } });
-                    }, 4000);
-                } catch (e) { 
-                    console.error("Error saving transaction:", e); 
-                }
+                    setQuantity(0); setGivenCashStr("");
+                    setTimeout(() => channelRef.current.postMessage({ type: 'STATE_UPDATE', payload: { status: 'idle' } }), 4000);
+                } catch (e) { console.error("Error saving transaction:", e); }
             };
 
             const handleDeleteEntry = async (id) => {
                 if (!user) return;
-                try {
-                    await getJournalCol().doc(id).delete();
-                } catch (e) {
-                    console.error("Delete error:", e);
-                }
+                try { await getJournalCol().doc(id).delete(); } catch (e) { console.error("Delete error:", e); }
             };
 
             const handleSaveSettings = async (p) => {
                 if (!user) return;
                 try {
-                    await getSettingsDoc().set({
-                        tokenPrice: p, 
-                        updatedAt: new Date().toISOString()
-                    }, { merge: true });
+                    await getSettingsDoc().set({ tokenPrice: p, updatedAt: new Date().toISOString() }, { merge: true });
                     setShowSettings(false);
-                } catch (e) {
-                    console.error("Settings save error:", e);
-                }
+                } catch (e) { console.error("Settings save error:", e); }
             };
 
             return (
-                <div className="h-screen w-screen p-4 md:p-8 flex flex-col gap-4 md:gap-8 overflow-hidden bg-orange-50/20">
+                <div className="h-screen w-screen p-4 md:p-8 flex flex-col gap-4 md:gap-8 overflow-hidden">
                     <header className="flex justify-between items-center px-4 shrink-0">
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 md:w-12 md:h-12 glass-card rounded-2xl flex items-center justify-center animate-float shadow-orange-100">
+                            <div className="w-10 h-10 md:w-12 md:h-12 glass-card rounded-2xl flex items-center justify-center animate-float shadow-sm border-white">
                                 <Icon name="Sun" color="#f97316" size={24} />
                             </div>
                             <div>
                                 <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-800">Sommer-Kasse</h1>
-                                <p className="text-[8px] md:text-[10px] font-bold text-orange-400 uppercase tracking-widest">Markenverkauf</p>
+                                <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Backend</p>
                             </div>
                         </div>
                         <div className="flex gap-2">
@@ -354,48 +347,48 @@
                     </header>
 
                     <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8 min-h-0">
-                        <section className="lg:col-span-7 glass-card rounded-[2rem] md:rounded-[3.5rem] p-6 md:p-10 flex flex-col items-center justify-center relative overflow-hidden bg-white/40">
+                        <section className="lg:col-span-7 glass-card rounded-[2.5rem] md:rounded-[3.5rem] p-6 md:p-10 flex flex-col items-center justify-center relative overflow-hidden bg-white shadow-xl shadow-slate-200/50 border-white">
                             <div className="absolute top-0 right-0 p-8">
-                                <span className="px-4 py-2 bg-orange-100 text-orange-600 rounded-full text-xs font-black uppercase tracking-widest">
-                                    Preis/Marke: {formatCurrency(tokenPrice)}
+                                <span className="px-4 py-2 bg-slate-50 text-slate-400 rounded-full text-xs font-black uppercase tracking-widest border border-slate-100">
+                                    Preis: {formatCurrency(tokenPrice)}
                                 </span>
                             </div>
 
-                            <div className="text-8xl md:text-9xl lg:text-[13rem] font-black tracking-tighter leading-none mb-2 tabular-nums text-slate-900 drop-shadow-sm">
+                            <div className="text-8xl md:text-9xl lg:text-[13rem] font-black tracking-tighter leading-none mb-2 tabular-nums text-slate-900">
                                 {quantity}
                             </div>
-                            <p className="text-sm md:text-xl font-bold text-orange-300 uppercase tracking-widest mb-6 md:mb-12">Wertmarken</p>
+                            <p className="text-sm md:text-xl font-bold text-slate-300 uppercase tracking-[0.4em] mb-6 md:mb-12">Wertmarken</p>
                             
                             <div className="flex gap-4 md:gap-8 items-center mb-6 md:mb-12">
-                                <button onClick={() => setQuantity(q => Math.max(0, q-1))} className="w-16 h-16 md:w-24 md:h-24 glass-card rounded-full flex items-center justify-center apple-button text-2xl font-light hover:bg-white">
+                                <button onClick={() => setQuantity(q => Math.max(0, q-1))} className="w-16 h-16 md:w-24 md:h-24 glass-card rounded-full flex items-center justify-center apple-button text-2xl font-light hover:bg-slate-50 border-slate-100">
                                     <Icon name="Minus" size={28} color="#f97316" />
                                 </button>
-                                <div className="glass-card px-8 md:px-14 py-4 md:py-8 rounded-[1.5rem] md:rounded-[3rem] border-orange-200 bg-white/80 shadow-xl shadow-orange-500/5">
+                                <div className="glass-card px-8 md:px-14 py-4 md:py-8 rounded-[1.5rem] md:rounded-[3rem] border-slate-100 bg-white shadow-lg">
                                     <span className="text-3xl md:text-6xl font-black text-orange-500 tabular-nums">{formatCurrency(total)}</span>
                                 </div>
-                                <button onClick={() => setQuantity(q => q+1)} className="w-16 h-16 md:w-24 md:h-24 bg-orange-500 text-white rounded-full flex items-center justify-center apple-button shadow-xl shadow-orange-300">
+                                <button onClick={() => setQuantity(q => q+1)} className="w-16 h-16 md:w-24 md:h-24 bg-orange-500 text-white rounded-full flex items-center justify-center apple-button shadow-xl shadow-orange-200">
                                     <Icon name="Plus" size={28} />
                                 </button>
                             </div>
 
                             <div className="grid grid-cols-3 gap-2 md:gap-4 w-full max-sm:max-w-xs">
                                 {[5, 10, 20].map(n => (
-                                    <button key={n} onClick={() => setQuantity(q => q+n)} className="glass-card py-4 rounded-2xl font-black text-lg apple-button hover:bg-orange-500 hover:text-white transition-all border-orange-100">
+                                    <button key={n} onClick={() => setQuantity(q => q+n)} className="glass-card py-4 rounded-2xl font-black text-lg apple-button hover:bg-slate-900 hover:text-white transition-all border-slate-100">
                                         +{n}
                                     </button>
                                 ))}
                             </div>
                         </section>
 
-                        <section className="lg:col-span-5 glass-card rounded-[2rem] md:rounded-[3.5rem] p-6 md:p-10 flex flex-col shadow-inner min-h-0 bg-white/60">
+                        <section className="lg:col-span-5 glass-card rounded-[2.5rem] md:rounded-[3.5rem] p-6 md:p-10 flex flex-col shadow-xl shadow-slate-200/50 min-h-0 bg-white border-white">
                             <div className="grid grid-cols-2 gap-3 mb-4 md:mb-8 shrink-0">
-                                <div className="bg-orange-50 p-4 rounded-2xl border border-orange-100">
+                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                                     <span className="text-[8px] md:text-[10px] block font-black text-slate-400 uppercase mb-1 tracking-widest">Gegeben</span>
                                     <span className="text-xl md:text-2xl font-black tabular-nums text-slate-700">{formatCurrency(given)}</span>
                                 </div>
-                                <div className="bg-orange-500/10 p-4 rounded-2xl border border-orange-200">
-                                    <span className="text-[8px] md:text-[10px] block font-black text-orange-600 uppercase mb-1 tracking-widest">Rückgeld</span>
-                                    <span className="text-xl md:text-2xl font-black text-orange-600 tabular-nums">{formatCurrency(change)}</span>
+                                <div className="bg-orange-50 p-4 rounded-2xl border border-orange-100">
+                                    <span className="text-[8px] md:text-[10px] block font-black text-orange-600 uppercase mb-1 tracking-widest text-center">Rückgeld</span>
+                                    <span className="text-xl md:text-2xl font-black text-orange-600 tabular-nums block text-center">{formatCurrency(change)}</span>
                                 </div>
                             </div>
 
@@ -405,7 +398,7 @@
                                         if (k === 'C') setGivenCashStr("");
                                         else if (k.includes('€')) setGivenCashStr(k.replace('€',''));
                                         else setGivenCashStr(s => s + k);
-                                    }} className={`rounded-2xl font-bold text-xl apple-button transition-all flex items-center justify-center ${k === 'C' ? 'bg-rose-50 text-rose-500' : 'glass-card hover:bg-white border-orange-50 shadow-sm'}`}>
+                                    }} className={`rounded-2xl font-bold text-xl apple-button transition-all flex items-center justify-center ${k === 'C' ? 'bg-rose-50 text-rose-500' : 'glass-card hover:bg-slate-50 border-slate-100'}`}>
                                         {k}
                                     </button>
                                 ))}
@@ -415,36 +408,23 @@
                                 <button 
                                     onClick={() => handleCheckout('sale')} 
                                     disabled={quantity === 0} 
-                                    className="w-full bg-slate-900 text-white py-5 md:py-8 rounded-[1.5rem] md:rounded-[2.5rem] font-black text-xl md:text-2xl apple-button shadow-2xl disabled:opacity-10 flex items-center justify-center gap-3 active:scale-95"
+                                    className="w-full bg-slate-900 text-white py-5 md:py-8 rounded-[1.5rem] md:rounded-[2.5rem] font-black text-xl md:text-2xl apple-button shadow-2xl disabled:opacity-10 active:scale-95"
                                 >
-                                    <Icon name="ShoppingCart" size={24} color="#fff" /> KASSIEREN
+                                    ABSCHLIESSEN
                                 </button>
                                 <button 
                                     onClick={() => handleCheckout('return')} 
                                     disabled={quantity === 0} 
-                                    className="w-full bg-rose-50 text-rose-600 py-3 rounded-xl font-bold text-xs apple-button border border-rose-100 disabled:opacity-20"
+                                    className="w-full text-slate-300 py-3 rounded-xl font-bold text-xs apple-button hover:text-rose-400"
                                 >
-                                    FALSCHBUCHUNG / RETOURE
+                                    RETOURE / STORNO
                                 </button>
                             </div>
                         </section>
                     </main>
 
-                    {showJournal && (
-                        <JournalModal 
-                            journal={journal} 
-                            onDelete={handleDeleteEntry} 
-                            onClose={() => setShowJournal(false)} 
-                        />
-                    )}
-                    
-                    {showSettings && (
-                        <SettingsModal 
-                            tokenPrice={tokenPrice} 
-                            onSave={handleSaveSettings} 
-                            onClose={() => setShowSettings(false)} 
-                        />
-                    )}
+                    {showJournal && <JournalModal journal={journal} onDelete={handleDeleteEntry} onClose={() => setShowJournal(false)} />}
+                    {showSettings && <SettingsModal tokenPrice={tokenPrice} onSave={handleSaveSettings} onClose={() => setShowSettings(false)} />}
                 </div>
             );
         }
@@ -457,22 +437,23 @@
                 return () => channel.close();
             }, []);
 
-            const containerClass = "h-screen w-screen flex flex-col items-center justify-center p-4 md:p-8 overflow-hidden transition-colors duration-700";
-
             if (state.status === 'success') {
                 return (
-                    <div className={`${containerClass} bg-orange-50`}>
-                        <div className="animate-success flex flex-col items-center text-center max-w-full">
-                            <div className="w-32 h-32 md:w-56 md:h-56 bg-orange-500 rounded-full flex items-center justify-center shadow-2xl shadow-orange-300 mb-8 pulse-orange">
-                                <Icon name="Heart" size={64} color="#fff" className="md:w-32 md:h-32" />
+                    <div className="h-screen w-screen flex flex-col items-center justify-center p-8 bg-mesh">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="mb-10 scale-125 md:scale-[2]">
+                                <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                                  <circle className="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                                  <path className="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                                </svg>
                             </div>
-                            <h1 className="text-4xl md:text-8xl font-black text-orange-900 mb-4 tracking-tighter">Viel Spaß!</h1>
-                            <p className="text-xl md:text-3xl text-orange-600/80 font-semibold mb-12">Genießen Sie das Fest.</p>
+                            <h1 className="text-5xl md:text-7xl font-black text-slate-800 mb-4 tracking-tighter">Fertig!</h1>
+                            <p className="text-xl md:text-2xl text-slate-400 font-medium mb-12">Viel Spaß auf dem Sommerfest.</p>
                             
                             {state.change > 0 && (
-                                <div className="glass-card p-8 md:p-12 rounded-[3rem] border-orange-200 animate-float bg-white/90">
-                                    <p className="text-sm md:text-xl font-bold text-orange-400 uppercase tracking-[0.2em] mb-4">Ihr Rückgeld</p>
-                                    <p className="text-5xl md:text-[8rem] font-black text-orange-600 tabular-nums leading-none">{formatCurrency(state.change)}</p>
+                                <div className="glass-card p-10 md:p-14 rounded-[3.5rem] border-white shadow-xl bg-white/80 animate-float">
+                                    <p className="text-xs md:text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Dein Rückgeld</p>
+                                    <p className="text-6xl md:text-9xl font-black text-orange-500 tabular-nums leading-none">{formatCurrency(state.change)}</p>
                                 </div>
                             )}
                         </div>
@@ -482,24 +463,21 @@
 
             if (state.status === 'active') {
                 return (
-                    <div className={`${containerClass} bg-orange-500`}>
-                        <div className="w-full max-w-5xl glass-card rounded-[3rem] md:rounded-[5rem] flex flex-col overflow-hidden shadow-2xl border-white/40 bg-white/95 max-h-full">
-                            <div className="bg-orange-600 p-6 md:p-12 text-white flex justify-between items-center shrink-0">
-                                <div className="flex flex-col">
-                                    <span className="text-xl md:text-4xl font-black tracking-tighter uppercase leading-none mb-1">Deine Bestellung</span>
-                                    <span className="text-[10px] md:text-lg opacity-80 font-bold uppercase tracking-widest">Markenverkauf</span>
+                    <div className="h-screen w-screen flex flex-col items-center justify-center p-6 md:p-20 bg-mesh">
+                        <div className="w-full max-w-4xl glass-card rounded-[3.5rem] md:rounded-[5rem] flex flex-col shadow-2xl border-white bg-white/90">
+                            <div className="flex-1 flex flex-col items-center justify-center p-12 md:p-24">
+                                <div className="flex items-center gap-4 mb-8 md:mb-12">
+                                    <Icon name="Ticket" size={24} color="#f97316" className="md:w-10 md:h-10 opacity-40" />
+                                    <span className="text-lg md:text-3xl font-bold text-slate-300 uppercase tracking-[0.4em]">Bestellung</span>
                                 </div>
-                                <div className="w-12 h-12 md:w-20 md:h-20 bg-white/20 rounded-3xl flex items-center justify-center">
-                                    <Icon name="Ticket" size={32} color="#fff" className="md:w-12 md:h-12" />
-                                </div>
-                            </div>
-                            <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-16 min-h-0">
-                                <span className="text-[9rem] md:text-[15rem] lg:text-[20rem] font-black leading-none text-orange-600 tracking-tighter shrink-0 animate-float drop-shadow-xl">{state.quantity}</span>
-                                <span className="text-xl md:text-5xl text-orange-300 font-bold uppercase tracking-[0.5rem] md:tracking-[1.2rem] mb-10 md:mb-20">Marken</span>
+                                <span className="text-[12rem] md:text-[22rem] font-black leading-none text-slate-900 tracking-tighter shrink-0 animate-float">{state.quantity}</span>
+                                <span className="text-lg md:text-3xl text-orange-500 font-black uppercase tracking-[0.4em] mt-2 mb-12">Wertmarken</span>
                                 
-                                <div className="w-full glass-card rounded-[2rem] md:rounded-[4rem] p-8 md:p-14 flex justify-between items-center border-orange-100 bg-orange-50/50 shrink-0">
-                                    <span className="text-2xl md:text-5xl font-black text-slate-400 uppercase tracking-widest">Summe</span>
-                                    <span className="text-4xl md:text-9xl font-black text-orange-600 tabular-nums drop-shadow-sm">{formatCurrency(state.total)}</span>
+                                <div className="w-full h-px bg-slate-100 mb-12"></div>
+                                
+                                <div className="flex flex-col items-center gap-2">
+                                    <span className="text-sm md:text-xl font-bold text-slate-300 uppercase tracking-widest">Gesamtbetrag</span>
+                                    <span className="text-6xl md:text-[8rem] font-black text-slate-900 tabular-nums">{formatCurrency(state.total)}</span>
                                 </div>
                             </div>
                         </div>
@@ -508,18 +486,12 @@
             }
 
             return (
-                <div className="h-screen w-screen bg-orange-600 flex flex-col items-center justify-center text-white p-6 overflow-hidden relative">
-                    <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-orange-400 rounded-full blur-[120px] opacity-40 animate-float"></div>
-                    <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-yellow-400 rounded-full blur-[100px] opacity-30 animate-pulse"></div>
-                    
-                    <div className="relative z-10 text-center max-w-full">
-                        <div className="mb-10 inline-block p-10 glass-card rounded-[3rem] bg-white/10 border-white/20 animate-float shadow-2xl">
-                            <Icon name="Sun" size={64} color="#fff" className="md:w-40 md:h-40" />
-                        </div>
-                        <h1 className="text-5xl md:text-[10rem] font-black tracking-tighter leading-none mb-6 drop-shadow-2xl">Sommerfest</h1>
-                        <div className="h-2 w-32 md:w-64 bg-white/40 mx-auto rounded-full mb-10 shadow-sm"></div>
-                        <p className="text-xl md:text-5xl font-light tracking-[0.5rem] md:tracking-[1.5rem] opacity-90 uppercase leading-relaxed">Willkommen am Stand</p>
+                <div className="h-screen w-screen bg-mesh flex flex-col items-center justify-center text-center p-10">
+                    <div className="mb-12 p-8 glass-card rounded-[3rem] bg-white border-white shadow-xl animate-float">
+                        <Icon name="Sun" size={80} color="#f97316" className="md:w-48 md:h-48" />
                     </div>
+                    <h1 className="text-6xl md:text-[10rem] font-black tracking-tighter leading-none text-slate-900 mb-4">Sommerfest</h1>
+                    <p className="text-lg md:text-4xl font-light tracking-[0.5rem] md:tracking-[1.2rem] text-slate-300 uppercase">Willkommen am Stand</p>
                 </div>
             );
         }
