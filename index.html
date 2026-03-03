@@ -19,8 +19,8 @@
         @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600;700&family=Inter:wght@400;600;900&display=swap');
         
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.4);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.5);
             --fest-orange: #f97316;
         }
 
@@ -34,8 +34,8 @@
 
         .glass-card {
             background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             border: 1px solid var(--glass-border);
         }
 
@@ -47,39 +47,57 @@
             transform: scale(0.94);
         }
 
-        /* Checkmark Animation */
-        .checkmark__circle {
-          stroke-dasharray: 166;
-          stroke-dashoffset: 166;
-          stroke-width: 2;
-          stroke-miterlimit: 10;
-          stroke: #f97316;
-          fill: none;
-          animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        /* Success Animation Classes */
+        .checkmark-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 2rem;
         }
 
         .checkmark {
-          width: 120px;
-          height: 120px;
-          border-radius: 50%;
-          display: block;
-          stroke-width: 2;
-          stroke: #fff;
-          stroke-miterlimit: 10;
-          box-shadow: inset 0px 0px 0px #f97316;
-          animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 2;
+            stroke: #fff;
+            stroke-miterlimit: 10;
+            box-shadow: inset 0px 0px 0px #22c55e;
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+
+        .checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 2;
+            stroke-miterlimit: 10;
+            stroke: #22c55e;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
         }
 
         .checkmark__check {
-          transform-origin: 50% 50%;
-          stroke-dasharray: 48;
-          stroke-dashoffset: 48;
-          animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
         }
 
         @keyframes stroke { 100% { stroke-dashoffset: 0; } }
         @keyframes scale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } }
-        @keyframes fill { 100% { box-shadow: inset 0px 0px 0px 100px #f97316; } }
+        @keyframes fill { 100% { box-shadow: inset 0px 0px 0px 100px #22c55e; } }
+
+        /* General Animations */
+        .pop-in { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .number-transition {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
@@ -114,7 +132,7 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
         const { useState, useEffect, useMemo, useRef } = React;
-        const SYNC_CHANNEL_NAME = 'sommerfest_kasse_sync';
+        const SYNC_CHANNEL_NAME = 'sommerfest_kasse_sync_final';
 
         const formatCurrency = (amount) => {
             return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
@@ -138,13 +156,13 @@
             return <span ref={iconRef} className={`inline-flex items-center justify-center ${className}`}></span>;
         };
 
-        // --- KOMPONENTEN ---
+        // --- COMPONENTS ---
 
         function SettingsModal({ tokenPrice, onSave, onClose }) {
             const [localPrice, setLocalPrice] = useState(tokenPrice.toString().replace('.', ','));
             return (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-slate-900/10 backdrop-blur-sm">
-                    <div className="glass-card w-full max-w-md rounded-[2.5rem] p-8 flex flex-col shadow-2xl border-orange-100">
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-slate-900/20 backdrop-blur-sm">
+                    <div className="glass-card w-full max-w-md rounded-[2.5rem] p-8 flex flex-col shadow-2xl border-white pop-in">
                         <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
                             <Icon name="Settings" color="#f97316" /> Einstellungen
                         </h2>
@@ -160,13 +178,13 @@
                             </div>
                         </div>
                         <div className="mt-8 flex gap-3">
-                            <button onClick={onClose} className="flex-1 py-4 bg-slate-100 rounded-2xl font-bold text-slate-500">Abbrechen</button>
+                            <button onClick={onClose} className="flex-1 py-4 bg-slate-100 rounded-2xl font-bold text-slate-500 apple-button">Abbrechen</button>
                             <button 
                                 onClick={() => {
                                     const p = parseFloat(localPrice.replace(',', '.'));
                                     if (!isNaN(p)) onSave(p);
                                 }}
-                                className="flex-1 py-4 bg-orange-500 text-white rounded-2xl font-bold shadow-lg shadow-orange-200"
+                                className="flex-1 py-4 bg-orange-500 text-white rounded-2xl font-bold shadow-lg shadow-orange-200 apple-button"
                             >
                                 Speichern
                             </button>
@@ -187,15 +205,15 @@
             }, [journal]);
 
             return (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/10 backdrop-blur-sm">
-                    <div className="glass-card w-full max-w-4xl max-h-[85vh] rounded-[2.5rem] flex flex-col overflow-hidden shadow-2xl border-orange-50">
-                        <div className="flex justify-between items-center p-8 border-b border-orange-50 bg-white">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/20 backdrop-blur-sm">
+                    <div className="glass-card w-full max-w-4xl max-h-[85vh] rounded-[2.5rem] flex flex-col overflow-hidden shadow-2xl border-white pop-in">
+                        <div className="flex justify-between items-center p-8 border-b border-orange-50 bg-white/50">
                             <h2 className="text-3xl font-bold tracking-tight text-slate-800">Journal</h2>
                             <button onClick={onClose} className="p-3 bg-slate-100 rounded-full apple-button"><Icon name="X" color="#64748b" /></button>
                         </div>
-                        <div className="grid grid-cols-2 gap-6 p-8 bg-slate-50/50">
+                        <div className="grid grid-cols-2 gap-6 p-8 bg-slate-50/30">
                             <div className="glass-card p-6 rounded-3xl text-center bg-white shadow-sm border-white">
-                                <p className="text-sm font-semibold text-slate-400 uppercase tracking-widest">Verkaufte Marken</p>
+                                <p className="text-sm font-semibold text-slate-400 uppercase tracking-widest">Marken Gesamt</p>
                                 <p className="text-4xl font-black text-slate-800">{stats.sales}</p>
                             </div>
                             <div className="glass-card p-6 rounded-3xl text-center bg-white shadow-sm border-white">
@@ -203,9 +221,9 @@
                                 <p className="text-4xl font-black text-orange-500">{formatCurrency(stats.revenue)}</p>
                             </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-8 pt-0 bg-white">
+                        <div className="flex-1 overflow-y-auto p-8 pt-0 bg-white/20">
                             <table className="w-full">
-                                <thead className="sticky top-0 bg-white text-xs font-bold text-slate-400 uppercase tracking-tighter z-10 border-b border-slate-50">
+                                <thead className="sticky top-0 bg-white/80 backdrop-blur-md text-xs font-bold text-slate-400 uppercase tracking-tighter z-10 border-b border-slate-50">
                                     <tr>
                                         <th className="py-4 text-left">Zeit</th>
                                         <th className="py-4 text-left">Typ</th>
@@ -216,7 +234,7 @@
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
                                     {journal.map(item => (
-                                        <tr key={item.id} className="group transition-colors hover:bg-slate-50/50">
+                                        <tr key={item.id} className="group transition-colors hover:bg-white/40">
                                             <td className="py-5 font-medium text-slate-500">{new Date(item.timestamp).toLocaleTimeString()}</td>
                                             <td className="py-5">
                                                 <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${item.type === 'sale' ? 'bg-orange-50 text-orange-600' : 'bg-rose-50 text-rose-600'}`}>
@@ -226,7 +244,7 @@
                                             <td className="py-5 text-right font-semibold">{item.quantity}</td>
                                             <td className="py-5 text-right font-black">{formatCurrency(item.amount)}</td>
                                             <td className="py-5 text-right">
-                                                <button onClick={() => onDelete(item.id)} className="text-slate-200 hover:text-rose-500 transition-colors">
+                                                <button onClick={() => onDelete(item.id)} className="text-slate-200 hover:text-rose-500 transition-colors p-2">
                                                     <Icon name="Trash2" size={18} />
                                                 </button>
                                             </td>
@@ -240,6 +258,8 @@
             );
         }
 
+        // --- CASHIER APP ---
+
         function CashierApp() {
             const [user, setUser] = useState(null);
             const [tokenPrice, setTokenPrice] = useState(0.50);
@@ -252,13 +272,11 @@
 
             useEffect(() => {
                 const initAuth = async () => {
-                    try {
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            await auth.signInWithCustomToken(__initial_auth_token);
-                        } else {
-                            await auth.signInAnonymously();
-                        }
-                    } catch (e) { console.error("Auth error:", e); }
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await auth.signInWithCustomToken(__initial_auth_token);
+                    } else {
+                        await auth.signInAnonymously();
+                    }
                 };
                 initAuth();
                 const unsubscribe = auth.onAuthStateChanged(setUser);
@@ -277,12 +295,12 @@
                 const unsubJournal = getJournalCol().onSnapshot((snapshot) => {
                     const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setJournal(data.sort((a, b) => (b.timestamp || "").localeCompare(a.timestamp || "")));
-                }, (err) => console.error("Journal sync error:", err));
+                }, (err) => console.error("Sync error:", err));
                 const unsubSettings = getSettingsDoc().onSnapshot((doc) => {
                     if (doc.exists && doc.data().tokenPrice) setTokenPrice(doc.data().tokenPrice);
-                }, (err) => console.error("Settings sync error:", err));
+                });
                 return () => { unsubJournal(); unsubSettings(); };
-            }, [user, appId]);
+            }, [user]);
 
             const total = quantity * tokenPrice;
             const given = parseFloat(givenCashStr.replace(',', '.')) || 0;
@@ -291,7 +309,7 @@
             useEffect(() => {
                 if (channelRef.current) {
                     channelRef.current.postMessage({
-                        type: 'STATE_UPDATE',
+                        type: 'UPDATE',
                         payload: { quantity, total, status: quantity > 0 ? 'active' : 'idle' }
                     });
                 }
@@ -301,30 +319,17 @@
                 if (!user || quantity === 0) return;
                 const amount = type === 'sale' ? total : -total;
                 const qty = type === 'sale' ? quantity : -quantity;
-                const entry = { type, quantity: qty, amount, timestamp: new Date().toISOString(), userId: user.uid };
+                const entry = { type, quantity: qty, amount, timestamp: new Date().toISOString() };
 
                 try {
                     await getJournalCol().add(entry);
                     channelRef.current.postMessage({ 
-                        type: 'STATE_UPDATE', 
+                        type: 'UPDATE', 
                         payload: { quantity: 0, total: 0, status: 'success', change: type === 'sale' ? change : 0 } 
                     });
                     setQuantity(0); setGivenCashStr("");
-                    setTimeout(() => channelRef.current.postMessage({ type: 'STATE_UPDATE', payload: { status: 'idle' } }), 4000);
-                } catch (e) { console.error("Error saving transaction:", e); }
-            };
-
-            const handleDeleteEntry = async (id) => {
-                if (!user) return;
-                try { await getJournalCol().doc(id).delete(); } catch (e) { console.error("Delete error:", e); }
-            };
-
-            const handleSaveSettings = async (p) => {
-                if (!user) return;
-                try {
-                    await getSettingsDoc().set({ tokenPrice: p, updatedAt: new Date().toISOString() }, { merge: true });
-                    setShowSettings(false);
-                } catch (e) { console.error("Settings save error:", e); }
+                    setTimeout(() => channelRef.current.postMessage({ type: 'UPDATE', payload: { status: 'idle' } }), 4000);
+                } catch (e) { console.error("Checkout error:", e); }
             };
 
             return (
@@ -336,7 +341,6 @@
                             </div>
                             <div>
                                 <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-800">Sommer-Kasse</h1>
-                                <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Backend</p>
                             </div>
                         </div>
                         <div className="flex gap-2">
@@ -347,48 +351,44 @@
                     </header>
 
                     <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8 min-h-0">
-                        <section className="lg:col-span-7 glass-card rounded-[2.5rem] md:rounded-[3.5rem] p-6 md:p-10 flex flex-col items-center justify-center relative overflow-hidden bg-white shadow-xl shadow-slate-200/50 border-white">
-                            <div className="absolute top-0 right-0 p-8">
-                                <span className="px-4 py-2 bg-slate-50 text-slate-400 rounded-full text-xs font-black uppercase tracking-widest border border-slate-100">
-                                    Preis: {formatCurrency(tokenPrice)}
-                                </span>
-                            </div>
-
-                            <div className="text-8xl md:text-9xl lg:text-[13rem] font-black tracking-tighter leading-none mb-2 tabular-nums text-slate-900">
+                        {/* Control Section */}
+                        <section className="lg:col-span-7 glass-card rounded-[2.5rem] md:rounded-[3.5rem] p-6 md:p-10 flex flex-col items-center justify-center relative overflow-hidden bg-white/60 shadow-xl border-white">
+                            <div className="text-8xl md:text-9xl lg:text-[11rem] font-black tracking-tighter leading-none mb-2 tabular-nums text-slate-900 pop-in">
                                 {quantity}
                             </div>
                             <p className="text-sm md:text-xl font-bold text-slate-300 uppercase tracking-[0.4em] mb-6 md:mb-12">Wertmarken</p>
                             
                             <div className="flex gap-4 md:gap-8 items-center mb-6 md:mb-12">
-                                <button onClick={() => setQuantity(q => Math.max(0, q-1))} className="w-16 h-16 md:w-24 md:h-24 glass-card rounded-full flex items-center justify-center apple-button text-2xl font-light hover:bg-slate-50 border-slate-100">
+                                <button onClick={() => setQuantity(q => Math.max(0, q-1))} className="w-16 h-16 md:w-20 md:h-20 glass-card rounded-full flex items-center justify-center apple-button border-slate-100 shadow-sm">
                                     <Icon name="Minus" size={28} color="#f97316" />
                                 </button>
-                                <div className="glass-card px-8 md:px-14 py-4 md:py-8 rounded-[1.5rem] md:rounded-[3rem] border-slate-100 bg-white shadow-lg">
-                                    <span className="text-3xl md:text-6xl font-black text-orange-500 tabular-nums">{formatCurrency(total)}</span>
+                                <div className="glass-card px-10 md:px-14 py-4 md:py-6 rounded-[1.5rem] md:rounded-[2.5rem] border-white bg-white shadow-lg">
+                                    <span className="text-3xl md:text-5xl font-black text-orange-500 tabular-nums">{formatCurrency(total)}</span>
                                 </div>
-                                <button onClick={() => setQuantity(q => q+1)} className="w-16 h-16 md:w-24 md:h-24 bg-orange-500 text-white rounded-full flex items-center justify-center apple-button shadow-xl shadow-orange-200">
+                                <button onClick={() => setQuantity(q => q+1)} className="w-16 h-16 md:w-20 md:h-20 bg-orange-500 text-white rounded-full flex items-center justify-center apple-button shadow-xl shadow-orange-200">
                                     <Icon name="Plus" size={28} />
                                 </button>
                             </div>
 
-                            <div className="grid grid-cols-3 gap-2 md:gap-4 w-full max-sm:max-w-xs">
+                            <div className="grid grid-cols-3 gap-2 md:gap-4 w-full max-w-sm">
                                 {[5, 10, 20].map(n => (
-                                    <button key={n} onClick={() => setQuantity(q => q+n)} className="glass-card py-4 rounded-2xl font-black text-lg apple-button hover:bg-slate-900 hover:text-white transition-all border-slate-100">
+                                    <button key={n} onClick={() => setQuantity(q => q+n)} className="glass-card py-4 rounded-2xl font-black text-lg apple-button hover:bg-slate-900 hover:text-white transition-all border-white">
                                         +{n}
                                     </button>
                                 ))}
                             </div>
                         </section>
 
-                        <section className="lg:col-span-5 glass-card rounded-[2.5rem] md:rounded-[3.5rem] p-6 md:p-10 flex flex-col shadow-xl shadow-slate-200/50 min-h-0 bg-white border-white">
-                            <div className="grid grid-cols-2 gap-3 mb-4 md:mb-8 shrink-0">
+                        {/* Payment Section */}
+                        <section className="lg:col-span-5 glass-card rounded-[2.5rem] md:rounded-[3.5rem] p-6 md:p-10 flex flex-col shadow-xl min-h-0 bg-white border-white">
+                            <div className="grid grid-cols-2 gap-3 mb-6 shrink-0">
                                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                                    <span className="text-[8px] md:text-[10px] block font-black text-slate-400 uppercase mb-1 tracking-widest">Gegeben</span>
+                                    <span className="text-[10px] block font-black text-slate-400 uppercase mb-1 tracking-widest">Gegeben</span>
                                     <span className="text-xl md:text-2xl font-black tabular-nums text-slate-700">{formatCurrency(given)}</span>
                                 </div>
-                                <div className="bg-orange-50 p-4 rounded-2xl border border-orange-100">
-                                    <span className="text-[8px] md:text-[10px] block font-black text-orange-600 uppercase mb-1 tracking-widest text-center">Rückgeld</span>
-                                    <span className="text-xl md:text-2xl font-black text-orange-600 tabular-nums block text-center">{formatCurrency(change)}</span>
+                                <div className="bg-green-50 p-4 rounded-2xl border border-green-100">
+                                    <span className="text-[10px] block font-black text-green-600 uppercase mb-1 tracking-widest">Rückgeld</span>
+                                    <span className="text-xl md:text-2xl font-black text-green-600 tabular-nums">{formatCurrency(change)}</span>
                                 </div>
                             </div>
 
@@ -398,17 +398,17 @@
                                         if (k === 'C') setGivenCashStr("");
                                         else if (k.includes('€')) setGivenCashStr(k.replace('€',''));
                                         else setGivenCashStr(s => s + k);
-                                    }} className={`rounded-2xl font-bold text-xl apple-button transition-all flex items-center justify-center ${k === 'C' ? 'bg-rose-50 text-rose-500' : 'glass-card hover:bg-slate-50 border-slate-100'}`}>
+                                    }} className={`rounded-2xl font-bold text-xl apple-button transition-all flex items-center justify-center ${k === 'C' ? 'bg-rose-50 text-rose-500' : 'glass-card hover:bg-slate-50 border-slate-50 shadow-sm'}`}>
                                         {k}
                                     </button>
                                 ))}
                             </div>
 
-                            <div className="mt-4 md:mt-8 flex flex-col gap-3 shrink-0">
+                            <div className="mt-8 flex flex-col gap-3 shrink-0">
                                 <button 
                                     onClick={() => handleCheckout('sale')} 
                                     disabled={quantity === 0} 
-                                    className="w-full bg-slate-900 text-white py-5 md:py-8 rounded-[1.5rem] md:rounded-[2.5rem] font-black text-xl md:text-2xl apple-button shadow-2xl disabled:opacity-10 active:scale-95"
+                                    className="w-full bg-slate-900 text-white py-6 md:py-8 rounded-[2rem] font-black text-xl apple-button shadow-2xl disabled:opacity-10"
                                 >
                                     ABSCHLIESSEN
                                 </button>
@@ -423,11 +423,13 @@
                         </section>
                     </main>
 
-                    {showJournal && <JournalModal journal={journal} onDelete={handleDeleteEntry} onClose={() => setShowJournal(false)} />}
-                    {showSettings && <SettingsModal tokenPrice={tokenPrice} onSave={handleSaveSettings} onClose={() => setShowSettings(false)} />}
+                    {showJournal && <JournalModal journal={journal} onDelete={(id) => getJournalCol().doc(id).delete()} onClose={() => setShowJournal(false)} />}
+                    {showSettings && <SettingsModal tokenPrice={tokenPrice} onSave={(p) => getSettingsDoc().set({tokenPrice: p})} onClose={() => setShowSettings(false)} />}
                 </div>
             );
         }
+
+        // --- CUSTOMER VIEW ---
 
         function CustomerView() {
             const [state, setState] = useState({ quantity: 0, total: 0, status: 'idle', change: 0 });
@@ -440,20 +442,20 @@
             if (state.status === 'success') {
                 return (
                     <div className="h-screen w-screen flex flex-col items-center justify-center p-8 bg-mesh">
-                        <div className="flex flex-col items-center text-center">
-                            <div className="mb-10 scale-125 md:scale-[2]">
+                        <div className="flex flex-col items-center text-center pop-in">
+                            <div className="checkmark-wrapper">
                                 <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                                  <circle className="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
-                                  <path className="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                                    <circle className="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                                    <path className="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
                                 </svg>
                             </div>
-                            <h1 className="text-5xl md:text-7xl font-black text-slate-800 mb-4 tracking-tighter">Fertig!</h1>
-                            <p className="text-xl md:text-2xl text-slate-400 font-medium mb-12">Viel Spaß auf dem Sommerfest.</p>
+                            <h1 className="text-5xl md:text-6xl font-black text-slate-800 mb-2 tracking-tighter">Vielen Dank!</h1>
+                            <p className="text-xl text-slate-400 font-medium mb-10">Viel Spaß auf dem Sommerfest.</p>
                             
                             {state.change > 0 && (
-                                <div className="glass-card p-10 md:p-14 rounded-[3.5rem] border-white shadow-xl bg-white/80 animate-float">
-                                    <p className="text-xs md:text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Dein Rückgeld</p>
-                                    <p className="text-6xl md:text-9xl font-black text-orange-500 tabular-nums leading-none">{formatCurrency(state.change)}</p>
+                                <div className="glass-card p-8 rounded-[2.5rem] border-white shadow-xl bg-white/80 slide-up">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Dein Rückgeld</p>
+                                    <p className="text-6xl font-black text-green-600 tabular-nums leading-none">{formatCurrency(state.change)}</p>
                                 </div>
                             )}
                         </div>
@@ -463,21 +465,21 @@
 
             if (state.status === 'active') {
                 return (
-                    <div className="h-screen w-screen flex flex-col items-center justify-center p-6 md:p-20 bg-mesh">
-                        <div className="w-full max-w-4xl glass-card rounded-[3.5rem] md:rounded-[5rem] flex flex-col shadow-2xl border-white bg-white/90">
-                            <div className="flex-1 flex flex-col items-center justify-center p-12 md:p-24">
-                                <div className="flex items-center gap-4 mb-8 md:mb-12">
-                                    <Icon name="Ticket" size={24} color="#f97316" className="md:w-10 md:h-10 opacity-40" />
-                                    <span className="text-lg md:text-3xl font-bold text-slate-300 uppercase tracking-[0.4em]">Bestellung</span>
+                    <div className="h-screen w-screen flex flex-col items-center justify-center p-6 bg-mesh">
+                        <div className="w-full max-w-lg glass-card rounded-[3rem] flex flex-col shadow-2xl border-white bg-white/90 p-10 pop-in">
+                            <div className="flex flex-col items-center justify-center">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <Icon name="Ticket" size={20} color="#f97316" className="opacity-30" />
+                                    <span className="text-xs font-bold text-slate-300 uppercase tracking-[0.3em]">Deine Bestellung</span>
                                 </div>
-                                <span className="text-[12rem] md:text-[22rem] font-black leading-none text-slate-900 tracking-tighter shrink-0 animate-float">{state.quantity}</span>
-                                <span className="text-lg md:text-3xl text-orange-500 font-black uppercase tracking-[0.4em] mt-2 mb-12">Wertmarken</span>
+                                <span className="text-[11rem] font-black leading-none text-slate-900 tracking-tighter animate-float">{state.quantity}</span>
+                                <span className="text-lg text-orange-500 font-black uppercase tracking-[0.3em] mb-8">Wertmarken</span>
                                 
-                                <div className="w-full h-px bg-slate-100 mb-12"></div>
+                                <div className="w-full h-px bg-slate-100 mb-8"></div>
                                 
-                                <div className="flex flex-col items-center gap-2">
-                                    <span className="text-sm md:text-xl font-bold text-slate-300 uppercase tracking-widest">Gesamtbetrag</span>
-                                    <span className="text-6xl md:text-[8rem] font-black text-slate-900 tabular-nums">{formatCurrency(state.total)}</span>
+                                <div className="flex flex-col items-center">
+                                    <span className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-1">Zu zahlen</span>
+                                    <span className="text-6xl font-black text-slate-900 tabular-nums">{formatCurrency(state.total)}</span>
                                 </div>
                             </div>
                         </div>
@@ -487,22 +489,22 @@
 
             return (
                 <div className="h-screen w-screen bg-mesh flex flex-col items-center justify-center text-center p-10">
-                    <div className="mb-12 p-8 glass-card rounded-[3rem] bg-white border-white shadow-xl animate-float">
-                        <Icon name="Sun" size={80} color="#f97316" className="md:w-48 md:h-48" />
+                    <div className="mb-8 p-6 glass-card rounded-[2.5rem] bg-white border-white shadow-xl animate-float">
+                        <Icon name="Sun" size={60} color="#f97316" className="md:w-32 md:h-32" />
                     </div>
-                    <h1 className="text-6xl md:text-[10rem] font-black tracking-tighter leading-none text-slate-900 mb-4">Sommerfest</h1>
-                    <p className="text-lg md:text-4xl font-light tracking-[0.5rem] md:tracking-[1.2rem] text-slate-300 uppercase">Willkommen am Stand</p>
+                    <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-none text-slate-900 mb-4">Sommerfest</h1>
+                    <p className="text-lg md:text-2xl font-medium tracking-[0.5rem] text-slate-300 uppercase">Willkommen am Stand</p>
                 </div>
             );
         }
 
         function App() {
-            const [view, setView] = useState('loading');
+            const [view, setView] = useState(null);
             useEffect(() => {
                 const params = new URLSearchParams(window.location.search);
                 setView(params.get('view') === 'customer' ? 'customer' : 'cashier');
             }, []);
-            if (view === 'loading') return null;
+            if (!view) return null;
             return view === 'customer' ? <CustomerView /> : <CashierApp />;
         }
 
