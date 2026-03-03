@@ -22,8 +22,6 @@
             --glass-bg: rgba(255, 255, 255, 0.7);
             --glass-border: rgba(255, 255, 255, 0.3);
             --fest-orange: #f97316;
-            --fest-orange-light: #ffedd5;
-            --fest-orange-dark: #ea580c;
         }
 
         body { 
@@ -66,13 +64,6 @@
         }
         .animate-float { animation: float 6s ease-in-out infinite; }
 
-        @keyframes pulse-orange {
-            0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); }
-            70% { box-shadow: 0 0 0 20px rgba(249, 115, 22, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
-        }
-        .pulse-orange { animation: pulse-orange 2s infinite; }
-
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(249, 115, 22, 0.2); border-radius: 10px; }
@@ -82,8 +73,8 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // Use environment provided config to avoid token audience mismatch
-        const firebaseConfig = {
+        // Firebase Initialisierung
+       const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
@@ -91,14 +82,15 @@
   messagingSenderId: "899854905140",
   appId: "1:899854905140:web:94be886a048356c7fb3f61"
 };
-        firebase.initializeApp(firebaseConfig);
+        const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sommerfest-kasse';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
         const { useState, useEffect, useMemo, useRef } = React;
         const SYNC_CHANNEL_NAME = 'sommerfest_kasse_sync';
 
+        // Hilfsfunktionen
         const formatCurrency = (amount) => {
             return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
         };
@@ -121,7 +113,7 @@
             return <span ref={iconRef} className={`inline-flex items-center justify-center ${className}`}></span>;
         };
 
-        // --- COMPONENTS ---
+        // --- KOMPONENTEN ---
 
         function SettingsModal({ tokenPrice, onSave, onClose }) {
             const [localPrice, setLocalPrice] = useState(tokenPrice.toString().replace('.', ','));
@@ -233,6 +225,7 @@
             const [showSettings, setShowSettings] = useState(false);
             const channelRef = useRef(null);
 
+            // Auth Initialisierung (Regel 3)
             useEffect(() => {
                 const initAuth = async () => {
                     try {
@@ -241,31 +234,38 @@
                         } else {
                             await auth.signInAnonymously();
                         }
-                    } catch (e) { console.error("Auth error:", e); }
+                    } catch (e) {
+                        console.error("Auth error:", e);
+                    }
                 };
                 initAuth();
                 const unsubscribe = auth.onAuthStateChanged(setUser);
                 channelRef.current = new BroadcastChannel(SYNC_CHANNEL_NAME);
-                return () => { unsubscribe(); if (channelRef.current) channelRef.current.close(); };
+                return () => {
+                    unsubscribe();
+                    if (channelRef.current) channelRef.current.close();
+                };
             }, []);
+
+            // Firestore Pfade (Regel 1) - Muss auf Collection enden (ungerade Anzahl Segmente)
+            const getJournalCol = () => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('journal');
+            const getSettingsDoc = () => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('settings');
 
             useEffect(() => {
                 if (!user) return;
                 
-                const journalCol = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('journal');
-                const settingsDoc = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('settings');
-                
-                const unsubJournal = journalCol.onSnapshot((snapshot) => {
+                // Realtime Sync
+                const unsubJournal = getJournalCol().onSnapshot((snapshot) => {
                     const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setJournal(data.sort((a, b) => (b.timestamp || "").localeCompare(a.timestamp || "")));
                 }, (err) => console.error("Journal sync error:", err));
 
-                const unsubSettings = settingsDoc.onSnapshot((doc) => {
+                const unsubSettings = getSettingsDoc().onSnapshot((doc) => {
                     if (doc.exists && doc.data().tokenPrice) setTokenPrice(doc.data().tokenPrice);
                 }, (err) => console.error("Settings sync error:", err));
 
                 return () => { unsubJournal(); unsubSettings(); };
-            }, [user]);
+            }, [user, appId]);
 
             const total = quantity * tokenPrice;
             const given = parseFloat(givenCashStr.replace(',', '.')) || 0;
@@ -294,7 +294,7 @@
                 };
 
                 try {
-                    await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('journal').add(entry);
+                    await getJournalCol().add(entry);
                     
                     channelRef.current.postMessage({ 
                         type: 'STATE_UPDATE', 
@@ -309,6 +309,28 @@
                     }, 4000);
                 } catch (e) { 
                     console.error("Error saving transaction:", e); 
+                }
+            };
+
+            const handleDeleteEntry = async (id) => {
+                if (!user) return;
+                try {
+                    await getJournalCol().doc(id).delete();
+                } catch (e) {
+                    console.error("Delete error:", e);
+                }
+            };
+
+            const handleSaveSettings = async (p) => {
+                if (!user) return;
+                try {
+                    await getSettingsDoc().set({
+                        tokenPrice: p, 
+                        updatedAt: new Date().toISOString()
+                    }, { merge: true });
+                    setShowSettings(false);
+                } catch (e) {
+                    console.error("Settings save error:", e);
                 }
             };
 
@@ -411,7 +433,7 @@
                     {showJournal && (
                         <JournalModal 
                             journal={journal} 
-                            onDelete={(id) => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('journal').doc(id).delete()} 
+                            onDelete={handleDeleteEntry} 
                             onClose={() => setShowJournal(false)} 
                         />
                     )}
@@ -419,10 +441,7 @@
                     {showSettings && (
                         <SettingsModal 
                             tokenPrice={tokenPrice} 
-                            onSave={(p) => {
-                                db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('settings').set({tokenPrice: p, updatedAt: new Date().toISOString()}, {merge: true});
-                                setShowSettings(false);
-                            }} 
+                            onSave={handleSaveSettings} 
                             onClose={() => setShowSettings(false)} 
                         />
                     )}
@@ -500,10 +519,6 @@
                         <h1 className="text-5xl md:text-[10rem] font-black tracking-tighter leading-none mb-6 drop-shadow-2xl">Sommerfest</h1>
                         <div className="h-2 w-32 md:w-64 bg-white/40 mx-auto rounded-full mb-10 shadow-sm"></div>
                         <p className="text-xl md:text-5xl font-light tracking-[0.5rem] md:tracking-[1.5rem] opacity-90 uppercase leading-relaxed">Willkommen am Stand</p>
-                    </div>
-                    
-                    <div className="absolute bottom-12 left-0 right-0 text-center">
-                        <p className="text-white/40 text-xs md:text-lg font-bold tracking-[0.3em] uppercase">Bitte Marken bereit halten</p>
                     </div>
                 </div>
             );
