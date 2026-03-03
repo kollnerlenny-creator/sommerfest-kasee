@@ -19,9 +19,10 @@
         @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600;700&family=Inter:wght@400;600;900&display=swap');
         
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.85);
-            --glass-border: rgba(255, 255, 255, 0.5);
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.6);
             --fest-orange: #f97316;
+            --success-green: #22c55e;
         }
 
         body { 
@@ -47,58 +48,69 @@
             transform: scale(0.94);
         }
 
-        /* Success Animation Classes */
-        .checkmark-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 1.5rem;
+        /* --- STERN DER SHOW: DIE CHECKMARK ANIMATION --- */
+        .checkmark-container {
+            width: 120px;
+            height: 120px;
+            position: relative;
+            margin: 0 auto 2rem;
         }
 
-        .checkmark {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
+        .checkmark-svg {
+            width: 120px;
+            height: 120px;
             display: block;
-            stroke-width: 2;
-            stroke: #fff;
-            stroke-miterlimit: 10;
-            box-shadow: inset 0px 0px 0px #22c55e;
-            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
         }
 
-        .checkmark__circle {
+        .checkmark-circle {
             stroke-dasharray: 166;
             stroke-dashoffset: 166;
-            stroke-width: 2;
+            stroke-width: 3;
             stroke-miterlimit: 10;
-            stroke: #22c55e;
+            stroke: var(--success-green);
             fill: none;
             animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
         }
 
-        .checkmark__check {
+        .checkmark-check {
             transform-origin: 50% 50%;
             stroke-dasharray: 48;
             stroke-dashoffset: 48;
+            stroke: white;
+            stroke-width: 4;
             animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
         }
 
-        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
-        @keyframes scale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } }
-        @keyframes fill { 100% { box-shadow: inset 0px 0px 0px 100px #22c55e; } }
+        .checkmark-fill {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            box-shadow: inset 0px 0px 0px var(--success-green);
+            animation: fill 0.4s ease-in-out 0.4s forwards, scale 0.3s ease-in-out 0.9s both;
+        }
 
-        .pop-in { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes stroke {
+            100% { stroke-dashoffset: 0; }
+        }
+
+        @keyframes scale {
+            0%, 100% { transform: none; }
+            50% { transform: scale3d(1.1, 1.1, 1); }
+        }
+
+        @keyframes fill {
+            100% { box-shadow: inset 0px 0px 0px 100px var(--success-green); }
+        }
+
+        .pop-in { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
-        }
-        .animate-float { animation: float 5s ease-in-out infinite; }
+        .slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         .bg-mesh {
             background-color: #ffffff;
@@ -112,7 +124,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-       const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
@@ -127,7 +139,7 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
         const { useState, useEffect, useMemo, useRef } = React;
-        const SYNC_CHANNEL_NAME = 'sommerfest_kasse_sync_v2';
+        const SYNC_CHANNEL_NAME = 'sommerfest_kasse_sync_v3';
 
         const formatCurrency = (amount) => {
             return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
@@ -290,7 +302,7 @@
                 const unsubJournal = getJournalCol().onSnapshot((snapshot) => {
                     const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setJournal(data.sort((a, b) => (b.timestamp || "").localeCompare(a.timestamp || "")));
-                }, (err) => console.error("Sync error:", err));
+                });
                 const unsubSettings = getSettingsDoc().onSnapshot((doc) => {
                     if (doc.exists && doc.data().tokenPrice) setTokenPrice(doc.data().tokenPrice);
                 });
@@ -320,12 +332,12 @@
                     await getJournalCol().add(entry);
                     channelRef.current.postMessage({ 
                         type: 'UPDATE', 
-                        payload: { quantity: 0, total: 0, status: 'success', change: type === 'sale' ? change : 0, given } 
+                        payload: { quantity: 0, total: 0, status: 'success', change: type === 'sale' ? change : 0, given: given > 0 ? given : total } 
                     });
                     setQuantity(0); setGivenCashStr("");
                     setTimeout(() => {
                         channelRef.current.postMessage({ type: 'UPDATE', payload: { status: 'idle', quantity: 0, total: 0, given: 0 } });
-                    }, 4000);
+                    }, 5000);
                 } catch (e) { console.error("Checkout error:", e); }
             };
 
@@ -333,7 +345,7 @@
                 <div className="h-screen w-screen p-4 md:p-8 flex flex-col gap-4 md:gap-8 overflow-hidden">
                     <header className="flex justify-between items-center px-4 shrink-0">
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 md:w-12 md:h-12 glass-card rounded-2xl flex items-center justify-center animate-float shadow-sm border-white">
+                            <div className="w-10 h-10 glass-card rounded-2xl flex items-center justify-center shadow-sm border-white">
                                 <Icon name="Sun" color="#f97316" size={24} />
                             </div>
                             <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-800">Sommer-Kasse</h1>
@@ -403,14 +415,7 @@
                                     disabled={quantity === 0} 
                                     className="w-full bg-slate-900 text-white py-6 md:py-8 rounded-[2rem] font-black text-xl apple-button shadow-2xl disabled:opacity-10"
                                 >
-                                    ABSCHLIESSEN
-                                </button>
-                                <button 
-                                    onClick={() => handleCheckout('return')} 
-                                    disabled={quantity === 0} 
-                                    className="w-full text-slate-300 py-3 rounded-xl font-bold text-xs apple-button hover:text-rose-400"
-                                >
-                                    RETOURE / STORNO
+                                    BEZAHLT
                                 </button>
                             </div>
                         </section>
@@ -424,48 +429,49 @@
 
         // --- CUSTOMER VIEW ---
 
+        const SuccessScreen = ({ state }) => {
+            return (
+                <div className="h-screen w-screen flex flex-col items-center justify-center p-8 bg-mesh overflow-hidden text-center">
+                    <div className="checkmark-container">
+                        <div className="checkmark-fill"></div>
+                        <svg className="checkmark-svg" viewBox="0 0 52 52">
+                            <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
+                            <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+                        </svg>
+                    </div>
+                    
+                    <h1 className="text-6xl md:text-8xl font-black text-slate-800 mb-2 tracking-tighter pop-in" style={{animationDelay: '0.8s'}}>Zahlung OK</h1>
+                    <p className="text-xl md:text-2xl text-slate-400 font-medium mb-12 slide-up" style={{animationDelay: '1s'}}>Viel Spaß beim Sommerfest!</p>
+                    
+                    <div className="flex flex-col md:flex-row gap-4 slide-up" style={{animationDelay: '1.2s'}}>
+                        <div className="glass-card p-6 md:p-8 rounded-[2rem] border-white shadow-lg bg-white/50 min-w-[200px]">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Gegeben</p>
+                            <p className="text-3xl font-black text-slate-700">{formatCurrency(state.given)}</p>
+                        </div>
+                        {state.change > 0 && (
+                            <div className="glass-card p-6 md:p-8 px-10 rounded-[2.5rem] border-white shadow-2xl bg-white min-w-[240px]">
+                                <p className="text-[10px] font-bold text-green-500 uppercase tracking-widest mb-1">Ihr Rückgeld</p>
+                                <p className="text-5xl font-black text-green-600 tabular-nums">{formatCurrency(state.change)}</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
         function CustomerView() {
             const [state, setState] = useState({ quantity: 0, total: 0, given: 0, status: 'idle', change: 0 });
             
             useEffect(() => {
                 const channel = new BroadcastChannel(SYNC_CHANNEL_NAME);
                 channel.onmessage = (e) => {
-                    console.log("Customer Sync:", e.data.payload);
                     setState(e.data.payload);
                 };
                 return () => channel.close();
             }, []);
 
             if (state.status === 'success') {
-                return (
-                    <div className="h-screen w-screen flex flex-col items-center justify-center p-8 bg-mesh overflow-hidden">
-                        <div className="flex flex-col items-center text-center pop-in">
-                            <div className="checkmark-wrapper">
-                                <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                                    <circle className="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
-                                    <path className="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-                                </svg>
-                            </div>
-                            <h1 className="text-5xl md:text-7xl font-black text-slate-800 mb-2 tracking-tighter">Vielen Dank!</h1>
-                            <p className="text-xl text-slate-400 font-medium mb-12">Genießen Sie das Fest.</p>
-                            
-                            <div className="flex gap-4 slide-up">
-                                {state.given > 0 && (
-                                    <div className="glass-card p-6 rounded-[2rem] border-white shadow-lg bg-white/50">
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Gegeben</p>
-                                        <p className="text-2xl font-black text-slate-700">{formatCurrency(state.given)}</p>
-                                    </div>
-                                )}
-                                {state.change > 0 && (
-                                    <div className="glass-card p-6 px-10 rounded-[2rem] border-white shadow-xl bg-white">
-                                        <p className="text-[10px] font-bold text-green-500 uppercase tracking-widest mb-1">Ihr Rückgeld</p>
-                                        <p className="text-4xl font-black text-green-600 tabular-nums">{formatCurrency(state.change)}</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                );
+                return <SuccessScreen state={state} />;
             }
 
             if (state.status === 'active') {
@@ -474,22 +480,19 @@
                         <div className="w-full max-w-xl glass-card rounded-[3rem] flex flex-col shadow-2xl border-white bg-white/90 p-8 md:p-12 pop-in">
                             <div className="flex flex-col items-center justify-center text-center">
                                 <span className="text-xs font-bold text-slate-300 uppercase tracking-[0.3em] mb-4">Ihre Bestellung</span>
-                                <div className="relative mb-2">
-                                    <span className="text-[11rem] md:text-[14rem] font-black leading-none text-slate-900 tracking-tighter animate-float block">{state.quantity}</span>
-                                    <div className="absolute -right-12 top-1/2 -translate-y-1/2 bg-orange-500 text-white p-4 rounded-full shadow-xl rotate-12">
-                                        <Icon name="Ticket" size={32} />
-                                    </div>
+                                <div className="mb-2">
+                                    <span className="text-[11rem] md:text-[14rem] font-black leading-none text-slate-900 tracking-tighter block">{state.quantity}</span>
                                 </div>
                                 <span className="text-lg md:text-2xl text-orange-500 font-black uppercase tracking-[0.4em] mb-10">Wertmarken</span>
                                 
                                 <div className="w-full h-px bg-slate-100 mb-10"></div>
                                 
                                 <div className="grid grid-cols-2 gap-8 w-full">
-                                    <div className="flex flex-col items-center border-r border-slate-50">
+                                    <div className="flex flex-col items-center border-r border-slate-100 pr-8">
                                         <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-1">Summe</span>
                                         <span className="text-4xl md:text-5xl font-black text-slate-900 tabular-nums">{formatCurrency(state.total)}</span>
                                     </div>
-                                    <div className="flex flex-col items-center">
+                                    <div className="flex flex-col items-center pl-8">
                                         <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-1">Gegeben</span>
                                         <span className="text-4xl md:text-5xl font-black text-blue-600 tabular-nums">{state.given > 0 ? formatCurrency(state.given) : "—"}</span>
                                     </div>
@@ -502,7 +505,7 @@
 
             return (
                 <div className="h-screen w-screen bg-mesh flex flex-col items-center justify-center text-center p-10 overflow-hidden">
-                    <div className="mb-10 p-10 glass-card rounded-[3rem] bg-white border-white shadow-2xl animate-float">
+                    <div className="mb-10 p-10 glass-card rounded-[3rem] bg-white border-white shadow-2xl">
                         <Icon name="Sun" size={80} color="#f97316" className="md:w-40 md:h-40" />
                     </div>
                     <h1 className="text-7xl md:text-[9rem] font-black tracking-tighter leading-none text-slate-900 mb-6 pop-in">Sommerfest</h1>
