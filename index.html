@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sommerfest Kasse - Premium Edition</title>
+    <title>Sommerfest Kasse - Cloud Sync</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -48,7 +48,6 @@
             transform: scale(0.94);
         }
 
-        /* --- NEUE ROBUSTE CHECK-ANIMATION --- */
         .success-circle {
             width: 100px;
             height: 100px;
@@ -85,7 +84,6 @@
             to { stroke-dashoffset: 0; }
         }
 
-        /* --- MARKEN-SYMBOL IM HINTERGRUND --- */
         .token-background-icon {
             position: absolute;
             z-index: 0;
@@ -112,7 +110,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-       const firebaseConfig = {
+        const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
@@ -120,14 +118,12 @@
   messagingSenderId: "899854905140",
   appId: "1:899854905140:web:94be886a048356c7fb3f61"
 };
-
         const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
         const { useState, useEffect, useMemo, useRef } = React;
-        const SYNC_CHANNEL_NAME = 'sommerfest_kasse_sync_v3';
 
         const formatCurrency = (amount) => {
             return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
@@ -150,6 +146,11 @@
             }, [name, color, size]);
             return <span ref={iconRef} className={`inline-flex items-center justify-center ${className}`}></span>;
         };
+
+        // Firestore Helpers
+        const getJournalCol = () => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('journal');
+        const getSettingsDoc = () => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('settings');
+        const getDisplayDoc = () => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('display_state');
 
         // --- COMPONENTS ---
 
@@ -263,7 +264,6 @@
             const [journal, setJournal] = useState([]);
             const [showJournal, setShowJournal] = useState(false);
             const [showSettings, setShowSettings] = useState(false);
-            const channelRef = useRef(null);
 
             useEffect(() => {
                 const initAuth = async () => {
@@ -275,15 +275,8 @@
                 };
                 initAuth();
                 const unsubscribe = auth.onAuthStateChanged(setUser);
-                channelRef.current = new BroadcastChannel(SYNC_CHANNEL_NAME);
-                return () => {
-                    unsubscribe();
-                    if (channelRef.current) channelRef.current.close();
-                };
+                return () => unsubscribe();
             }, []);
-
-            const getJournalCol = () => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('journal');
-            const getSettingsDoc = () => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('settings');
 
             useEffect(() => {
                 if (!user) return;
@@ -301,14 +294,22 @@
             const given = parseFloat(givenCashStr.replace(',', '.')) || 0;
             const change = given > 0 ? Math.max(0, given - total) : 0;
 
+            // Sync display state to Firestore
             useEffect(() => {
-                if (channelRef.current) {
-                    channelRef.current.postMessage({
-                        type: 'UPDATE',
-                        payload: { quantity, total, given, status: quantity > 0 ? 'active' : 'idle' }
-                    });
-                }
-            }, [quantity, total, given]);
+                if (!user) return;
+                const sync = async () => {
+                    try {
+                        await getDisplayDoc().set({
+                            quantity, 
+                            total, 
+                            given, 
+                            status: quantity > 0 ? 'active' : 'idle',
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true });
+                    } catch (e) { console.error("Sync error:", e); }
+                };
+                sync();
+            }, [quantity, total, given, user]);
 
             const handleCheckout = async (type = 'sale') => {
                 if (!user || quantity === 0) return;
@@ -318,13 +319,19 @@
 
                 try {
                     await getJournalCol().add(entry);
-                    channelRef.current.postMessage({ 
-                        type: 'UPDATE', 
-                        payload: { quantity: 0, total: 0, status: 'success', change: type === 'sale' ? change : 0, given: given > 0 ? given : total } 
+                    await getDisplayDoc().set({ 
+                        quantity: 0, 
+                        total: 0, 
+                        status: 'success', 
+                        change: type === 'sale' ? change : 0, 
+                        given: given > 0 ? given : total,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
+                    
                     setQuantity(0); setGivenCashStr("");
-                    setTimeout(() => {
-                        channelRef.current.postMessage({ type: 'UPDATE', payload: { status: 'idle', quantity: 0, total: 0, given: 0 } });
+                    
+                    setTimeout(async () => {
+                        await getDisplayDoc().set({ status: 'idle', quantity: 0, total: 0, given: 0 });
                     }, 5000);
                 } catch (e) { console.error("Checkout error:", e); }
             };
@@ -339,7 +346,7 @@
                             <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-800">Sommer-Kasse</h1>
                         </div>
                         <div className="flex gap-2">
-                            <button onClick={() => window.open('?view=customer', '_blank')} className="glass-card p-3 rounded-xl apple-button hover:bg-white"><Icon name="ScreenShare" size={20} color="#3b82f6" /></button>
+                            <button onClick={() => window.open(window.location.href + (window.location.search ? '&view=customer' : '?view=customer'), '_blank')} className="glass-card p-3 rounded-xl apple-button hover:bg-white"><Icon name="ScreenShare" size={20} color="#3b82f6" /></button>
                             <button onClick={() => setShowJournal(true)} className="glass-card p-3 rounded-xl apple-button hover:bg-white"><Icon name="History" size={20} color="#f97316" /></button>
                             <button onClick={() => setShowSettings(true)} className="glass-card p-3 rounded-xl apple-button hover:bg-white"><Icon name="Settings" size={20} color="#64748b" /></button>
                         </div>
@@ -453,14 +460,30 @@
 
         function CustomerView() {
             const [state, setState] = useState({ quantity: 0, total: 0, given: 0, status: 'idle', change: 0 });
-            
+            const [user, setUser] = useState(null);
+
             useEffect(() => {
-                const channel = new BroadcastChannel(SYNC_CHANNEL_NAME);
-                channel.onmessage = (e) => {
-                    setState(e.data.payload);
+                const initAuth = async () => {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await auth.signInWithCustomToken(__initial_auth_token);
+                    } else {
+                        await auth.signInAnonymously();
+                    }
                 };
-                return () => channel.close();
+                initAuth();
+                const unsubscribe = auth.onAuthStateChanged(setUser);
+                return () => unsubscribe();
             }, []);
+
+            useEffect(() => {
+                if (!user) return;
+                const unsub = getDisplayDoc().onSnapshot((doc) => {
+                    if (doc.exists) {
+                        setState(doc.data());
+                    }
+                });
+                return () => unsub();
+            }, [user]);
 
             if (state.status === 'success') {
                 return <SuccessScreen state={state} />;
