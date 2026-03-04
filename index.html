@@ -114,7 +114,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-      const firebaseConfig = {
+       const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
@@ -541,8 +541,9 @@
                     <div className="mb-12 p-12 glass-card rounded-[6rem] bg-white shadow-2xl z-10 floating">
                         <Icon name="Sun" size={150} color="#f97316" className="pulse-soft" />
                     </div>
-                    <h1 className="text-[10rem] font-black tracking-tighter text-slate-900 leading-none mb-4 z-10 pop-in">Sommerfest</h1>
-                    <p className="text-4xl font-black text-orange-500 uppercase tracking-[1rem] mb-8 z-10">Essensmarken Kasse</p>
+                    {/* Vertauschte Reihenfolge: Essensmarken Kasse oben, Sommerfest darunter */}
+                    <h1 className="text-6xl font-black text-orange-500 uppercase tracking-[1rem] mb-6 z-10 pop-in">Essensmarken Kasse</h1>
+                    <p className="text-[8rem] font-black tracking-tighter text-slate-900 leading-none mb-8 z-10 pop-in" style={{animationDelay: '0.2s'}}>Sommerfest</p>
                     <p className="text-3xl font-medium tracking-[1.5rem] text-slate-300 uppercase z-10 pop-in" style={{animationDelay:'0.3s'}}>Herzlich Willkommen</p>
                     
                     <footer className="absolute bottom-10 left-0 right-0 text-slate-400 text-sm font-bold uppercase tracking-[0.8rem] opacity-30">
