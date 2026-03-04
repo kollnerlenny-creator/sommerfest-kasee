@@ -69,9 +69,12 @@
             stroke-linecap: round;
             stroke-linejoin: round;
             fill: none;
+        }
+
+        /* Die Animation direkt auf den Pfad legen und auf die standardisierte pathLength anpassen */
+        .check-icon-svg path {
             stroke-dasharray: 100;
             stroke-dashoffset: 100;
-            /* Animation über exakt 2.5 Sekunden, startet nach 0.5s */
             animation: checkDraw 2.5s cubic-bezier(0.65, 0, 0.45, 1) 0.5s forwards;
         }
 
@@ -122,7 +125,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-      const firebaseConfig = {
+        const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
@@ -294,7 +297,6 @@
                 if (!user || quantity < 0) return;
                 const sync = async () => {
                     try {
-                        // Lösche Reset-Timer, wenn der Kassierer wieder tippt
                         if (autoResetTimer.current) clearTimeout(autoResetTimer.current);
                         
                         await getDisplayDoc().set({
@@ -315,7 +317,6 @@
                 try {
                     await getJournalCol().add(entry);
                     
-                    // Setze Success-Status
                     await getDisplayDoc().set({ 
                         status: 'success', type, quantity, total, 
                         change: type === 'sale' ? change : 0, 
@@ -325,11 +326,10 @@
                     
                     setQuantity(0); setGivenCashStr("");
 
-                    // WICHTIG: Warte erst, bis die Animation (3s) sicher vorbei ist, bevor der Bildschirmschoner kommt
                     if (autoResetTimer.current) clearTimeout(autoResetTimer.current);
                     autoResetTimer.current = setTimeout(async () => {
                         await getDisplayDoc().set({ status: 'idle', quantity: 0, total: 0, given: 0 });
-                    }, 15000); // 15 Sekunden (genug Puffer für 3s Animation + Lesezeit)
+                    }, 15000); 
                 } catch (e) { console.error("Checkout error:", e); }
             };
 
@@ -421,7 +421,11 @@
                     {confetti.map(c => <div key={c.id} className="confetti" style={{'--tx': c.tx, '--ty': c.ty, backgroundColor: c.color, left: '50%', top: '50%'}}></div>)}
                     <div className="success-circle" style={{backgroundColor: isReturn ? '#ef4444' : '#22c55e'}}>
                         <svg className="check-icon-svg" viewBox="0 0 50 50">
-                            {isReturn ? <path d="M15 15L35 35M35 15L15 35" /> : <path d="M10 25L20 35L40 15" />}
+                            {/* Wichtig: pathLength="100" erzwingt eine normierte Länge, damit die dasharray-Animation perfekt greift */}
+                            {isReturn 
+                                ? <path d="M15 15L35 35M35 15L15 35" pathLength="100" /> 
+                                : <path d="M10 25L20 35L40 15" pathLength="100" />
+                            }
                         </svg>
                     </div>
                     <h1 className="text-7xl font-black text-slate-800 mb-4 tracking-tighter pop-in" style={{animationDelay: '0.4s'}}>{isReturn ? 'Storniert' : 'Vielen Dank!'}</h1>
