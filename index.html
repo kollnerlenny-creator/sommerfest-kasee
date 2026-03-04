@@ -71,21 +71,26 @@
             fill: none;
         }
 
-        /* Die Animation direkt auf den Pfad legen und auf die standardisierte pathLength anpassen */
-        .check-icon-svg path {
-            stroke-dasharray: 100;
-            stroke-dashoffset: 100;
-            animation: checkDraw 2.5s cubic-bezier(0.65, 0, 0.45, 1) 0.5s forwards;
+        /* 100% Sicher für alle Browser: Exakte mathematische Pfadlänge statt pathLength="100" */
+        .path-check {
+            stroke-dasharray: 43;
+            stroke-dashoffset: 43;
+            animation: drawPath 0.8s ease-out 0.4s forwards;
+        }
+
+        .path-return {
+            stroke-dasharray: 57;
+            stroke-dashoffset: 57;
+            animation: drawPath 0.8s ease-out 0.4s forwards;
+        }
+
+        @keyframes drawPath {
+            to { stroke-dashoffset: 0; }
         }
 
         @keyframes circleExpand {
             from { transform: scale(0); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
-        }
-
-        @keyframes checkDraw {
-            from { stroke-dashoffset: 100; }
-            to { stroke-dashoffset: 0; }
         }
 
         .confetti {
@@ -125,7 +130,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
@@ -421,10 +426,9 @@
                     {confetti.map(c => <div key={c.id} className="confetti" style={{'--tx': c.tx, '--ty': c.ty, backgroundColor: c.color, left: '50%', top: '50%'}}></div>)}
                     <div className="success-circle" style={{backgroundColor: isReturn ? '#ef4444' : '#22c55e'}}>
                         <svg className="check-icon-svg" viewBox="0 0 50 50">
-                            {/* Wichtig: pathLength="100" erzwingt eine normierte Länge, damit die dasharray-Animation perfekt greift */}
                             {isReturn 
-                                ? <path d="M15 15L35 35M35 15L15 35" pathLength="100" /> 
-                                : <path d="M10 25L20 35L40 15" pathLength="100" />
+                                ? <path className="path-return" d="M15 15L35 35M35 15L15 35" /> 
+                                : <path className="path-check" d="M10 25L20 35L40 15" />
                             }
                         </svg>
                     </div>
