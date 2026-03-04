@@ -70,7 +70,7 @@
             stroke-linejoin: round;
             stroke-dasharray: 100;
             stroke-dashoffset: 100;
-            animation: drawTick 3s ease-out 0.4s forwards;
+            animation: drawTick 1.5s ease-out 0.4s forwards;
         }
 
         @keyframes drawTick { to { stroke-dashoffset: 0; } }
@@ -165,7 +165,6 @@
 
                 const unsubJournal = getJournalCol().onSnapshot(snap => {
                     const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    // Einfaches Sortieren im Speicher
                     setTransactions(data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)));
                 });
 
@@ -183,11 +182,11 @@
             useEffect(() => {
                 if (!user) return;
                 getDisplayDoc().set({
-                    quantity, total, given,
+                    quantity, total, given, change,
                     status: quantity > 0 ? 'active' : 'idle',
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true });
-            }, [quantity, total, given, user]);
+            }, [quantity, total, given, change, user]);
 
             const handleAction = async (type) => {
                 if (!user || quantity === 0) return;
@@ -207,6 +206,14 @@
                     });
                     setQuantity(0); setGivenStr("");
                 } catch (e) { console.error(e); }
+            };
+
+            const deleteTransaction = async (id) => {
+                try {
+                    await getJournalCol().doc(id).delete();
+                } catch (e) {
+                    console.error("Fehler beim Löschen:", e);
+                }
             };
 
             const saveSettings = async () => {
@@ -296,7 +303,6 @@
                         </div>
                     </main>
 
-                    {/* EINSTELLUNGEN MODAL */}
                     {showSettings && (
                         <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 modal-overlay">
                             <div className="glass-card w-full max-w-md rounded-[3rem] p-10 pop-in">
@@ -319,7 +325,6 @@
                         </div>
                     )}
 
-                    {/* JOURNAL MODAL */}
                     {showJournal && (
                         <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 modal-overlay">
                             <div className="glass-card w-full max-w-2xl h-[80vh] rounded-[3rem] flex flex-col pop-in overflow-hidden">
@@ -338,7 +343,7 @@
                                             <div className="text-center py-20 text-slate-400 font-bold italic">Noch keine Verkäufe getätigt...</div>
                                         ) : (
                                             transactions.map(t => (
-                                                <div key={t.id} className={`p-5 rounded-3xl flex justify-between items-center ${t.type === 'return' ? 'bg-rose-50 border border-rose-100' : 'bg-white border border-slate-100'}`}>
+                                                <div key={t.id} className={`p-5 rounded-3xl flex justify-between items-center ${t.type === 'return' ? 'bg-rose-50 border border-rose-100' : 'bg-white border border-slate-100'} group relative`}>
                                                     <div className="flex items-center gap-4">
                                                         <div className={`p-3 rounded-2xl ${t.type === 'return' ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-500'}`}>
                                                             <Icon name={t.type === 'return' ? 'Undo2' : 'ShoppingBag'} size={20} />
@@ -348,8 +353,17 @@
                                                             <span className="block text-xs font-bold text-slate-400 uppercase">{new Date(t.timestamp).toLocaleTimeString('de-DE')} Uhr</span>
                                                         </div>
                                                     </div>
-                                                    <div className={`text-xl font-black tabular-nums ${t.type === 'return' ? 'text-rose-500' : 'text-slate-800'}`}>
-                                                        {t.type === 'return' ? '-' : ''}{formatCurrency(Math.abs(t.amount))}
+                                                    <div className="flex items-center gap-6">
+                                                        <div className={`text-xl font-black tabular-nums ${t.type === 'return' ? 'text-rose-500' : 'text-slate-800'}`}>
+                                                            {t.type === 'return' ? '-' : ''}{formatCurrency(Math.abs(t.amount))}
+                                                        </div>
+                                                        <button 
+                                                            onClick={() => deleteTransaction(t.id)}
+                                                            className="p-3 text-rose-300 hover:text-rose-600 hover:bg-rose-100 rounded-xl transition-colors apple-button"
+                                                            title="Eintrag löschen"
+                                                        >
+                                                            <Icon name="Trash2" size={20} />
+                                                        </button>
                                                     </div>
                                                 </div>
                                             ))
@@ -366,7 +380,7 @@
         const SuccessScreen = ({ state, onFinish }) => {
             const isReturn = state.type === 'return';
             useEffect(() => {
-                const timer = setTimeout(onFinish, 20000);
+                const timer = setTimeout(onFinish, 5000); 
                 return () => clearTimeout(timer);
             }, [onFinish]);
 
@@ -381,25 +395,24 @@
                             }
                         </svg>
                     </div>
-                    <h1 className="text-[7rem] font-black text-slate-800 mb-4 tracking-tighter pop-in" style={{animationDelay: '0.2s'}}>
+                    <h1 className="text-[8rem] font-black text-slate-800 mb-12 tracking-tighter pop-in" style={{animationDelay: '0.2s'}}>
                         {isReturn ? 'Storniert' : 'Vielen Dank!'}
                     </h1>
-                    <p className="text-3xl text-orange-500 font-bold uppercase tracking-[0.5em] mb-12 pop-in" style={{animationDelay: '0.4s'}}>
-                        Genieße den Sommer
-                    </p>
                     
                     {!isReturn && (
-                        <div className="flex gap-8 pop-in" style={{animationDelay: '0.6s'}}>
-                            <div className="glass-card p-10 rounded-[3rem] min-w-[280px]">
-                                <span className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] block mb-2">Gegeben</span>
-                                <span className="text-5xl font-black text-slate-700">{formatCurrency(state.given)}</span>
-                            </div>
-                            {state.change > 0 && (
-                                <div className="glass-card p-10 px-16 rounded-[3rem] min-w-[320px] border-green-200">
-                                    <span className="text-xs font-bold text-green-500 uppercase tracking-[0.2em] block mb-2">Rückgeld</span>
-                                    <span className="text-7xl font-black text-green-600 tabular-nums">{formatCurrency(state.change)}</span>
+                        <div className="flex flex-col gap-6 items-center pop-in" style={{animationDelay: '0.4s'}}>
+                            <div className="flex gap-8">
+                                <div className="glass-card p-10 rounded-[3rem] min-w-[280px]">
+                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] block mb-2">Gegeben</span>
+                                    <span className="text-5xl font-black text-slate-700 tabular-nums">{formatCurrency(state.given)}</span>
                                 </div>
-                            )}
+                                {state.change > 0 && (
+                                    <div className="glass-card p-10 px-16 rounded-[3rem] min-w-[320px] border-green-200">
+                                        <span className="text-xs font-bold text-green-500 uppercase tracking-[0.2em] block mb-2">Rückgeld</span>
+                                        <span className="text-7xl font-black text-green-600 tabular-nums">{formatCurrency(state.change)}</span>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>
@@ -416,7 +429,7 @@
                     if (!doc.exists) return;
                     const data = doc.data();
                     if (Date.now() < lockUntil.current && data.status === 'idle') return;
-                    if (data.status === 'success') lockUntil.current = Date.now() + 20000;
+                    if (data.status === 'success') lockUntil.current = Date.now() + 5000;
                     setState(data);
                 });
                 return () => unsub();
@@ -433,17 +446,24 @@
                 return (
                     <div className="h-screen w-screen flex items-center justify-center bg-summer p-10 relative">
                         <div className="sun-ray opacity-20"></div>
-                        <div className="w-full max-w-3xl glass-card rounded-[6rem] p-24 text-center pop-in relative z-10">
-                            <span className="text-[20rem] font-black leading-none text-slate-900 block mb-4 tabular-nums">{state.quantity}</span>
+                        <div className="w-full max-w-4xl glass-card rounded-[6rem] p-24 text-center pop-in relative z-10">
+                            <span className="text-[18rem] font-black leading-none text-slate-900 block mb-4 tabular-nums">{state.quantity}</span>
                             <span className="text-4xl font-bold text-slate-300 uppercase tracking-[1em] block mb-20">Marken</span>
-                            <div className="flex justify-between items-center px-10 border-t-2 pt-16 border-slate-50">
+                            
+                            <div className="grid grid-cols-3 gap-8 px-10 border-t-2 pt-16 border-slate-50">
                                 <div className="text-left">
                                     <span className="text-sm font-bold text-slate-400 uppercase block mb-2 tracking-widest">Summe</span>
-                                    <span className="text-7xl font-black tabular-nums">{formatCurrency(state.total)}</span>
+                                    <span className="text-6xl font-black tabular-nums">{formatCurrency(state.total)}</span>
+                                </div>
+                                <div className="text-center">
+                                    <span className="text-sm font-bold text-slate-400 uppercase block mb-2 tracking-widest">Gegeben</span>
+                                    <span className="text-6xl font-black text-sky-500 tabular-nums">{state.given > 0 ? formatCurrency(state.given) : '—'}</span>
                                 </div>
                                 <div className="text-right">
-                                    <span className="text-sm font-bold text-slate-400 uppercase block mb-2 tracking-widest">Gegeben</span>
-                                    <span className="text-7xl font-black text-sky-500 tabular-nums">{state.given > 0 ? formatCurrency(state.given) : '—'}</span>
+                                    <span className="text-sm font-bold text-green-500 uppercase block mb-2 tracking-widest">Rückgeld</span>
+                                    <span className={`text-6xl font-black tabular-nums ${state.change > 0 ? 'text-green-600' : 'text-slate-200'}`}>
+                                        {state.change > 0 ? formatCurrency(state.change) : formatCurrency(0)}
+                                    </span>
                                 </div>
                             </div>
                         </div>
