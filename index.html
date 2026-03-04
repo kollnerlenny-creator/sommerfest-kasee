@@ -114,7 +114,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-       const firebaseConfig = {
+        const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
@@ -151,9 +151,16 @@
 
         const TokenIcon = ({ size = 100, color = "#f97316", className = "" }) => (
             <svg width={size} height={size} viewBox="0 0 100 100" className={className}>
-                <circle cx="50" cy="50" r="45" fill="none" stroke={color} strokeWidth="2" strokeDasharray="4 4" />
-                <circle cx="50" cy="50" r="38" fill={color} fillOpacity="0.1" stroke={color} strokeWidth="4" />
-                <text x="50" y="58" textAnchor="middle" fontSize="24" fontWeight="bold" fill={color} style={{fontFamily: 'Fredoka'}}>M</text>
+                {/* Essensmarke Form mit Zacken an den Seiten */}
+                <path 
+                    d="M10,25 Q10,20 15,20 L85,20 Q90,20 90,25 L90,35 Q85,40 90,45 L90,55 Q85,60 90,65 L90,75 Q90,80 85,80 L15,80 Q10,80 10,75 L10,65 Q15,60 10,55 L10,45 Q15,40 10,35 Z" 
+                    fill={color} 
+                    fillOpacity="0.1" 
+                    stroke={color} 
+                    strokeWidth="3" 
+                />
+                <line x1="30" y1="20" x2="30" y2="80" stroke={color} strokeWidth="2" strokeDasharray="4 4" opacity="0.5" />
+                <text x="60" y="58" textAnchor="middle" fontSize="24" fontWeight="bold" fill={color} style={{fontFamily: 'Fredoka'}}>M</text>
             </svg>
         );
 
@@ -331,6 +338,11 @@
                         </div>
                     </main>
 
+                    {/* Copyright Hinweis Verkäufer Display */}
+                    <footer className="mt-auto pt-4 text-center text-slate-400 text-xs font-medium uppercase tracking-widest opacity-60">
+                        © Programmiert von Lenny Köllner
+                    </footer>
+
                     {showSettings && (
                         <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 modal-overlay">
                             <div className="glass-card w-full max-w-md rounded-[3rem] p-10 pop-in">
@@ -443,6 +455,10 @@
                             </div>
                         </div>
                     )}
+
+                    <footer className="absolute bottom-8 left-0 right-0 text-slate-400 text-sm font-medium uppercase tracking-widest opacity-60">
+                        Programmiert von Lenny Köllner
+                    </footer>
                 </div>
             );
         };
@@ -510,6 +526,10 @@
                                 </div>
                             </div>
                         </div>
+
+                        <footer className="absolute bottom-8 left-0 right-0 text-center text-slate-400 text-sm font-medium uppercase tracking-widest opacity-60">
+                            Programmiert von Lenny Köllner
+                        </footer>
                     </div>
                 );
             }
@@ -522,6 +542,10 @@
                     </div>
                     <h1 className="text-[12rem] font-black tracking-tighter text-slate-900 leading-none mb-6 z-10 pop-in">Sommerfest</h1>
                     <p className="text-5xl font-medium tracking-[2rem] text-slate-300 uppercase z-10 pop-in" style={{animationDelay:'0.3s'}}>Herzlich Willkommen</p>
+                    
+                    <footer className="absolute bottom-12 left-0 right-0 text-slate-400 text-lg font-medium uppercase tracking-[1rem] opacity-40">
+                        Programmiert von Lenny Köllner
+                    </footer>
                 </div>
             );
         }
