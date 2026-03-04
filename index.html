@@ -71,17 +71,17 @@
             fill: none;
         }
 
-        /* 100% Sicher für alle Browser: Exakte mathematische Pfadlänge statt pathLength="100" */
+        /* Verlangsamte Animationen (2.0s Dauer) für bessere Sichtbarkeit */
         .path-check {
             stroke-dasharray: 43;
             stroke-dashoffset: 43;
-            animation: drawPath 0.8s ease-out 0.4s forwards;
+            animation: drawPath 2.0s cubic-bezier(0.65, 0, 0.45, 1) 0.5s forwards;
         }
 
         .path-return {
             stroke-dasharray: 57;
             stroke-dashoffset: 57;
-            animation: drawPath 0.8s ease-out 0.4s forwards;
+            animation: drawPath 2.0s cubic-bezier(0.65, 0, 0.45, 1) 0.5s forwards;
         }
 
         @keyframes drawPath {
@@ -130,7 +130,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-const firebaseConfig = {
+       const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
