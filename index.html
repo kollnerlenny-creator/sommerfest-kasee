@@ -10,7 +10,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
@@ -48,24 +47,8 @@
                 radial-gradient(at 0% 0%, hsla(35,100%,96%,1) 0, transparent 50%), 
                 radial-gradient(at 50% 10%, hsla(45,100%,94%,1) 0, transparent 50%), 
                 radial-gradient(at 100% 0%, hsla(25,100%,95%,1) 0, transparent 50%);
-            animation: meshMove 15s ease-in-out infinite alternate;
         }
 
-        @keyframes meshMove {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 100% 100%; }
-        }
-
-        .floating {
-            animation: floating 4s ease-in-out infinite;
-        }
-
-        @keyframes floating {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-15px) rotate(2deg); }
-        }
-
-        /* --- Erfolgs-Animation Optimierung --- */
         .success-circle {
             width: 140px;
             height: 140px;
@@ -74,14 +57,13 @@
             align-items: center;
             justify-content: center;
             margin: 0 auto 2.5rem;
-            animation: circleExpand 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation: circleExpand 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
             box-shadow: 0 25px 50px -12px rgba(34, 197, 94, 0.4);
-            position: relative;
         }
 
         .check-icon-svg {
-            width: 70px;
-            height: 70px;
+            width: 75px;
+            height: 75px;
             stroke: white;
             stroke-width: 6;
             stroke-linecap: round;
@@ -89,8 +71,8 @@
             fill: none;
             stroke-dasharray: 100;
             stroke-dashoffset: 100;
-            /* DEUTLICH LANGSAMER: 1.8 Sekunden Zeichenzeit */
-            animation: checkDraw 1.8s ease-in-out 0.8s forwards;
+            /* Animation über exakt 2.5 Sekunden, startet nach 0.5s */
+            animation: checkDraw 2.5s cubic-bezier(0.65, 0, 0.45, 1) 0.5s forwards;
         }
 
         @keyframes circleExpand {
@@ -107,11 +89,9 @@
             position: absolute;
             width: 10px;
             height: 10px;
-            background: var(--summer-yellow);
             border-radius: 50%;
             animation: confettiFall 3s ease-out forwards;
             pointer-events: none;
-            z-index: 50;
         }
 
         @keyframes confettiFall {
@@ -119,32 +99,22 @@
             100% { transform: translate(var(--tx), var(--ty)) scale(1); opacity: 0; }
         }
 
-        .apple-button {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .apple-button:active {
-            transform: scale(0.92);
-        }
-
+        .apple-button { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .apple-button:active { transform: scale(0.92); }
         .pop-in { animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
         .slide-up { animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes slideUp { from { transform: translateY(60px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
         .sun-ray {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 200%;
-            height: 200%;
+            top: 50%; left: 50%;
+            width: 200%; height: 200%;
             background: conic-gradient(from 0deg, transparent, rgba(250, 204, 21, 0.1), transparent 30deg);
             transform: translate(-50%, -50%);
             animation: rotate 20s linear infinite;
             pointer-events: none;
         }
-
         @keyframes rotate { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
     </style>
 </head>
@@ -152,7 +122,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-     const firebaseConfig = {
+        const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
@@ -192,8 +162,6 @@
         const getJournalCol = () => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('journal');
         const getSettingsDoc = () => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('settings');
         const getDisplayDoc = () => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('display_state');
-
-        // --- COMPONENTS ---
 
         function SettingsModal({ tokenPrice, onSave, onClose }) {
             const [localPrice, setLocalPrice] = useState(tokenPrice.toString().replace('.', ','));
@@ -283,8 +251,6 @@
             );
         }
 
-        // --- CASHIER APP ---
-
         function CashierApp() {
             const [user, setUser] = useState(null);
             const [tokenPrice, setTokenPrice] = useState(0.50);
@@ -330,9 +296,7 @@
                     try {
                         if (autoResetTimer.current) clearTimeout(autoResetTimer.current);
                         await getDisplayDoc().set({
-                            quantity, 
-                            total, 
-                            given, 
+                            quantity, total, given, 
                             status: quantity > 0 ? 'active' : 'idle',
                             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                         }, { merge: true });
@@ -343,31 +307,22 @@
 
             const handleCheckout = async (type = 'sale') => {
                 if (!user || quantity === 0) return;
-                
                 const amount = type === 'sale' ? total : -total;
                 const qty = type === 'sale' ? quantity : -quantity;
                 const entry = { type, quantity: qty, amount, timestamp: new Date().toISOString() };
-
                 try {
                     await getJournalCol().add(entry);
                     await getDisplayDoc().set({ 
-                        status: 'success', 
-                        type: type,
-                        quantity: quantity,
-                        total: total,
+                        status: 'success', type, quantity, total, 
                         change: type === 'sale' ? change : 0, 
                         given: given > 0 ? given : total,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                    
-                    setQuantity(0); 
-                    setGivenCashStr("");
-
+                    setQuantity(0); setGivenCashStr("");
                     if (autoResetTimer.current) clearTimeout(autoResetTimer.current);
                     autoResetTimer.current = setTimeout(async () => {
                         await getDisplayDoc().set({ status: 'idle', quantity: 0, total: 0, given: 0 });
                     }, 12000); 
-
                 } catch (e) { console.error("Checkout error:", e); }
             };
 
@@ -375,7 +330,7 @@
                 <div className="h-screen w-screen p-4 md:p-8 flex flex-col gap-4 overflow-hidden relative">
                     <header className="flex justify-between items-center px-4 shrink-0 z-10">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-200 floating">
+                            <div className="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-200">
                                 <Icon name="Sun" color="white" size={24} />
                             </div>
                             <div>
@@ -389,20 +344,17 @@
                             <button onClick={() => setShowSettings(true)} className="glass-card p-3 rounded-xl apple-button hover:bg-white text-slate-400"><Icon name="Settings" size={18} /></button>
                         </div>
                     </header>
-
                     <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0 z-10">
                         <section className="lg:col-span-7 glass-card rounded-[3rem] p-8 flex flex-col items-center justify-center relative bg-white/40 border-white shadow-xl overflow-hidden">
                             <div className="sun-ray opacity-10"></div>
                             <div className="text-center z-10">
-                                <div className="text-[10rem] font-black tracking-tighter leading-none mb-2 tabular-nums text-slate-900 drop-shadow-sm">{quantity}</div>
+                                <div className="text-[10rem] font-black tracking-tighter leading-none mb-2 tabular-nums text-slate-900">{quantity}</div>
                                 <p className="text-sm font-bold text-slate-300 uppercase tracking-[0.6em] mb-12">Wertmarken</p>
-                                
                                 <div className="flex gap-6 items-center mb-12">
                                     <button onClick={() => setQuantity(q => Math.max(0, q-1))} className="w-20 h-20 glass-card rounded-full flex items-center justify-center apple-button hover:bg-white shadow-md"><Icon name="Minus" color="#f97316" size={32} /></button>
                                     <div className="glass-card px-12 py-6 rounded-[2rem] bg-white shadow-xl border-white min-w-[240px]"><span className="text-5xl font-black text-orange-500">{formatCurrency(total)}</span></div>
                                     <button onClick={() => setQuantity(q => q+1)} className="w-20 h-20 bg-orange-500 text-white rounded-full flex items-center justify-center apple-button shadow-2xl shadow-orange-200"><Icon name="Plus" size={32} /></button>
                                 </div>
-
                                 <div className="grid grid-cols-3 gap-4 w-full max-w-sm">
                                     {[5, 10, 20].map(n => (
                                         <button key={n} onClick={() => setQuantity(q => q+n)} className="glass-card py-5 rounded-2xl font-black text-lg apple-button hover:bg-slate-900 hover:text-white border-white">+{n}</button>
@@ -410,7 +362,6 @@
                                 </div>
                             </div>
                         </section>
-
                         <section className="lg:col-span-5 glass-card rounded-[3rem] p-8 flex flex-col shadow-xl bg-white/80 border-white">
                             <div className="grid grid-cols-2 gap-4 mb-10 shrink-0">
                                 <div className="bg-slate-50/50 p-6 rounded-3xl border border-slate-100">
@@ -422,7 +373,6 @@
                                     <span className="text-3xl font-black text-green-600 tabular-nums">{formatCurrency(change)}</span>
                                 </div>
                             </div>
-
                             <div className="grid grid-cols-4 gap-3 flex-1 min-h-0">
                                 {['1','2','3','5€','4','5','6','10€','7','8','9','20€',',','0','C','50€'].map((k, idx) => (
                                     <button key={idx} onClick={() => {
@@ -434,67 +384,41 @@
                                     </button>
                                 ))}
                             </div>
-
                             <div className="mt-10 flex gap-4 shrink-0">
-                                <button onClick={() => handleCheckout('return')} disabled={quantity === 0} className="flex-1 bg-rose-50 text-rose-500 py-7 rounded-[2rem] font-bold text-xs apple-button border border-rose-100 disabled:opacity-30 tracking-widest">RETOURE</button>
+                                <button onClick={() => handleCheckout('return')} disabled={quantity === 0} className="flex-1 bg-rose-50 text-rose-500 py-7 rounded-[2rem] font-bold text-xs apple-button border border-rose-100 disabled:opacity-30 tracking-widest uppercase">Storno</button>
                                 <button onClick={() => handleCheckout('sale')} disabled={quantity === 0} className="flex-[2] bg-slate-900 text-white py-7 rounded-[2rem] font-black text-2xl apple-button shadow-2xl disabled:opacity-10">BEZAHLT</button>
                             </div>
                         </section>
                     </main>
-
                     {showJournal && <JournalModal journal={journal} onDelete={(id) => getJournalCol().doc(id).delete()} onClose={() => setShowJournal(false)} />}
                     {showSettings && <SettingsModal tokenPrice={tokenPrice} onSave={(p) => getSettingsDoc().set({tokenPrice: p})} onClose={() => setShowSettings(false)} />}
                 </div>
             );
         }
 
-        // --- CUSTOMER VIEW ---
-
         const SuccessScreen = ({ state }) => {
             const isReturn = state.type === 'return';
             const [confetti, setConfetti] = useState([]);
-
             useEffect(() => {
                 if (!isReturn) {
                     const newConfetti = Array.from({ length: 40 }).map((_, i) => ({
-                        id: i,
-                        tx: (Math.random() - 0.5) * 600 + 'px',
-                        ty: (Math.random() - 0.5) * 600 + 'px',
+                        id: i, tx: (Math.random() - 0.5) * 600 + 'px', ty: (Math.random() - 0.5) * 600 + 'px',
                         color: ['#facc15', '#fb923c', '#fde68a'][Math.floor(Math.random() * 3)]
                     }));
                     setConfetti(newConfetti);
                 }
             }, [isReturn]);
-
             return (
                 <div className="h-screen w-screen flex flex-col items-center justify-center p-10 bg-mesh overflow-hidden text-center relative">
                     <div className="sun-ray opacity-30"></div>
-                    
-                    {confetti.map(c => (
-                        <div key={c.id} className="confetti" style={{
-                            '--tx': c.tx, '--ty': c.ty, 
-                            backgroundColor: c.color,
-                            left: '50%', top: '50%'
-                        }}></div>
-                    ))}
-
+                    {confetti.map(c => <div key={c.id} className="confetti" style={{'--tx': c.tx, '--ty': c.ty, backgroundColor: c.color, left: '50%', top: '50%'}}></div>)}
                     <div className="success-circle" style={{backgroundColor: isReturn ? '#ef4444' : '#22c55e'}}>
                         <svg className="check-icon-svg" viewBox="0 0 50 50">
-                            {isReturn ? (
-                                <path d="M15 15L35 35M35 15L15 35" />
-                            ) : (
-                                <path d="M10 25L20 35L40 15" />
-                            )}
+                            {isReturn ? <path d="M15 15L35 35M35 15L15 35" /> : <path d="M10 25L20 35L40 15" />}
                         </svg>
                     </div>
-                    
-                    <h1 className="text-7xl font-black text-slate-800 mb-4 tracking-tighter pop-in" style={{animationDelay: '0.4s'}}>
-                        {isReturn ? 'Storno' : 'Vielen Dank!'}
-                    </h1>
-                    <p className="text-2xl text-slate-400 font-medium mb-12 slide-up" style={{animationDelay: '0.7s'}}>
-                        {isReturn ? 'Vorgang rückgängig gemacht.' : 'Viel Spaß beim Sommerfest!'}
-                    </p>
-                    
+                    <h1 className="text-7xl font-black text-slate-800 mb-4 tracking-tighter pop-in" style={{animationDelay: '0.4s'}}>{isReturn ? 'Storniert' : 'Vielen Dank!'}</h1>
+                    <p className="text-2xl text-slate-400 font-medium mb-12 slide-up" style={{animationDelay: '0.7s'}}>{isReturn ? 'Vorgang wurde rückgängig gemacht.' : 'Viel Spaß beim Sommerfest!'}</p>
                     {!isReturn && (
                         <div className="flex gap-6 slide-up" style={{animationDelay: '0.9s'}}>
                             <div className="glass-card p-8 rounded-[2.5rem] border-white shadow-lg bg-white/50 min-w-[200px]">
@@ -502,7 +426,7 @@
                                 <p className="text-3xl font-black text-slate-700">{formatCurrency(state.given)}</p>
                             </div>
                             {state.change > 0 && (
-                                <div className="glass-card p-8 px-12 rounded-[2.5rem] border-white shadow-2xl bg-white min-w-[240px] floating">
+                                <div className="glass-card p-8 px-12 rounded-[2.5rem] border-white shadow-2xl bg-white min-w-[240px]">
                                     <p className="text-xs font-bold text-green-500 uppercase tracking-widest mb-1">Rückgeld</p>
                                     <p className="text-5xl font-black text-green-600 tabular-nums">{formatCurrency(state.change)}</p>
                                 </div>
@@ -516,7 +440,6 @@
         function CustomerView() {
             const [state, setState] = useState({ status: 'idle' });
             const [user, setUser] = useState(null);
-
             useEffect(() => {
                 const initAuth = async () => {
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -529,21 +452,12 @@
                 const unsubscribe = auth.onAuthStateChanged(setUser);
                 return () => unsubscribe();
             }, []);
-
             useEffect(() => {
                 if (!user) return;
-                const unsub = getDisplayDoc().onSnapshot((doc) => {
-                    if (doc.exists) {
-                        setState(doc.data());
-                    }
-                });
+                const unsub = getDisplayDoc().onSnapshot((doc) => { if (doc.exists) setState(doc.data()); });
                 return () => unsub();
             }, [user]);
-
-            if (state.status === 'success') {
-                return <SuccessScreen state={state} />;
-            }
-
+            if (state.status === 'success') return <SuccessScreen state={state} />;
             if (state.status === 'active') {
                 return (
                     <div className="h-screen w-screen flex flex-col items-center justify-center p-10 bg-mesh overflow-hidden relative">
@@ -551,13 +465,11 @@
                         <div className="w-full max-w-xl glass-card rounded-[4rem] flex flex-col shadow-2xl border-white bg-white/90 p-16 pop-in relative z-10">
                             <div className="text-center">
                                 <span className="text-xs font-bold text-orange-400 uppercase tracking-[0.5em] mb-4 block">Bestellung</span>
-                                <div className="mb-4 floating">
+                                <div className="mb-4">
                                     <span className="text-[12rem] font-black leading-none text-slate-900 tracking-tighter block">{state.quantity}</span>
                                 </div>
                                 <span className="text-2xl text-slate-300 font-black uppercase tracking-[0.6em] mb-12 block">Wertmarken</span>
-                                
                                 <div className="w-full h-px bg-slate-100 mb-10"></div>
-                                
                                 <div className="grid grid-cols-2 gap-8 w-full">
                                     <div className="flex flex-col items-center border-r border-slate-100">
                                         <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Summe</span>
@@ -573,12 +485,11 @@
                     </div>
                 );
             }
-
             return (
                 <div className="h-screen w-screen bg-mesh flex flex-col items-center justify-center text-center p-10 overflow-hidden relative">
                     <div className="sun-ray opacity-20"></div>
-                    <div className="mb-10 p-10 glass-card rounded-[4rem] bg-white shadow-2xl floating z-10">
-                        <Icon name="Sun" size={100} color="#f97316" className="md:w-32 md:h-32" />
+                    <div className="mb-10 p-10 glass-card rounded-[4rem] bg-white shadow-2xl z-10">
+                        <Icon name="Sun" size={100} color="#f97316" />
                     </div>
                     <h1 className="text-[8rem] font-black tracking-tighter leading-none text-slate-900 mb-6 pop-in z-10">Sommerfest</h1>
                     <p className="text-2xl font-medium tracking-[0.8rem] text-slate-300 uppercase slide-up z-10">Willkommen am Stand</p>
