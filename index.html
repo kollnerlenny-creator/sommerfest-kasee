@@ -122,7 +122,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const firebaseConfig = {
+      const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
@@ -294,7 +294,9 @@
                 if (!user || quantity < 0) return;
                 const sync = async () => {
                     try {
+                        // Lösche Reset-Timer, wenn der Kassierer wieder tippt
                         if (autoResetTimer.current) clearTimeout(autoResetTimer.current);
+                        
                         await getDisplayDoc().set({
                             quantity, total, given, 
                             status: quantity > 0 ? 'active' : 'idle',
@@ -312,17 +314,22 @@
                 const entry = { type, quantity: qty, amount, timestamp: new Date().toISOString() };
                 try {
                     await getJournalCol().add(entry);
+                    
+                    // Setze Success-Status
                     await getDisplayDoc().set({ 
                         status: 'success', type, quantity, total, 
                         change: type === 'sale' ? change : 0, 
                         given: given > 0 ? given : total,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
+                    
                     setQuantity(0); setGivenCashStr("");
+
+                    // WICHTIG: Warte erst, bis die Animation (3s) sicher vorbei ist, bevor der Bildschirmschoner kommt
                     if (autoResetTimer.current) clearTimeout(autoResetTimer.current);
                     autoResetTimer.current = setTimeout(async () => {
                         await getDisplayDoc().set({ status: 'idle', quantity: 0, total: 0, given: 0 });
-                    }, 12000); 
+                    }, 15000); // 15 Sekunden (genug Puffer für 3s Animation + Lesezeit)
                 } catch (e) { console.error("Checkout error:", e); }
             };
 
