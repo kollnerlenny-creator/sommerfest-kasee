@@ -89,6 +89,15 @@
         .pop-in { animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes popIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
+        .floating { animation: float 6s ease-in-out infinite; }
+        @keyframes float { 
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        .pulse-soft { animation: pulseSoft 2s infinite; }
+        @keyframes pulseSoft { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
         .apple-button { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .apple-button:active { transform: scale(0.92); opacity: 0.85; }
         
@@ -140,11 +149,19 @@
             return <span ref={iconRef} className={`inline-flex items-center justify-center ${className}`}></span>;
         };
 
+        const TokenIcon = ({ size = 100, color = "#f97316", className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 100 100" className={className}>
+                <circle cx="50" cy="50" r="45" fill="none" stroke={color} strokeWidth="2" strokeDasharray="4 4" />
+                <circle cx="50" cy="50" r="38" fill={color} fillOpacity="0.1" stroke={color} strokeWidth="4" />
+                <text x="50" y="58" textAnchor="middle" fontSize="24" fontWeight="bold" fill={color} style={{fontFamily: 'Fredoka'}}>M</text>
+            </svg>
+        );
+
         const getJournalCol = () => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('journal');
         const getSettingsDoc = () => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('settings');
         const getDisplayDoc = () => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('display_state');
 
-        // --- KASSEN ANSICHT ---
+        // --- CASHIER VIEW ---
         function CashierApp({ user }) {
             const [tokenPrice, setTokenPrice] = useState(0.50);
             const [quantity, setQuantity] = useState(0);
@@ -211,9 +228,7 @@
             const deleteTransaction = async (id) => {
                 try {
                     await getJournalCol().doc(id).delete();
-                } catch (e) {
-                    console.error("Fehler beim Löschen:", e);
-                }
+                } catch (e) { console.error(e); }
             };
 
             const saveSettings = async () => {
@@ -252,18 +267,31 @@
 
                     <main className="flex-1 grid grid-cols-12 gap-6 min-h-0">
                         <div className="col-span-7 glass-card rounded-[3.5rem] p-10 flex flex-col items-center justify-center relative">
-                            <div className="text-[14rem] font-black leading-none text-slate-900 mb-2 tabular-nums">{quantity}</div>
-                            <p className="text-2xl font-bold text-slate-300 uppercase tracking-[0.5em] mb-12">Marken</p>
+                            {/* Schnellauswahl Buttons */}
+                            <div className="flex gap-4 mb-8">
+                                {[5, 10, 15, 20].map(n => (
+                                    <button 
+                                        key={n} 
+                                        onClick={() => setQuantity(n)} 
+                                        className="px-6 py-3 rounded-2xl bg-orange-100 text-orange-600 font-bold text-xl apple-button border-2 border-orange-200"
+                                    >
+                                        {n} Stk.
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="text-[12rem] font-black leading-none text-slate-900 mb-2 tabular-nums">{quantity}</div>
+                            <p className="text-2xl font-bold text-slate-300 uppercase tracking-[0.5em] mb-10">Marken</p>
                             
                             <div className="flex gap-10 items-center">
-                                <button onClick={() => setQuantity(q => Math.max(0, q-1))} className="w-28 h-28 glass-card rounded-full apple-button text-orange-500 flex items-center justify-center">
-                                    <Icon name="Minus" size={48} />
+                                <button onClick={() => setQuantity(q => Math.max(0, q-1))} className="w-24 h-24 glass-card rounded-full apple-button text-orange-500 flex items-center justify-center">
+                                    <Icon name="Minus" size={40} />
                                 </button>
-                                <div className="glass-card px-20 py-10 rounded-[3rem] bg-white/80 min-w-[300px] text-center">
-                                    <span className="text-7xl font-black text-orange-500">{formatCurrency(total)}</span>
+                                <div className="glass-card px-16 py-8 rounded-[3rem] bg-white/80 min-w-[280px] text-center">
+                                    <span className="text-6xl font-black text-orange-500">{formatCurrency(total)}</span>
                                 </div>
-                                <button onClick={() => setQuantity(q => q+1)} className="w-28 h-28 bg-orange-500 text-white rounded-full apple-button shadow-2xl flex items-center justify-center">
-                                    <Icon name="Plus" size={48} />
+                                <button onClick={() => setQuantity(q => q+1)} className="w-24 h-24 bg-orange-500 text-white rounded-full apple-button shadow-2xl flex items-center justify-center">
+                                    <Icon name="Plus" size={40} />
                                 </button>
                             </div>
                         </div>
@@ -340,7 +368,7 @@
                                 <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
                                     <div className="flex flex-col gap-3">
                                         {transactions.length === 0 ? (
-                                            <div className="text-center py-20 text-slate-400 font-bold italic">Noch keine Verkäufe getätigt...</div>
+                                            <div className="text-center py-20 text-slate-400 font-bold italic">Noch keine Verkäufe...</div>
                                         ) : (
                                             transactions.map(t => (
                                                 <div key={t.id} className={`p-5 rounded-3xl flex justify-between items-center ${t.type === 'return' ? 'bg-rose-50 border border-rose-100' : 'bg-white border border-slate-100'} group relative`}>
@@ -360,7 +388,6 @@
                                                         <button 
                                                             onClick={() => deleteTransaction(t.id)}
                                                             className="p-3 text-rose-300 hover:text-rose-600 hover:bg-rose-100 rounded-xl transition-colors apple-button"
-                                                            title="Eintrag löschen"
                                                         >
                                                             <Icon name="Trash2" size={20} />
                                                         </button>
@@ -377,6 +404,7 @@
             );
         }
 
+        // --- SUCCESS SCREEN ---
         const SuccessScreen = ({ state, onFinish }) => {
             const isReturn = state.type === 'return';
             useEffect(() => {
@@ -419,6 +447,7 @@
             );
         };
 
+        // --- CUSTOMER VIEW ---
         function CustomerView({ user }) {
             const [state, setState] = useState({ status: 'idle' });
             const lockUntil = useRef(0);
@@ -444,24 +473,38 @@
             
             if (state.status === 'active') {
                 return (
-                    <div className="h-screen w-screen flex items-center justify-center bg-summer p-10 relative">
+                    <div className="h-screen w-screen flex items-center justify-center bg-summer p-10 relative overflow-hidden">
                         <div className="sun-ray opacity-20"></div>
-                        <div className="w-full max-w-4xl glass-card rounded-[6rem] p-24 text-center pop-in relative z-10">
-                            <span className="text-[18rem] font-black leading-none text-slate-900 block mb-4 tabular-nums">{state.quantity}</span>
+                        
+                        {/* Animiertes Hintergrund-Icon */}
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10 floating">
+                            <TokenIcon size={600} />
+                        </div>
+
+                        <div className="w-full max-w-5xl glass-card rounded-[6rem] p-24 text-center pop-in relative z-10 flex flex-col items-center">
+                            <div className="relative mb-6">
+                                <span className="text-[20rem] font-black leading-none text-slate-900 block tabular-nums animate-bounce-slow">
+                                    {state.quantity}
+                                </span>
+                                <TokenIcon size={120} className="absolute -top-10 -right-20 floating text-orange-400 opacity-80" />
+                            </div>
+                            
                             <span className="text-4xl font-bold text-slate-300 uppercase tracking-[1em] block mb-20">Marken</span>
                             
-                            <div className="grid grid-cols-3 gap-8 px-10 border-t-2 pt-16 border-slate-50">
-                                <div className="text-left">
+                            <div className="grid grid-cols-3 gap-8 w-full px-10 border-t-2 pt-16 border-slate-50">
+                                <div className="text-left pop-in" style={{animationDelay: '0.2s'}}>
                                     <span className="text-sm font-bold text-slate-400 uppercase block mb-2 tracking-widest">Summe</span>
-                                    <span className="text-6xl font-black tabular-nums">{formatCurrency(state.total)}</span>
+                                    <span className="text-7xl font-black tabular-nums">{formatCurrency(state.total)}</span>
                                 </div>
-                                <div className="text-center">
+                                <div className="text-center pop-in" style={{animationDelay: '0.4s'}}>
                                     <span className="text-sm font-bold text-slate-400 uppercase block mb-2 tracking-widest">Gegeben</span>
-                                    <span className="text-6xl font-black text-sky-500 tabular-nums">{state.given > 0 ? formatCurrency(state.given) : '—'}</span>
+                                    <span className={`text-7xl font-black tabular-nums transition-colors duration-500 ${state.given > 0 ? 'text-sky-500' : 'text-slate-200'}`}>
+                                        {state.given > 0 ? formatCurrency(state.given) : '—'}
+                                    </span>
                                 </div>
-                                <div className="text-right">
+                                <div className="text-right pop-in" style={{animationDelay: '0.6s'}}>
                                     <span className="text-sm font-bold text-green-500 uppercase block mb-2 tracking-widest">Rückgeld</span>
-                                    <span className={`text-6xl font-black tabular-nums ${state.change > 0 ? 'text-green-600' : 'text-slate-200'}`}>
+                                    <span className={`text-7xl font-black tabular-nums transition-all duration-500 ${state.change > 0 ? 'text-green-600 scale-110' : 'text-slate-200'}`}>
                                         {state.change > 0 ? formatCurrency(state.change) : formatCurrency(0)}
                                     </span>
                                 </div>
@@ -474,11 +517,11 @@
             return (
                 <div className="h-screen w-screen bg-summer flex flex-col items-center justify-center text-center p-10 overflow-hidden relative">
                     <div className="sun-ray"></div>
-                    <div className="mb-16 p-16 glass-card rounded-[6rem] bg-white shadow-2xl z-10">
-                        <Icon name="Sun" size={180} color="#f97316" />
+                    <div className="mb-16 p-16 glass-card rounded-[6rem] bg-white shadow-2xl z-10 floating">
+                        <Icon name="Sun" size={180} color="#f97316" className="pulse-soft" />
                     </div>
                     <h1 className="text-[12rem] font-black tracking-tighter text-slate-900 leading-none mb-6 z-10 pop-in">Sommerfest</h1>
-                    <p className="text-5xl font-medium tracking-[2rem] text-slate-300 uppercase z-10 pop-in" style={{animationDelay:'0.3s'}}>Willkommen</p>
+                    <p className="text-5xl font-medium tracking-[2rem] text-slate-300 uppercase z-10 pop-in" style={{animationDelay:'0.3s'}}>Herzlich Willkommen</p>
                 </div>
             );
         }
@@ -505,7 +548,14 @@
             }, []);
 
             if (!view || !user) {
-                return <div className="h-screen w-screen flex items-center justify-center bg-orange-50 text-orange-500 text-3xl font-black animate-pulse">Wird geladen...</div>;
+                return (
+                    <div className="h-screen w-screen flex flex-col items-center justify-center bg-orange-50 text-orange-500 gap-6">
+                        <div className="animate-spin text-6xl">
+                            <Icon name="Loader2" size={64} />
+                        </div>
+                        <span className="text-3xl font-black">Wird geladen...</span>
+                    </div>
+                );
             }
 
             return view === 'customer' ? <CustomerView user={user} /> : <CashierApp user={user} />;
