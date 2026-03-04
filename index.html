@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sommerfest Kasse - Final Fix</title>
+    <title>Sommerfest Kasse - Cloud Sync</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -19,81 +19,41 @@
         @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600;700&family=Inter:wght@400;600;900&display=swap');
         
         :root {
+            --glass-bg: rgba(255, 255, 255, 0.92);
+            --glass-border: rgba(255, 255, 255, 0.7);
             --fest-orange: #f97316;
             --success-green: #22c55e;
+            --return-red: #ef4444;
             --summer-yellow: #facc15;
         }
 
         body { 
-            font-family: 'SF Pro Display', 'Inter', sans-serif;
-            background: #fffaf0;
+            font-family: 'SF Pro Display', 'Inter', -apple-system, sans-serif;
+            background: #fafafa;
             overflow: hidden;
             margin: 0;
             padding: 0;
         }
 
-        /* Sommerlicher Hintergrund */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+        }
+
         .bg-mesh {
             background-color: #fffaf0;
             background-image: 
                 radial-gradient(at 0% 0%, hsla(35,100%,96%,1) 0, transparent 50%), 
-                radial-gradient(at 100% 100%, hsla(45,100%,94%,1) 0, transparent 50%);
+                radial-gradient(at 50% 10%, hsla(45,100%,94%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(25,100%,95%,1) 0, transparent 50%);
+            animation: meshMove 15s ease-in-out infinite alternate;
         }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-        }
-
-        /* --- FIX: Die Check-Animation --- */
-        .success-circle {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 2rem;
-            animation: circleScale 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-            box-shadow: 0 20px 40px -10px rgba(34, 197, 94, 0.4);
-        }
-
-        .check-icon-svg {
-            width: 70px;
-            height: 70px;
-            stroke: white;
-            stroke-width: 5;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            fill: none;
-            stroke-dasharray: 100;
-            stroke-dashoffset: 100;
-            /* Verlangsamte Zeichnung: 1.5s */
-            animation: checkDraw 1.5s ease-out 0.5s forwards;
-        }
-
-        @keyframes circleScale {
-            0% { transform: scale(0); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        @keyframes checkDraw {
-            0% { stroke-dashoffset: 100; }
-            100% { stroke-dashoffset: 0; }
-        }
-
-        /* Partikel-Effekte */
-        .particle {
-            position: absolute;
-            pointer-events: none;
-            animation: fly 3s ease-out forwards;
-        }
-
-        @keyframes fly {
-            0% { transform: translate(0,0) scale(1); opacity: 1; }
-            100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
+        @keyframes meshMove {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
         }
 
         .floating {
@@ -101,36 +61,98 @@
         }
 
         @keyframes floating {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
+        }
+
+        /* --- Erfolgs-Animation Optimierung --- */
+        .success-circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2.5rem;
+            animation: circleExpand 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            box-shadow: 0 25px 50px -12px rgba(34, 197, 94, 0.4);
+            position: relative;
+        }
+
+        .check-icon-svg {
+            width: 70px;
+            height: 70px;
+            stroke: white;
+            stroke-width: 6;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            /* DEUTLICH LANGSAMER: 1.8 Sekunden Zeichenzeit */
+            animation: checkDraw 1.8s ease-in-out 0.8s forwards;
+        }
+
+        @keyframes circleExpand {
+            from { transform: scale(0); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes checkDraw {
+            from { stroke-dashoffset: 100; }
+            to { stroke-dashoffset: 0; }
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--summer-yellow);
+            border-radius: 50%;
+            animation: confettiFall 3s ease-out forwards;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translate(0, 0) scale(0); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(1); opacity: 0; }
         }
 
         .apple-button {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .apple-button:active {
-            transform: scale(0.95);
+            transform: scale(0.92);
         }
 
+        .pop-in { animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .slide-up { animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideUp { from { transform: translateY(60px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
         .sun-ray {
             position: absolute;
-            top: 50%; left: 50%;
-            width: 200vw; height: 200vw;
-            background: conic-gradient(from 0deg, transparent, rgba(250, 204, 21, 0.05), transparent 40deg);
-            animation: rotateSun 40s linear infinite;
-            pointer-events: none;
+            top: 50%;
+            left: 50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(250, 204, 21, 0.1), transparent 30deg);
             transform: translate(-50%, -50%);
+            animation: rotate 20s linear infinite;
+            pointer-events: none;
         }
 
-        @keyframes rotateSun { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes rotate { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
     </style>
 </head>
-<body class="bg-mesh">
+<body class="text-slate-900 bg-mesh">
     <div id="root"></div>
 
     <script type="text/babel">
-        const firebaseConfig = {
+     const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
@@ -145,181 +167,407 @@
 
         const { useState, useEffect, useMemo, useRef } = React;
 
-        const formatCurrency = (val) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(val);
-
-        const Icon = ({ name, color = "currentColor", size = 24 }) => {
-            const ref = useRef(null);
-            useEffect(() => {
-                if (window.lucide && ref.current) {
-                    ref.current.innerHTML = '';
-                    const i = document.createElement('i');
-                    i.setAttribute('data-lucide', name.toLowerCase());
-                    ref.current.appendChild(i);
-                    window.lucide.createIcons({ attrs: { stroke: color, 'stroke-width': 2, width: size, height: size } });
-                }
-            }, [name, color, size]);
-            return <span ref={ref} className="inline-flex items-center"></span>;
+        const formatCurrency = (amount) => {
+            return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
         };
 
-        const getDisplayDoc = () => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('display_state');
+        const Icon = ({ name, color = "currentColor", size = 24, className = "" }) => {
+            const iconRef = useRef(null);
+            useEffect(() => {
+                if (window.lucide && iconRef.current) {
+                    iconRef.current.innerHTML = '';
+                    const iconName = name.charAt(0).toLowerCase() + name.slice(1).replace(/([A-Z])/g, '-$1').toLowerCase();
+                    const iconElement = document.createElement('i');
+                    iconElement.setAttribute('data-lucide', iconName);
+                    iconRef.current.appendChild(iconElement);
+                    window.lucide.createIcons({
+                        attrs: { stroke: color, 'stroke-width': 2, width: size, height: size },
+                        nameAttr: 'data-lucide'
+                    });
+                }
+            }, [name, color, size]);
+            return <span ref={iconRef} className={`inline-flex items-center justify-center ${className}`}></span>;
+        };
+
         const getJournalCol = () => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('journal');
         const getSettingsDoc = () => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('settings');
+        const getDisplayDoc = () => db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('display_state');
+
+        // --- COMPONENTS ---
+
+        function SettingsModal({ tokenPrice, onSave, onClose }) {
+            const [localPrice, setLocalPrice] = useState(tokenPrice.toString().replace('.', ','));
+            return (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-slate-900/20 backdrop-blur-sm">
+                    <div className="glass-card w-full max-w-md rounded-[2.5rem] p-8 flex flex-col shadow-2xl border-white pop-in">
+                        <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
+                            <Icon name="Settings" color="#f97316" /> Einstellungen
+                        </h2>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Markenwert (€)</label>
+                            <input 
+                                type="text" 
+                                value={localPrice}
+                                onChange={(e) => setLocalPrice(e.target.value)}
+                                className="w-full bg-slate-50 p-4 rounded-2xl text-2xl font-black outline-none border-2 border-transparent focus:border-orange-400 transition-all text-orange-600"
+                            />
+                        </div>
+                        <div className="mt-8 flex gap-3">
+                            <button onClick={onClose} className="flex-1 py-4 bg-slate-100 rounded-2xl font-bold text-slate-500 apple-button">Abbrechen</button>
+                            <button onClick={() => onSave(parseFloat(localPrice.replace(',', '.')))} className="flex-1 py-4 bg-orange-500 text-white rounded-2xl font-bold shadow-lg apple-button">Speichern</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function JournalModal({ journal, onDelete, onClose }) {
+            const stats = useMemo(() => {
+                let sales = 0, revenue = 0;
+                journal.forEach(item => { 
+                    sales += Number(item.quantity) || 0; 
+                    revenue += Number(item.amount) || 0; 
+                });
+                return { sales, revenue };
+            }, [journal]);
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/20 backdrop-blur-sm">
+                    <div className="glass-card w-full max-w-4xl max-h-[85vh] rounded-[2.5rem] flex flex-col overflow-hidden shadow-2xl border-white pop-in">
+                        <div className="flex justify-between items-center p-8 border-b border-orange-50 bg-white/50">
+                            <h2 className="text-3xl font-bold tracking-tight text-slate-800">Journal</h2>
+                            <button onClick={onClose} className="p-3 bg-slate-100 rounded-full apple-button"><Icon name="X" color="#64748b" /></button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-6 p-8 bg-slate-50/30">
+                            <div className="glass-card p-6 rounded-3xl text-center bg-white border-white">
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Marken Gesamt</p>
+                                <p className="text-4xl font-black text-slate-800">{stats.sales}</p>
+                            </div>
+                            <div className="glass-card p-6 rounded-3xl text-center bg-white border-white">
+                                <p className="text-xs font-bold text-orange-500 uppercase tracking-widest">Kassenstand</p>
+                                <p className="text-4xl font-black text-orange-500">{formatCurrency(stats.revenue)}</p>
+                            </div>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-8 pt-0">
+                            <table className="w-full">
+                                <thead className="sticky top-0 bg-white/95 text-xs font-bold text-slate-400 uppercase tracking-tighter z-10">
+                                    <tr>
+                                        <th className="py-4 text-left">Zeit</th>
+                                        <th className="py-4 text-left">Typ</th>
+                                        <th className="py-4 text-right">Menge</th>
+                                        <th className="py-4 text-right">Summe</th>
+                                        <th className="py-4 text-right">Aktion</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {journal.map(item => (
+                                        <tr key={item.id} className="group">
+                                            <td className="py-5 font-medium text-slate-500">{new Date(item.timestamp).toLocaleTimeString()}</td>
+                                            <td className="py-5">
+                                                <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold ${item.type === 'sale' ? 'bg-orange-50 text-orange-600' : 'bg-rose-50 text-rose-600'}`}>
+                                                    {item.type === 'sale' ? 'VERKAUF' : 'RETOURE'}
+                                                </span>
+                                            </td>
+                                            <td className="py-5 text-right font-semibold">{item.quantity}</td>
+                                            <td className="py-5 text-right font-black">{formatCurrency(item.amount)}</td>
+                                            <td className="py-5 text-right">
+                                                <button onClick={() => onDelete(item.id)} className="text-slate-200 hover:text-rose-500 p-2 transition-colors"><Icon name="Trash2" size={16} /></button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
 
         // --- CASHIER APP ---
+
         function CashierApp() {
             const [user, setUser] = useState(null);
+            const [tokenPrice, setTokenPrice] = useState(0.50);
             const [quantity, setQuantity] = useState(0);
             const [givenCashStr, setGivenCashStr] = useState("");
-            const [tokenPrice, setTokenPrice] = useState(0.5);
-            
-            useEffect(() => {
-                const init = async () => {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await auth.signInWithCustomToken(__initial_auth_token);
-                    else await auth.signInAnonymously();
-                };
-                init();
-                auth.onAuthStateChanged(setUser);
-                getSettingsDoc().onSnapshot(d => d.exists && setTokenPrice(d.data().tokenPrice));
-            }, []);
+            const [journal, setJournal] = useState([]);
+            const [showJournal, setShowJournal] = useState(false);
+            const [showSettings, setShowSettings] = useState(false);
+            const autoResetTimer = useRef(null);
 
-            const total = quantity * tokenPrice;
-            const given = parseFloat(givenCashStr.replace(',', '.')) || 0;
-            const change = Math.max(0, given - total);
+            useEffect(() => {
+                const initAuth = async () => {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await auth.signInWithCustomToken(__initial_auth_token);
+                    } else {
+                        await auth.signInAnonymously();
+                    }
+                };
+                initAuth();
+                const unsubscribe = auth.onAuthStateChanged(setUser);
+                return () => unsubscribe();
+            }, []);
 
             useEffect(() => {
                 if (!user) return;
-                getDisplayDoc().set({
-                    quantity, total, given, 
-                    status: quantity > 0 ? 'active' : 'idle',
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
+                const unsubJournal = getJournalCol().onSnapshot((snapshot) => {
+                    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setJournal(data.sort((a, b) => (b.timestamp || "").localeCompare(a.timestamp || "")));
+                });
+                const unsubSettings = getSettingsDoc().onSnapshot((doc) => {
+                    if (doc.exists && doc.data().tokenPrice) setTokenPrice(doc.data().tokenPrice);
+                });
+                return () => { unsubJournal(); unsubSettings(); };
+            }, [user]);
+
+            const total = quantity * tokenPrice;
+            const given = parseFloat(givenCashStr.replace(',', '.')) || 0;
+            const change = given > 0 ? Math.max(0, given - total) : 0;
+
+            useEffect(() => {
+                if (!user || quantity < 0) return;
+                const sync = async () => {
+                    try {
+                        if (autoResetTimer.current) clearTimeout(autoResetTimer.current);
+                        await getDisplayDoc().set({
+                            quantity, 
+                            total, 
+                            given, 
+                            status: quantity > 0 ? 'active' : 'idle',
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true });
+                    } catch (e) { console.error("Sync error:", e); }
+                };
+                sync();
             }, [quantity, total, given, user]);
 
-            const handleCheckout = async (type) => {
-                if (quantity === 0) return;
-                const entry = { type, quantity: type === 'sale' ? quantity : -quantity, amount: type === 'sale' ? total : -total, timestamp: new Date().toISOString() };
-                await getJournalCol().add(entry);
-                await getDisplayDoc().set({ 
-                    status: 'success', type, quantity, total, change, given: given || total,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                setQuantity(0); setGivenCashStr("");
-                // Langer Reset (20 Sek), damit Animation nicht unterbrochen wird
-                setTimeout(() => getDisplayDoc().update({ status: 'idle' }), 20000);
+            const handleCheckout = async (type = 'sale') => {
+                if (!user || quantity === 0) return;
+                
+                const amount = type === 'sale' ? total : -total;
+                const qty = type === 'sale' ? quantity : -quantity;
+                const entry = { type, quantity: qty, amount, timestamp: new Date().toISOString() };
+
+                try {
+                    await getJournalCol().add(entry);
+                    await getDisplayDoc().set({ 
+                        status: 'success', 
+                        type: type,
+                        quantity: quantity,
+                        total: total,
+                        change: type === 'sale' ? change : 0, 
+                        given: given > 0 ? given : total,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    setQuantity(0); 
+                    setGivenCashStr("");
+
+                    if (autoResetTimer.current) clearTimeout(autoResetTimer.current);
+                    autoResetTimer.current = setTimeout(async () => {
+                        await getDisplayDoc().set({ status: 'idle', quantity: 0, total: 0, given: 0 });
+                    }, 12000); 
+
+                } catch (e) { console.error("Checkout error:", e); }
             };
 
             return (
-                <div className="h-screen flex flex-col p-6 gap-6 relative">
-                    <div className="sun-ray"></div>
-                    <header className="flex justify-between items-center z-10">
+                <div className="h-screen w-screen p-4 md:p-8 flex flex-col gap-4 overflow-hidden relative">
+                    <header className="flex justify-between items-center px-4 shrink-0 z-10">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center shadow-lg"><Icon name="Sun" color="white" size={20} /></div>
-                            <h1 className="text-lg font-black text-slate-800">Kasse</h1>
+                            <div className="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-200 floating">
+                                <Icon name="Sun" color="white" size={24} />
+                            </div>
+                            <div>
+                                <h1 className="text-xl font-black tracking-tight text-slate-800 leading-none">Sommer-Kasse</h1>
+                                <span className="text-[10px] font-bold text-orange-400 uppercase tracking-widest">Markenverkauf</span>
+                            </div>
+                        </div>
+                        <div className="flex gap-2">
+                            <button onClick={() => window.open(window.location.href + (window.location.search ? '&view=customer' : '?view=customer'), '_blank')} className="glass-card p-3 rounded-xl apple-button hover:bg-white text-blue-500"><Icon name="ScreenShare" size={18} /></button>
+                            <button onClick={() => setShowJournal(true)} className="glass-card p-3 rounded-xl apple-button hover:bg-white text-orange-500"><Icon name="History" size={18} /></button>
+                            <button onClick={() => setShowSettings(true)} className="glass-card p-3 rounded-xl apple-button hover:bg-white text-slate-400"><Icon name="Settings" size={18} /></button>
                         </div>
                     </header>
-                    <main className="flex-1 grid grid-cols-12 gap-6 z-10">
-                        <div className="col-span-7 glass-card rounded-[2.5rem] p-10 flex flex-col items-center justify-center">
-                            <div className="text-[8rem] font-black leading-none">{quantity}</div>
-                            <div className="text-4xl font-bold text-orange-500 mb-10">{formatCurrency(total)}</div>
-                            <div className="flex gap-4">
-                                <button onClick={() => setQuantity(q => Math.max(0, q-1))} className="w-16 h-16 glass-card rounded-full flex items-center justify-center apple-button"><Icon name="Minus" color="#f97316" /></button>
-                                <button onClick={() => setQuantity(q => q+1)} className="w-16 h-16 bg-orange-500 text-white rounded-full flex items-center justify-center apple-button shadow-lg"><Icon name="Plus" /></button>
+
+                    <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0 z-10">
+                        <section className="lg:col-span-7 glass-card rounded-[3rem] p-8 flex flex-col items-center justify-center relative bg-white/40 border-white shadow-xl overflow-hidden">
+                            <div className="sun-ray opacity-10"></div>
+                            <div className="text-center z-10">
+                                <div className="text-[10rem] font-black tracking-tighter leading-none mb-2 tabular-nums text-slate-900 drop-shadow-sm">{quantity}</div>
+                                <p className="text-sm font-bold text-slate-300 uppercase tracking-[0.6em] mb-12">Wertmarken</p>
+                                
+                                <div className="flex gap-6 items-center mb-12">
+                                    <button onClick={() => setQuantity(q => Math.max(0, q-1))} className="w-20 h-20 glass-card rounded-full flex items-center justify-center apple-button hover:bg-white shadow-md"><Icon name="Minus" color="#f97316" size={32} /></button>
+                                    <div className="glass-card px-12 py-6 rounded-[2rem] bg-white shadow-xl border-white min-w-[240px]"><span className="text-5xl font-black text-orange-500">{formatCurrency(total)}</span></div>
+                                    <button onClick={() => setQuantity(q => q+1)} className="w-20 h-20 bg-orange-500 text-white rounded-full flex items-center justify-center apple-button shadow-2xl shadow-orange-200"><Icon name="Plus" size={32} /></button>
+                                </div>
+
+                                <div className="grid grid-cols-3 gap-4 w-full max-w-sm">
+                                    {[5, 10, 20].map(n => (
+                                        <button key={n} onClick={() => setQuantity(q => q+n)} className="glass-card py-5 rounded-2xl font-black text-lg apple-button hover:bg-slate-900 hover:text-white border-white">+{n}</button>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                        <div className="col-span-5 flex flex-col gap-6">
-                            <div className="glass-card p-6 rounded-3xl grid grid-cols-2 gap-4">
-                                <div><p className="text-[10px] font-bold text-slate-400 uppercase">Gegeben</p><p className="text-2xl font-black">{formatCurrency(given)}</p></div>
-                                <div><p className="text-[10px] font-bold text-green-500 uppercase">Rückgeld</p><p className="text-2xl font-black text-green-500">{formatCurrency(change)}</p></div>
+                        </section>
+
+                        <section className="lg:col-span-5 glass-card rounded-[3rem] p-8 flex flex-col shadow-xl bg-white/80 border-white">
+                            <div className="grid grid-cols-2 gap-4 mb-10 shrink-0">
+                                <div className="bg-slate-50/50 p-6 rounded-3xl border border-slate-100">
+                                    <span className="text-[10px] block font-black text-slate-400 uppercase mb-2">Gegeben</span>
+                                    <span className="text-3xl font-black tabular-nums text-slate-700">{formatCurrency(given)}</span>
+                                </div>
+                                <div className="bg-green-50/50 p-6 rounded-3xl border border-green-100">
+                                    <span className="text-[10px] block font-black text-green-600 uppercase mb-2">Rückgeld</span>
+                                    <span className="text-3xl font-black text-green-600 tabular-nums">{formatCurrency(change)}</span>
+                                </div>
                             </div>
-                            <div className="flex-1 grid grid-cols-4 gap-2">
-                                {['1','2','3','C','4','5','6','10€','7','8','9','20€',',','0','+10','50€'].map(k => (
-                                    <button key={k} onClick={() => {
-                                        if(k==='C') setGivenCashStr("");
-                                        else if(k==='+10') setQuantity(q => q+10);
-                                        else if(k.includes('€')) setGivenCashStr(k.replace('€',''));
-                                        else setGivenCashStr(s => s+k);
-                                    }} className="glass-card rounded-2xl font-bold text-xl apple-button">{k}</button>
+
+                            <div className="grid grid-cols-4 gap-3 flex-1 min-h-0">
+                                {['1','2','3','5€','4','5','6','10€','7','8','9','20€',',','0','C','50€'].map((k, idx) => (
+                                    <button key={idx} onClick={() => {
+                                        if (k === 'C') setGivenCashStr("");
+                                        else if (k.includes('€')) setGivenCashStr(k.replace('€',''));
+                                        else setGivenCashStr(s => s + k);
+                                    }} className={`rounded-2xl font-bold text-2xl apple-button transition-all flex items-center justify-center ${k === 'C' ? 'bg-rose-50 text-rose-500' : 'glass-card border-slate-50 shadow-sm hover:shadow-md'}`}>
+                                        {k}
+                                    </button>
                                 ))}
                             </div>
-                            <button onClick={() => handleCheckout('sale')} className="h-24 bg-slate-900 text-white rounded-[2rem] font-black text-2xl apple-button shadow-xl">BEZAHLT</button>
-                        </div>
+
+                            <div className="mt-10 flex gap-4 shrink-0">
+                                <button onClick={() => handleCheckout('return')} disabled={quantity === 0} className="flex-1 bg-rose-50 text-rose-500 py-7 rounded-[2rem] font-bold text-xs apple-button border border-rose-100 disabled:opacity-30 tracking-widest">RETOURE</button>
+                                <button onClick={() => handleCheckout('sale')} disabled={quantity === 0} className="flex-[2] bg-slate-900 text-white py-7 rounded-[2rem] font-black text-2xl apple-button shadow-2xl disabled:opacity-10">BEZAHLT</button>
+                            </div>
+                        </section>
                     </main>
+
+                    {showJournal && <JournalModal journal={journal} onDelete={(id) => getJournalCol().doc(id).delete()} onClose={() => setShowJournal(false)} />}
+                    {showSettings && <SettingsModal tokenPrice={tokenPrice} onSave={(p) => getSettingsDoc().set({tokenPrice: p})} onClose={() => setShowSettings(false)} />}
                 </div>
             );
         }
 
         // --- CUSTOMER VIEW ---
-        function CustomerView() {
-            const [state, setState] = useState({ status: 'idle' });
-            const [particles, setParticles] = useState([]);
+
+        const SuccessScreen = ({ state }) => {
+            const isReturn = state.type === 'return';
+            const [confetti, setConfetti] = useState([]);
 
             useEffect(() => {
-                auth.signInAnonymously();
-                const unsub = getDisplayDoc().onSnapshot(d => d.exists && setState(d.data()));
-                return () => unsub();
-            }, []);
-
-            useEffect(() => {
-                if (state.status === 'success' && state.type !== 'return') {
-                    const p = Array.from({length: 30}).map((_, i) => ({
+                if (!isReturn) {
+                    const newConfetti = Array.from({ length: 40 }).map((_, i) => ({
                         id: i,
-                        x: (Math.random() - 0.5) * 600 + 'px',
-                        y: (Math.random() - 0.5) * 600 + 'px',
-                        color: ['#facc15', '#fb923c', '#22c55e'][Math.floor(Math.random()*3)]
+                        tx: (Math.random() - 0.5) * 600 + 'px',
+                        ty: (Math.random() - 0.5) * 600 + 'px',
+                        color: ['#facc15', '#fb923c', '#fde68a'][Math.floor(Math.random() * 3)]
                     }));
-                    setParticles(p);
-                } else {
-                    setParticles([]);
+                    setConfetti(newConfetti);
                 }
-            }, [state.status]);
+            }, [isReturn]);
 
-            if (state.status === 'success') {
-                return (
-                    <div className="h-screen w-screen flex flex-col items-center justify-center bg-mesh p-10 relative overflow-hidden">
-                        <div className="sun-ray"></div>
-                        {particles.map(p => (
-                            <div key={p.id} className="particle" style={{
-                                '--x': p.x, '--y': p.y, backgroundColor: p.color,
-                                width: '12px', height: '12px', borderRadius: '50%',
-                                left: '50%', top: '50%'
-                            }}></div>
-                        ))}
-                        <div className="success-circle" style={{backgroundColor: state.type === 'return' ? '#ef4444' : '#22c55e'}}>
-                            <svg className="check-icon-svg" viewBox="0 0 50 50">
-                                {state.type === 'return' ? <path d="M15 15L35 35M35 15L15 35" /> : <path d="M10 25L20 35L40 15" />}
-                            </svg>
-                        </div>
-                        <h1 className="text-7xl font-black text-slate-800 mb-4">{state.type === 'return' ? 'Storno' : 'Fertig!'}</h1>
-                        <p className="text-xl text-slate-400 font-semibold mb-12">Viel Spaß beim Sommerfest!</p>
-                        
-                        <div className="flex gap-6 scale-90">
-                            <div className="glass-card p-8 rounded-[2.5rem] text-center min-w-[200px]">
-                                <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Gegeben</p>
-                                <p className="text-3xl font-black">{formatCurrency(state.given)}</p>
+            return (
+                <div className="h-screen w-screen flex flex-col items-center justify-center p-10 bg-mesh overflow-hidden text-center relative">
+                    <div className="sun-ray opacity-30"></div>
+                    
+                    {confetti.map(c => (
+                        <div key={c.id} className="confetti" style={{
+                            '--tx': c.tx, '--ty': c.ty, 
+                            backgroundColor: c.color,
+                            left: '50%', top: '50%'
+                        }}></div>
+                    ))}
+
+                    <div className="success-circle" style={{backgroundColor: isReturn ? '#ef4444' : '#22c55e'}}>
+                        <svg className="check-icon-svg" viewBox="0 0 50 50">
+                            {isReturn ? (
+                                <path d="M15 15L35 35M35 15L15 35" />
+                            ) : (
+                                <path d="M10 25L20 35L40 15" />
+                            )}
+                        </svg>
+                    </div>
+                    
+                    <h1 className="text-7xl font-black text-slate-800 mb-4 tracking-tighter pop-in" style={{animationDelay: '0.4s'}}>
+                        {isReturn ? 'Storno' : 'Vielen Dank!'}
+                    </h1>
+                    <p className="text-2xl text-slate-400 font-medium mb-12 slide-up" style={{animationDelay: '0.7s'}}>
+                        {isReturn ? 'Vorgang rückgängig gemacht.' : 'Viel Spaß beim Sommerfest!'}
+                    </p>
+                    
+                    {!isReturn && (
+                        <div className="flex gap-6 slide-up" style={{animationDelay: '0.9s'}}>
+                            <div className="glass-card p-8 rounded-[2.5rem] border-white shadow-lg bg-white/50 min-w-[200px]">
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Gegeben</p>
+                                <p className="text-3xl font-black text-slate-700">{formatCurrency(state.given)}</p>
                             </div>
                             {state.change > 0 && (
-                                <div className="glass-card p-8 rounded-[2.5rem] text-center min-w-[240px] border-green-200 shadow-xl floating">
-                                    <p className="text-[10px] font-bold text-green-500 uppercase mb-1">Ihr Rückgeld</p>
-                                    <p className="text-5xl font-black text-green-600">{formatCurrency(state.change)}</p>
+                                <div className="glass-card p-8 px-12 rounded-[2.5rem] border-white shadow-2xl bg-white min-w-[240px] floating">
+                                    <p className="text-xs font-bold text-green-500 uppercase tracking-widest mb-1">Rückgeld</p>
+                                    <p className="text-5xl font-black text-green-600 tabular-nums">{formatCurrency(state.change)}</p>
                                 </div>
                             )}
                         </div>
-                    </div>
-                );
+                    )}
+                </div>
+            );
+        };
+
+        function CustomerView() {
+            const [state, setState] = useState({ status: 'idle' });
+            const [user, setUser] = useState(null);
+
+            useEffect(() => {
+                const initAuth = async () => {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await auth.signInWithCustomToken(__initial_auth_token);
+                    } else {
+                        await auth.signInAnonymously();
+                    }
+                };
+                initAuth();
+                const unsubscribe = auth.onAuthStateChanged(setUser);
+                return () => unsubscribe();
+            }, []);
+
+            useEffect(() => {
+                if (!user) return;
+                const unsub = getDisplayDoc().onSnapshot((doc) => {
+                    if (doc.exists) {
+                        setState(doc.data());
+                    }
+                });
+                return () => unsub();
+            }, [user]);
+
+            if (state.status === 'success') {
+                return <SuccessScreen state={state} />;
             }
 
             if (state.status === 'active') {
                 return (
-                    <div className="h-screen w-screen flex flex-col items-center justify-center bg-mesh p-10">
-                        <div className="sun-ray"></div>
-                        <div className="w-full max-w-xl glass-card rounded-[4rem] p-16 text-center shadow-2xl relative z-10">
-                            <span className="text-orange-400 font-bold tracking-[0.3em] uppercase mb-4 block">Aktuelle Bestellung</span>
-                            <div className="text-[12rem] font-black leading-none mb-4 floating">{state.quantity}</div>
-                            <span className="text-2xl font-bold text-slate-300 uppercase tracking-[0.5em] mb-12 block">Wertmarken</span>
-                            <div className="h-px bg-slate-100 w-full mb-10"></div>
-                            <div className="flex justify-around">
-                                <div><p className="text-[10px] font-bold text-slate-400 uppercase">Summe</p><p className="text-4xl font-black">{formatCurrency(state.total)}</p></div>
-                                <div><p className="text-[10px] font-bold text-slate-400 uppercase">Gegeben</p><p className="text-4xl font-black text-blue-500">{state.given ? formatCurrency(state.given) : '—'}</p></div>
+                    <div className="h-screen w-screen flex flex-col items-center justify-center p-10 bg-mesh overflow-hidden relative">
+                        <div className="sun-ray opacity-10"></div>
+                        <div className="w-full max-w-xl glass-card rounded-[4rem] flex flex-col shadow-2xl border-white bg-white/90 p-16 pop-in relative z-10">
+                            <div className="text-center">
+                                <span className="text-xs font-bold text-orange-400 uppercase tracking-[0.5em] mb-4 block">Bestellung</span>
+                                <div className="mb-4 floating">
+                                    <span className="text-[12rem] font-black leading-none text-slate-900 tracking-tighter block">{state.quantity}</span>
+                                </div>
+                                <span className="text-2xl text-slate-300 font-black uppercase tracking-[0.6em] mb-12 block">Wertmarken</span>
+                                
+                                <div className="w-full h-px bg-slate-100 mb-10"></div>
+                                
+                                <div className="grid grid-cols-2 gap-8 w-full">
+                                    <div className="flex flex-col items-center border-r border-slate-100">
+                                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Summe</span>
+                                        <span className="text-4xl font-black text-slate-900 tabular-nums">{formatCurrency(state.total)}</span>
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Gegeben</span>
+                                        <span className="text-4xl font-black text-blue-600 tabular-nums">{state.given > 0 ? formatCurrency(state.given) : "—"}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -327,25 +575,29 @@
             }
 
             return (
-                <div className="h-screen w-screen flex flex-col items-center justify-center bg-mesh relative">
-                    <div className="sun-ray"></div>
-                    <div className="p-12 glass-card rounded-[4rem] mb-12 floating z-10"><Icon name="Sun" size={100} color="#f97316" /></div>
-                    <h1 className="text-8xl font-black text-slate-800 tracking-tighter z-10">Sommerfest</h1>
-                    <p className="text-2xl font-medium tracking-[0.8rem] text-slate-300 uppercase z-10">Kasse bereit</p>
+                <div className="h-screen w-screen bg-mesh flex flex-col items-center justify-center text-center p-10 overflow-hidden relative">
+                    <div className="sun-ray opacity-20"></div>
+                    <div className="mb-10 p-10 glass-card rounded-[4rem] bg-white shadow-2xl floating z-10">
+                        <Icon name="Sun" size={100} color="#f97316" className="md:w-32 md:h-32" />
+                    </div>
+                    <h1 className="text-[8rem] font-black tracking-tighter leading-none text-slate-900 mb-6 pop-in z-10">Sommerfest</h1>
+                    <p className="text-2xl font-medium tracking-[0.8rem] text-slate-300 uppercase slide-up z-10">Willkommen am Stand</p>
                 </div>
             );
         }
 
         function App() {
-            const [v, setV] = useState(null);
+            const [view, setView] = useState(null);
             useEffect(() => {
-                const p = new URLSearchParams(window.location.search);
-                setV(p.get('view') === 'customer' ? 'customer' : 'cashier');
+                const params = new URLSearchParams(window.location.search);
+                setView(params.get('view') === 'customer' ? 'customer' : 'cashier');
             }, []);
-            return v === 'customer' ? <CustomerView /> : v === 'cashier' ? <CashierApp /> : null;
+            if (!view) return null;
+            return view === 'customer' ? <CustomerView /> : <CashierApp />;
         }
 
-        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
 </body>
 </html>
