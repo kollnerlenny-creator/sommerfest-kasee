@@ -128,14 +128,22 @@
                 </div>
             </div>
             
-            <!-- Connection State / Device Badge -->
-            <div id="role-badge-container" class="hidden flex items-center gap-2 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-orange-100 shadow-sm">
-                <span class="relative flex h-2 w-2">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                <span id="role-badge-text" class="text-[10px] font-bold text-slate-600">Verbindung aktiv</span>
-                <button onclick="changeRole()" class="text-[10px] text-orange-500 hover:text-orange-600 font-bold ml-1.5 underline">Rolle wechseln</button>
+            <!-- Connection State / Device Badge & Kopplungs-Code -->
+            <div class="flex items-center gap-2">
+                <!-- Kopplungs-Code Input (Sichert Synchronisation auf mehreren Geräten) -->
+                <div class="flex items-center bg-white/90 border border-orange-100 rounded-xl px-2.5 py-1 shadow-sm">
+                    <span class="text-[9px] font-black text-orange-400 uppercase mr-1.5 tracking-wider"><i class="fa-solid fa-wifi"></i> Kasse-ID:</span>
+                    <input id="sync-room-code" type="text" value="SOMMER-2026" class="bg-transparent border-none text-[10px] font-black text-slate-700 uppercase focus:outline-none w-20 text-center" title="Nutze auf beiden Geräten dieselbe ID für die Live-Sync">
+                </div>
+
+                <div id="role-badge-container" class="hidden flex items-center gap-2 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-orange-100 shadow-sm">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span id="role-badge-text" class="text-[10px] font-bold text-slate-600">Verbindung aktiv</span>
+                    <button onclick="changeRole()" class="text-[10px] text-orange-500 hover:text-orange-600 font-bold ml-1.5 underline">Rolle wechseln</button>
+                </div>
             </div>
         </header>
 
@@ -573,9 +581,17 @@
         };
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'sommerfest-buffet-pos';
-        const rawFirebaseConfig = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+        const firebaseConfig = {
+  apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
+  authDomain: "sommerfest-kasse.firebaseapp.com",
+  projectId: "sommerfest-kasse",
+  storageBucket: "sommerfest-kasse.firebasestorage.app",
+  messagingSenderId: "899854905140",
+  appId: "1:899854905140:web:94be886a048356c7fb3f61"
+};
         
         let db, auth;
+        let isConfigured = false;
 
         async function initFirebase() {
             try {
@@ -587,14 +603,7 @@
                     return;
                 }
 
-                const firebaseConfig = {
-  apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
-  authDomain: "sommerfest-kasse.firebaseapp.com",
-  projectId: "sommerfest-kasse",
-  storageBucket: "sommerfest-kasse.firebasestorage.app",
-  messagingSenderId: "899854905140",
-  appId: "1:899854905140:web:94be886a048356c7fb3f61"
-};
+                const firebaseConfig = JSON.parse(rawFirebaseConfig);
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
@@ -622,34 +631,54 @@
             }
         }
 
+        function getTargetDocRef() {
+            // Get custom Pairing-Code from input (guarantees devices sync to exact same record)
+            const syncCode = (document.getElementById('sync-room-code').value || 'SOMMER-2026').trim().toUpperCase();
+            return doc(db, 'artifacts', appId, 'public', 'data', 'pos_sync', `state_${syncCode}`);
+        }
+
         function setupFirebaseSync() {
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'pos_sync', 'live_state');
-            
-            onSnapshot(docRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    
-                    // For both roles we keep the salesHistory in sync so we can render statistics
-                    window.appState.salesHistory = data.salesHistory || [];
-                    window.appState.tariffs = data.tariffs || window.appState.tariffs;
-                    
-                    if (window.appState.role === 'customer') {
-                        window.appState.cart = data.cart || [];
-                        window.appState.total = data.total || 0;
-                        window.appState.paid = data.paid || 0;
-                        window.appState.change = data.change || 0;
-                        window.appState.givenCash = data.givenCash || '';
-                        updateCustomerUI();
-                    } else if (window.appState.role === 'seller') {
-                        updateSellerUI();
+            let unsubscribe = null;
+
+            const startSync = () => {
+                if (unsubscribe) unsubscribe();
+                
+                const docRef = getTargetDocRef();
+                unsubscribe = onSnapshot(docRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        
+                        // For both roles we keep the salesHistory in sync so we can render statistics
+                        window.appState.salesHistory = data.salesHistory || [];
+                        window.appState.tariffs = data.tariffs || window.appState.tariffs;
+                        
+                        if (window.appState.role === 'customer') {
+                            window.appState.cart = data.cart || [];
+                            window.appState.total = data.total || 0;
+                            window.appState.paid = data.paid || 0;
+                            window.appState.change = data.change || 0;
+                            window.appState.givenCash = data.givenCash || '';
+                            updateCustomerUI();
+                        } else if (window.appState.role === 'seller') {
+                            updateSellerUI();
+                        }
                     }
-                }
-            }, (error) => {
-                console.error("Firestore Listen Error:", error);
+                }, (error) => {
+                    console.error("Firestore Listen Error:", error);
+                });
+            };
+
+            startSync();
+
+            // Setup listeners on room code input change to re-trigger sync instantly
+            document.getElementById('sync-room-code').addEventListener('input', () => {
+                startSync();
+                showToast('Kassen-Verbindung aktualisiert!', 'info');
             });
             
             window.syncToFirebase = async () => {
                 if (!auth.currentUser) return;
+                const docRef = getTargetDocRef();
                 try {
                     await setDoc(docRef, {
                         cart: window.appState.cart,
@@ -667,6 +696,7 @@
             };
 
             // Initial load of tariffs and sales history
+            const docRef = getTargetDocRef();
             getDoc(docRef).then((docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
@@ -1183,6 +1213,7 @@
         }
 
         // BIND CORE ACTIONS TO WINDOW OBJECT FOR HTML INTERACTION (Rule 3)
+        // This ensures the modules functions are globally accessible by touch events
         window.selectRole = selectRole;
         window.changeRole = changeRole;
         window.addToCart = addToCart;
