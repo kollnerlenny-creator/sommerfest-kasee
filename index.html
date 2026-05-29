@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sommerfest Buffet - Bezahlsystem & Ess-Zone</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,6 +16,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            touch-action: manipulation; /* Optimiert Touch-Reaktionszeiten */
         }
         .font-summer {
             font-family: 'Fredoka', sans-serif;
@@ -89,6 +90,12 @@
             animation: wave 10s linear infinite reverse;
             transform-origin: bottom;
         }
+
+        /* Vergrößerte Touch-Flächen für das iPad */
+        button {
+            min-height: 44px;
+            user-select: none;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-amber-50 via-orange-50 to-sky-50 min-h-screen text-slate-800 flex flex-col antialiased selection:bg-orange-200">
@@ -119,9 +126,9 @@
                     <div class="flex items-center gap-2 flex-wrap">
                         <h1 class="font-summer text-xl md:text-2xl font-bold bg-gradient-to-r from-orange-600 to-amber-500 bg-clip-text text-transparent leading-none">Ess-Zone Buffet</h1>
                         <!-- Live Personen-Zähler Badge -->
-                        <div class="bg-gradient-to-r from-sky-400 to-blue-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm shrink-0">
-                            <i class="fa-solid fa-users text-[9px]"></i>
-                            <span id="header-guests-count" class="font-black">0</span> in der Zone
+                        <div class="bg-gradient-to-r from-sky-400 to-blue-500 text-white text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-sm shrink-0">
+                            <i class="fa-solid fa-users text-[10px]"></i>
+                            <span id="header-guests-count" class="font-black text-xs">0</span> in der Zone
                         </div>
                     </div>
                     <p class="text-[9px] text-slate-400 font-bold tracking-wider uppercase mt-0.5">Sommerfest Bezahlsystem</p>
@@ -130,10 +137,10 @@
             
             <!-- Connection State / Device Badge & Kopplungs-Code -->
             <div class="flex items-center gap-2">
-                <!-- Kopplungs-Code Input (Sichert Synchronisation auf mehreren Geräten) -->
-                <div class="flex items-center bg-white/90 border border-orange-100 rounded-xl px-2.5 py-1 shadow-sm">
+                <!-- Kopplungs-Code Input -->
+                <div class="flex items-center bg-white/90 border border-orange-100 rounded-xl px-3 py-1.5 shadow-sm">
                     <span class="text-[9px] font-black text-orange-400 uppercase mr-1.5 tracking-wider"><i class="fa-solid fa-wifi"></i> Kasse-ID:</span>
-                    <input id="sync-room-code" type="text" value="SOMMER-2026" class="bg-transparent border-none text-[10px] font-black text-slate-700 uppercase focus:outline-none w-20 text-center" title="Nutze auf beiden Geräten dieselbe ID für die Live-Sync">
+                    <input id="sync-room-code" type="text" value="SOMMER-2026" class="bg-transparent border-none text-[11px] font-black text-slate-700 uppercase focus:outline-none w-24 text-center" title="Nutze auf beiden Geräten dieselbe ID für die Live-Sync">
                 </div>
 
                 <div id="role-badge-container" class="hidden flex items-center gap-2 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-orange-100 shadow-sm">
@@ -198,10 +205,10 @@
                     <!-- Stats & Config Actions -->
                     <div class="flex items-center gap-2">
                         <!-- Revenue / Profit Stats Trigger -->
-                        <button onclick="openHistoryModal()" class="bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white px-2.5 py-1 rounded-xl text-[10px] font-black flex items-center gap-1.5 transition-all shadow-sm">
+                        <button onclick="openHistoryModal()" class="bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white px-3 py-1.5 rounded-xl text-[11px] font-black flex items-center gap-1.5 transition-all shadow-sm">
                             <i class="fa-solid fa-chart-line"></i> Umsatz: <span id="seller-revenue-badge">0,00 €</span>
                         </button>
-                        <button onclick="openConfigModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-2.5 py-1 rounded-xl text-[10px] font-bold flex items-center gap-1 transition-all">
+                        <button onclick="openConfigModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-2.5 py-1.5 rounded-xl text-[10px] font-bold flex items-center gap-1 transition-all">
                             <i class="fa-solid fa-cog"></i> Anpassen
                         </button>
                     </div>
@@ -224,9 +231,9 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-1.5">
-                        <input id="input-custom-price" type="number" step="0.50" placeholder="0.00" class="bg-white border border-slate-200 px-2 py-1 rounded-lg text-right font-bold text-slate-700 w-16 text-xs focus:outline-none focus:ring-1 focus:ring-orange-400">
+                        <input id="input-custom-price" type="number" step="0.50" placeholder="0.00" class="bg-white border border-slate-200 px-2 py-1.5 rounded-lg text-right font-bold text-slate-700 w-20 text-xs focus:outline-none focus:ring-1 focus:ring-orange-400">
                         <span class="font-bold text-xs text-slate-400">€</span>
-                        <button onclick="addCustomPrice()" class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-3 py-1 rounded-lg font-bold text-xs transition-all shadow-sm">
+                        <button onclick="addCustomPrice()" class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-3.5 py-1.5 rounded-lg font-bold text-xs transition-all shadow-sm">
                             +
                         </button>
                     </div>
@@ -241,8 +248,8 @@
                         <h3 class="font-summer text-xs font-bold text-slate-700 flex items-center gap-1">
                             <i class="fa-solid fa-shopping-basket text-orange-500"></i> Bestellung
                         </h3>
-                        <button onclick="clearCart()" class="text-[9px] text-red-500 hover:text-red-600 font-bold flex items-center gap-0.5">
-                            <i class="fa-solid fa-trash-can text-[9px]"></i> Zurücksetzen
+                        <button onclick="clearCart()" class="text-[10px] text-red-500 hover:text-red-600 font-bold flex items-center gap-0.5">
+                            <i class="fa-solid fa-trash-can text-[10px]"></i> Leeren
                         </button>
                     </div>
 
@@ -253,7 +260,7 @@
 
                     <!-- Cart Total display -->
                     <div class="border-t border-slate-100 pt-1.5 mt-1.5 flex items-center justify-between shrink-0">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Gesamt:</span>
+                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Gesamt:</span>
                         <span id="seller-total-price" class="font-summer text-xl font-extrabold text-orange-600">0.00 €</span>
                     </div>
                 </div>
@@ -263,51 +270,51 @@
                     <!-- Given Cash Display -->
                     <div class="grid grid-cols-2 gap-2 bg-slate-50 p-2 rounded-xl border border-slate-100">
                         <div>
-                            <span class="text-[9px] font-bold text-slate-400 uppercase block leading-none mb-0.5">Gegeben:</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block leading-none mb-0.5">Gegeben:</span>
                             <div class="flex items-baseline gap-0.5">
-                                <span id="display-given-cash" class="font-mono text-base font-extrabold text-slate-700">0,00</span>
-                                <span class="text-[10px] font-bold text-slate-400">€</span>
+                                <span id="display-given-cash" class="font-mono text-lg font-extrabold text-slate-700">0,00</span>
+                                <span class="text-xs font-bold text-slate-400">€</span>
                             </div>
                         </div>
                         <div class="text-right border-l border-slate-200/60 pl-2">
-                            <span class="text-[9px] font-bold text-slate-400 uppercase block leading-none mb-0.5">Rückgeld:</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block leading-none mb-0.5">Rückgeld:</span>
                             <div class="flex items-baseline justify-end gap-0.5">
-                                <span id="display-change" class="font-mono text-lg font-black text-emerald-600">0,00</span>
-                                <span class="text-[10px] font-bold text-emerald-600">€</span>
+                                <span id="display-change" class="font-mono text-xl font-black text-emerald-600">0,00</span>
+                                <span class="text-xs font-bold text-emerald-600">€</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Quick Cash Selector Buttons -->
-                    <div class="grid grid-cols-4 gap-1">
-                        <button onclick="setQuickCash(5)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-[11px] transition-all border border-slate-200">5 €</button>
-                        <button onclick="setQuickCash(10)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-[11px] transition-all border border-slate-200">10 €</button>
-                        <button onclick="setQuickCash(20)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-[11px] transition-all border border-slate-200">20 €</button>
-                        <button onclick="setQuickCash(50)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-[11px] transition-all border border-slate-200">50 €</button>
+                    <!-- Quick Cash Selector Buttons (Vergrößert für Finger) -->
+                    <div class="grid grid-cols-4 gap-1.5">
+                        <button onclick="setQuickCash(5)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-2 rounded-lg text-xs transition-all border border-slate-200">5 €</button>
+                        <button onclick="setQuickCash(10)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-2 rounded-lg text-xs transition-all border border-slate-200">10 €</button>
+                        <button onclick="setQuickCash(20)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-2 rounded-lg text-xs transition-all border border-slate-200">20 €</button>
+                        <button onclick="setQuickCash(50)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-2 rounded-lg text-xs transition-all border border-slate-200">50 €</button>
                     </div>
 
-                    <!-- Numpad Grid (Extrem kompakt für iPad-Bildschirme) -->
-                    <div class="grid grid-cols-3 gap-1">
-                        <button onclick="pressNumpad('7')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-sm transition-all border border-slate-100">7</button>
-                        <button onclick="pressNumpad('8')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-sm transition-all border border-slate-100">8</button>
-                        <button onclick="pressNumpad('9')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-sm transition-all border border-slate-100">9</button>
+                    <!-- Numpad Grid (Extrem haptisch und kontrastreich für das iPad) -->
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button onclick="pressNumpad('7')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">7</button>
+                        <button onclick="pressNumpad('8')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">8</button>
+                        <button onclick="pressNumpad('9')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">9</button>
                         
-                        <button onclick="pressNumpad('4')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-sm transition-all border border-slate-100">4</button>
-                        <button onclick="pressNumpad('5')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-sm transition-all border border-slate-100">5</button>
-                        <button onclick="pressNumpad('6')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-sm transition-all border border-slate-100">6</button>
+                        <button onclick="pressNumpad('4')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">4</button>
+                        <button onclick="pressNumpad('5')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">5</button>
+                        <button onclick="pressNumpad('6')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">6</button>
                         
-                        <button onclick="pressNumpad('1')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-sm transition-all border border-slate-100">1</button>
-                        <button onclick="pressNumpad('2')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-sm transition-all border border-slate-100">2</button>
-                        <button onclick="pressNumpad('3')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-sm transition-all border border-slate-100">3</button>
+                        <button onclick="pressNumpad('1')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">1</button>
+                        <button onclick="pressNumpad('2')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">2</button>
+                        <button onclick="pressNumpad('3')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">3</button>
                         
-                        <button onclick="pressNumpad('C')" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold py-1.5 rounded-lg text-[10px] transition-all border border-red-100">C</button>
-                        <button onclick="pressNumpad('0')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-sm transition-all border border-slate-100">0</button>
-                        <button onclick="pressNumpad('.')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-sm transition-all border border-slate-100">,</button>
+                        <button onclick="pressNumpad('C')" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 rounded-lg text-xs transition-all border border-red-100">C</button>
+                        <button onclick="pressNumpad('0')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">0</button>
+                        <button onclick="pressNumpad('.')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">,</button>
                     </div>
 
                     <!-- Complete Payment button -->
-                    <button onclick="completeSale()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-98 text-white py-2 rounded-xl font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-1">
-                        <i class="fa-solid fa-circle-check"></i> Verkauf abschließen
+                    <button onclick="completeSale()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-98 text-white py-2.5 rounded-xl font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-circle-check text-sm"></i> Verkauf abschließen
                     </button>
                 </div>
             </div>
@@ -319,8 +326,8 @@
             <!-- SCREENSAVER OVERLAY (True Fullscreen sommerlicher Ruhezustand) -->
             <div id="customer-screensaver" class="fixed inset-0 bg-gradient-to-br from-amber-400 via-orange-400 to-sky-300 overflow-hidden flex flex-col justify-between p-6 md:p-12 text-white transition-all duration-500 z-50">
                 <!-- Exit button to escape screensaver gracefully -->
-                <button onclick="changeRole()" class="absolute top-4 right-4 z-[60] bg-white/10 hover:bg-white/20 active:scale-95 text-white/90 hover:text-white px-3 py-1.5 rounded-xl text-[10px] font-bold border border-white/20 transition-all flex items-center gap-1 shadow-sm">
-                    <i class="fa-solid fa-arrow-left"></i> Beenden
+                <button onclick="changeRole()" class="absolute top-4 right-4 z-[60] bg-white/20 hover:bg-white/30 active:scale-95 text-white/95 hover:text-white px-4 py-2 rounded-xl text-xs font-bold border border-white/30 transition-all flex items-center gap-1.5 shadow-md">
+                    <i class="fa-solid fa-arrow-left"></i> Beenden / Rolle wechseln
                 </button>
 
                 <!-- Floating Icons in Background -->
@@ -356,9 +363,9 @@
                     </p>
 
                     <!-- Stamp Callout Badge -->
-                    <div class="bg-orange-600/40 border-2 border-dashed border-white/40 px-5 py-3 rounded-2xl transform -rotate-1 shadow-md max-w-sm backdrop-blur-sm">
+                    <div class="bg-orange-600/40 border-2 border-dashed border-white/40 px-6 py-4 rounded-2xl transform -rotate-1 shadow-md max-w-sm backdrop-blur-sm">
                         <span class="text-xs font-bold block text-amber-200">ℹ️ ZUTRITT NUR MIT STEMPEL:</span>
-                        <p class="text-[11px] font-black tracking-wide mt-0.5 text-white">Hier bezahlen &amp; direkt Einlassstempel abholen!</p>
+                        <p class="text-xs font-black tracking-wide mt-1 text-white uppercase">Hier bezahlen &amp; direkt Einlassstempel abholen!</p>
                     </div>
                 </div>
 
@@ -402,22 +409,22 @@
                     <div class="bg-gradient-to-tr from-orange-500 to-amber-400 text-white p-4 rounded-3xl shadow-md flex flex-col justify-between min-h-[100px] md:min-h-[120px] relative overflow-hidden">
                         <div class="absolute -right-12 -top-12 w-24 h-24 bg-white/10 rounded-full"></div>
                         <div>
-                            <span class="text-[9px] font-bold uppercase tracking-widest text-orange-100">Zu zahlen</span>
-                            <h2 class="font-summer text-2xl md:text-3xl font-black mt-0.5" id="customer-total-price">0.00 €</h2>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-orange-100">Zu zahlen</span>
+                            <h2 class="font-summer text-3xl md:text-4xl font-black mt-0.5" id="customer-total-price">0.00 €</h2>
                         </div>
                         <div class="flex items-center gap-1 mt-1.5 text-[9px] bg-white/20 px-2.5 py-0.5 rounded-lg backdrop-blur-sm self-start font-bold">
                             <i class="fa-solid fa-shield-halved text-[8px]"></i> All-You-Can-Eat Flatrate
                         </div>
                     </div>
 
-                    <!-- Live Money calculations -->
+                    <!-- Live Money calculations (Große Touch-Zahlen!) -->
                     <div class="bg-white p-4 rounded-3xl shadow-lg border border-orange-100 flex-grow flex flex-col justify-center gap-3">
                         <!-- Paid -->
                         <div>
-                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Gegebenes Bargeld:</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Gegebenes Bargeld:</span>
                             <div class="flex items-baseline gap-1">
-                                <span class="font-mono text-xl md:text-2xl font-extrabold text-slate-700" id="customer-given">0,00</span>
-                                <span class="text-xs font-bold text-slate-400">€</span>
+                                <span class="font-mono text-2xl md:text-3xl font-extrabold text-slate-700" id="customer-given">0,00</span>
+                                <span class="text-sm font-bold text-slate-400">€</span>
                             </div>
                         </div>
 
@@ -426,15 +433,15 @@
 
                         <!-- Change -->
                         <div>
-                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Dein Rückgeld:</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Dein Rückgeld:</span>
                             <div class="flex items-baseline gap-1">
-                                <span class="font-mono text-2xl md:text-3xl font-black text-emerald-600" id="customer-change">0,00</span>
-                                <span class="text-sm font-bold text-emerald-600">€</span>
+                                <span class="font-mono text-3xl md:text-4xl font-black text-emerald-600 animate-pulse-soft" id="customer-change">0,00</span>
+                                <span class="text-base font-bold text-emerald-600">€</span>
                             </div>
                         </div>
 
                         <!-- Summer status sticker -->
-                        <div id="customer-status-banner" class="mt-1 p-2 rounded-xl text-center font-bold text-[10px] flex items-center justify-center gap-1.5">
+                        <div id="customer-status-banner" class="mt-1 p-2.5 rounded-xl text-center font-bold text-[10px] flex items-center justify-center gap-1.5">
                             <!-- Injected banner message -->
                         </div>
                     </div>
@@ -581,17 +588,19 @@
         };
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'sommerfest-buffet-pos';
-        const firebaseConfig = {
-  apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
-  authDomain: "sommerfest-kasse.firebaseapp.com",
-  projectId: "sommerfest-kasse",
-  storageBucket: "sommerfest-kasse.firebasestorage.app",
-  messagingSenderId: "899854905140",
-  appId: "1:899854905140:web:94be886a048356c7fb3f61"
-};
+        const rawFirebaseConfig = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
         
         let db, auth;
-        let isConfigured = false;
+        let unsubscribeSync = null;
+
+        // Offline Fallback by default
+        window.syncToFirebase = async () => {
+            if (window.appState.role === 'customer') {
+                updateCustomerUI();
+            } else if (window.appState.role === 'seller') {
+                updateSellerUI();
+            }
+        };
 
         async function initFirebase() {
             try {
@@ -599,15 +608,22 @@
                     showToast('Offline-Modus aktiv. Gerätesynchronisation nicht verfügbar.', 'warning');
                     document.getElementById('loading-overlay').classList.add('opacity-0');
                     setTimeout(() => document.getElementById('loading-overlay').classList.add('hidden'), 300);
-                    setupStateWatchersOffline();
                     return;
                 }
 
-                const firebaseConfig = JSON.parse(rawFirebaseConfig);
+               const firebaseConfig = {
+  apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
+  authDomain: "sommerfest-kasse.firebaseapp.com",
+  projectId: "sommerfest-kasse",
+  storageBucket: "sommerfest-kasse.firebasestorage.app",
+  messagingSenderId: "899854905140",
+  appId: "1:899854905140:web:94be886a048356c7fb3f61"
+};
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
 
+                // Wait for Auth (Rule 3)
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
@@ -627,28 +643,26 @@
                 showToast('Verbindungsfehler. Offline-Modus gestartet.', 'error');
                 document.getElementById('loading-overlay').classList.add('opacity-0');
                 setTimeout(() => document.getElementById('loading-overlay').classList.add('hidden'), 300);
-                setupStateWatchersOffline();
             }
         }
 
         function getTargetDocRef() {
-            // Get custom Pairing-Code from input (guarantees devices sync to exact same record)
             const syncCode = (document.getElementById('sync-room-code').value || 'SOMMER-2026').trim().toUpperCase();
             return doc(db, 'artifacts', appId, 'public', 'data', 'pos_sync', `state_${syncCode}`);
         }
 
         function setupFirebaseSync() {
-            let unsubscribe = null;
-
             const startSync = () => {
-                if (unsubscribe) unsubscribe();
+                if (unsubscribeSync) {
+                    unsubscribeSync();
+                }
                 
                 const docRef = getTargetDocRef();
-                unsubscribe = onSnapshot(docRef, (docSnap) => {
+                unsubscribeSync = onSnapshot(docRef, (docSnap) => {
                     if (docSnap.exists()) {
                         const data = docSnap.data();
                         
-                        // For both roles we keep the salesHistory in sync so we can render statistics
+                        // Keep statistics in sync
                         window.appState.salesHistory = data.salesHistory || [];
                         window.appState.tariffs = data.tariffs || window.appState.tariffs;
                         
@@ -668,14 +682,36 @@
                 });
             };
 
+            // Start Sync right away
             startSync();
 
             // Setup listeners on room code input change to re-trigger sync instantly
             document.getElementById('sync-room-code').addEventListener('input', () => {
                 startSync();
                 showToast('Kassen-Verbindung aktualisiert!', 'info');
+                
+                // Fetch the existing data of that new room code
+                const docRef = getTargetDocRef();
+                getDoc(docRef).then((docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        if (data.tariffs) window.appState.tariffs = data.tariffs;
+                        if (data.salesHistory) window.appState.salesHistory = data.salesHistory;
+                        if (window.appState.role === 'seller') {
+                            updateSellerUI();
+                        } else if (window.appState.role === 'customer') {
+                            window.appState.cart = data.cart || [];
+                            window.appState.total = data.total || 0;
+                            window.appState.paid = data.paid || 0;
+                            window.appState.change = data.change || 0;
+                            window.appState.givenCash = data.givenCash || '';
+                            updateCustomerUI();
+                        }
+                    }
+                });
             });
             
+            // Override window.syncToFirebase dynamically
             window.syncToFirebase = async () => {
                 if (!auth.currentUser) return;
                 const docRef = getTargetDocRef();
@@ -695,7 +731,7 @@
                 }
             };
 
-            // Initial load of tariffs and sales history
+            // Load initial state
             const docRef = getTargetDocRef();
             getDoc(docRef).then((docSnap) => {
                 if (docSnap.exists()) {
@@ -705,16 +741,6 @@
                     if (window.appState.role === 'seller') updateSellerUI();
                 }
             });
-        }
-
-        function setupStateWatchersOffline() {
-            window.syncToFirebase = () => {
-                if (window.appState.role === 'customer') {
-                    updateCustomerUI();
-                } else if (window.appState.role === 'seller') {
-                    updateSellerUI();
-                }
-            };
         }
 
         window.addEventListener('load', initFirebase);
@@ -742,6 +768,7 @@
         function changeRole() {
             document.getElementById('view-seller').classList.add('hidden');
             document.getElementById('view-customer').classList.add('hidden');
+            document.getElementById('customer-screensaver').classList.add('hidden'); // CRITICAL FIXED: Ensure screensaver is hidden
             document.getElementById('role-badge-container').classList.add('hidden');
             document.getElementById('view-role-selection').classList.remove('hidden');
             window.appState.role = null;
@@ -765,7 +792,7 @@
                 icon = 'fa-triangle-exclamation text-amber-500';
             }
             
-            toast.className = `p-3 rounded-2xl border shadow-md flex items-center gap-2 max-w-xs pointer-events-auto transition-all duration-300 ${bgClass}`;
+            toast.className = `p-3.5 rounded-2xl border shadow-md flex items-center gap-2.5 max-w-xs pointer-events-auto transition-all duration-300 ${bgClass}`;
             toast.innerHTML = `
                 <i class="fa-solid ${icon} text-sm shrink-0"></i>
                 <div class="text-[11px] font-bold">${message}</div>
@@ -1213,7 +1240,6 @@
         }
 
         // BIND CORE ACTIONS TO WINDOW OBJECT FOR HTML INTERACTION (Rule 3)
-        // This ensures the modules functions are globally accessible by touch events
         window.selectRole = selectRole;
         window.changeRole = changeRole;
         window.addToCart = addToCart;
