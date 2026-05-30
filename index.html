@@ -596,7 +596,7 @@
         // 👇 HIER DEINE EIGENE FIREBASE CONFIG EINFÜGEN                👇
         // 👇 (Überschreibe einfach das "null" mit deinem Config-Block) 👇
         
-        const firebaseConfig = {
+       const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
@@ -620,33 +620,60 @@
         let auth = null;
         let unsubscribeSync = null;
 
-        // Fallback: Max 4 Sekunden für Firebase-Ladevorgang, sonst Abbruch in Offline-Modus
+        // Fallback: Max 2 Sekunden für Firebase-Ladevorgang, sonst radikaler Abbruch in Offline-Modus
         const connectionTimeout = setTimeout(() => {
             const overlay = document.getElementById('loading-overlay');
             if (overlay && !overlay.classList.contains('hidden')) {
-                console.warn("Verbindungsaufbau überschritt Zeitlimit. Offline-Modus gestartet.");
-                showToast('Verbindung dauert zu lange. Offline-Modus aktiv.', 'warning');
+                console.warn("Verbindungsaufbau überschritt Zeitlimit. Offline-Modus wird erzwungen.");
+                
+                // Overlay weich ausblenden
                 overlay.classList.add('opacity-0');
                 setTimeout(() => overlay.classList.add('hidden'), 300);
+                
+                // Nutzer informieren
+                showToast('Offline-Modus aktiv. (Keine Cloud-Sync)', 'warning');
+                
+                // Fallback-Funktionen aktivieren
+                setupOfflineFallback();
             }
-        }, 4000);
+        }, 2000);
 
-        // Offline Fallback by default
-        window.syncToFirebase = async () => {
-            if (window.appState.role === 'customer') {
-                updateCustomerUI();
-            } else if (window.appState.role === 'seller') {
-                updateSellerUI();
-            }
-        };
+        // Offline Fallback System (Sorgt dafür, dass das POS bei Netzwerkausfall lokal weiterläuft!)
+        function setupOfflineFallback() {
+            window.syncToFirebase = async () => {
+                if (window.appState.role === 'customer') {
+                    updateCustomerUI();
+                } else if (window.appState.role === 'seller') {
+                    updateSellerUI();
+                }
+            };
+            
+            // Lokale Sync-Listener für Kassen-IDs im Offline-Modus
+            const roomInputs = document.querySelectorAll('.sync-room-code-input');
+            roomInputs.forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const newVal = e.target.value.toUpperCase();
+                    roomInputs.forEach(ri => { ri.value = newVal; });
+                    if (window.appState.role === 'seller') updateSellerUI();
+                    else if (window.appState.role === 'customer') updateCustomerUI();
+                });
+            });
+
+            // Falls die Rolle bereits gewählt wurde, Interfaces aktualisieren
+            if (window.appState.role === 'seller') updateSellerUI();
+            else if (window.appState.role === 'customer') updateCustomerUI();
+        }
 
         async function initFirebase() {
             try {
                 if (!firebaseConfig) {
                     clearTimeout(connectionTimeout);
-                    showToast('Offline-Modus aktiv. Gerätesynchronisation nicht verfügbar.', 'warning');
+                    showToast('Lokaler Offline-Modus aktiv.', 'info');
                     document.getElementById('loading-overlay').classList.add('opacity-0');
-                    setTimeout(() => document.getElementById('loading-overlay').classList.add('hidden'), 300);
+                    setTimeout(() => {
+                        document.getElementById('loading-overlay').classList.add('hidden');
+                        setupOfflineFallback();
+                    }, 300);
                     return;
                 }
 
@@ -675,7 +702,10 @@
                 console.error("Firebase Initialization Error:", err);
                 showToast('Verbindungsfehler. Offline-Modus gestartet.', 'error');
                 document.getElementById('loading-overlay').classList.add('opacity-0');
-                setTimeout(() => document.getElementById('loading-overlay').classList.add('hidden'), 300);
+                setTimeout(() => {
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                    setupOfflineFallback();
+                }, 300);
             }
         }
 
@@ -1026,6 +1056,7 @@
             showToast(`Tarif hinzugefügt: ${tariff.name}`, 'success');
         }
 
+        // ... existing script code remains exact and functional ...
         function changeCartQty(index, dir) {
             const item = window.appState.cart[index];
             item.qty += dir;
