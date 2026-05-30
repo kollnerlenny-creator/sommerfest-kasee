@@ -616,8 +616,20 @@
             console.error("Failed to parse __firebase_config JSON:", e);
         }
         
-        let db, auth;
+        let db = null;
+        let auth = null;
         let unsubscribeSync = null;
+
+        // Fallback: Max 4 Sekunden für Firebase-Ladevorgang, sonst Abbruch in Offline-Modus
+        const connectionTimeout = setTimeout(() => {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay && !overlay.classList.contains('hidden')) {
+                console.warn("Verbindungsaufbau überschritt Zeitlimit. Offline-Modus gestartet.");
+                showToast('Verbindung dauert zu lange. Offline-Modus aktiv.', 'warning');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }, 4000);
 
         // Offline Fallback by default
         window.syncToFirebase = async () => {
@@ -631,6 +643,7 @@
         async function initFirebase() {
             try {
                 if (!firebaseConfig) {
+                    clearTimeout(connectionTimeout);
                     showToast('Offline-Modus aktiv. Gerätesynchronisation nicht verfügbar.', 'warning');
                     document.getElementById('loading-overlay').classList.add('opacity-0');
                     setTimeout(() => document.getElementById('loading-overlay').classList.add('hidden'), 300);
@@ -650,6 +663,7 @@
 
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
+                        clearTimeout(connectionTimeout);
                         document.getElementById('loading-overlay').classList.add('opacity-0');
                         setTimeout(() => document.getElementById('loading-overlay').classList.add('hidden'), 300);
                         setupFirebaseSync();
@@ -657,6 +671,7 @@
                 });
 
             } catch (err) {
+                clearTimeout(connectionTimeout);
                 console.error("Firebase Initialization Error:", err);
                 showToast('Verbindungsfehler. Offline-Modus gestartet.', 'error');
                 document.getElementById('loading-overlay').classList.add('opacity-0');
@@ -675,17 +690,21 @@
         }
 
         function getTargetDocRef() {
+            if (!db) return null; // Guard
             const syncCode = getSyncRoomCodeValue();
             return doc(db, 'artifacts', appId, 'public', 'data', 'pos_sync', `state_${syncCode}`);
         }
 
         function setupFirebaseSync() {
             const startSync = () => {
+                if (!db) return; // Guard
                 if (unsubscribeSync) {
                     unsubscribeSync();
                 }
                 
                 const docRef = getTargetDocRef();
+                if (!docRef) return;
+                
                 unsubscribeSync = onSnapshot(docRef, (docSnap) => {
                     if (docSnap.exists()) {
                         const data = docSnap.data();
@@ -724,37 +743,46 @@
                     const newVal = e.target.value.toUpperCase();
                     roomInputs.forEach(ri => { ri.value = newVal; });
                     
-                    startSync();
-                    showToast('Verbindung geändert!', 'info');
-                    
-                    // Pre-fetch state of new code
-                    const docRef = getTargetDocRef();
-                    getDoc(docRef).then((docSnap) => {
-                        if (docSnap.exists()) {
-                            const data = docSnap.data();
-                            window.appState.lastSyncedData = data;
-                            window.appState.tariffs = data.tariffs || window.appState.tariffs;
-                            window.appState.salesHistory = data.salesHistory || [];
-                            
-                            if (window.appState.role === 'seller') {
-                                updateSellerUI();
-                            } else if (window.appState.role === 'customer') {
-                                window.appState.cart = data.cart || [];
-                                window.appState.total = data.total || 0;
-                                window.appState.paid = data.paid || 0;
-                                window.appState.change = data.change || 0;
-                                window.appState.givenCash = data.givenCash || '';
-                                updateCustomerUI();
-                            }
+                    if (db) {
+                        startSync();
+                        showToast('Verbindung geändert!', 'info');
+                        
+                        // Pre-fetch state of new code
+                        const docRef = getTargetDocRef();
+                        if (docRef) {
+                            getDoc(docRef).then((docSnap) => {
+                                if (docSnap.exists()) {
+                                    const data = docSnap.data();
+                                    window.appState.lastSyncedData = data;
+                                    window.appState.tariffs = data.tariffs || window.appState.tariffs;
+                                    window.appState.salesHistory = data.salesHistory || [];
+                                    
+                                    if (window.appState.role === 'seller') {
+                                        updateSellerUI();
+                                    } else if (window.appState.role === 'customer') {
+                                        window.appState.cart = data.cart || [];
+                                        window.appState.total = data.total || 0;
+                                        window.appState.paid = data.paid || 0;
+                                        window.appState.change = data.change || 0;
+                                        window.appState.givenCash = data.givenCash || '';
+                                        updateCustomerUI();
+                                    }
+                                }
+                            });
                         }
-                    });
+                    } else {
+                        // Offline mode local updates
+                        if (window.appState.role === 'seller') updateSellerUI();
+                        else if (window.appState.role === 'customer') updateCustomerUI();
+                    }
                 });
             });
             
             // Override window.syncToFirebase dynamically (Rule 3)
             window.syncToFirebase = async () => {
-                if (!auth || !auth.currentUser) return;
+                if (!db || !auth || !auth.currentUser) return;
                 const docRef = getTargetDocRef();
+                if (!docRef) return;
                 try {
                     await setDoc(docRef, {
                         cart: window.appState.cart,
@@ -773,15 +801,17 @@
 
             // Load initial state
             const docRef = getTargetDocRef();
-            getDoc(docRef).then((docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    window.appState.lastSyncedData = data;
-                    if (data.tariffs) window.appState.tariffs = data.tariffs;
-                    if (data.salesHistory) window.appState.salesHistory = data.salesHistory;
-                    if (window.appState.role === 'seller') updateSellerUI();
-                }
-            });
+            if (docRef) {
+                getDoc(docRef).then((docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        window.appState.lastSyncedData = data;
+                        if (data.tariffs) window.appState.tariffs = data.tariffs;
+                        if (data.salesHistory) window.appState.salesHistory = data.salesHistory;
+                        if (window.appState.role === 'seller') updateSellerUI();
+                    }
+                });
+            }
         }
 
         window.addEventListener('load', initFirebase);
@@ -833,6 +863,7 @@
 
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
+            if (!container) return;
             const toast = document.createElement('div');
             
             let bgClass = 'bg-white text-slate-800 border-slate-100';
@@ -1320,6 +1351,7 @@
         window.closeConfigModal = closeConfigModal;
         window.addNewTariff = addNewTariff;
         window.deleteTariff = deleteTariff;
+        window.showToast = showToast;
     </script>
 </body>
 </html>
