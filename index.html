@@ -596,7 +596,7 @@
         // 👇 HIER DEINE EIGENE FIREBASE CONFIG EINFÜGEN                👇
         // 👇 (Überschreibe einfach das "null" mit deinem Config-Block) 👇
         
-       const firebaseConfig = {
+        const firebaseConfig = {
   apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
   authDomain: "sommerfest-kasse.firebaseapp.com",
   projectId: "sommerfest-kasse",
@@ -636,7 +636,7 @@
                 // Fallback-Funktionen aktivieren
                 setupOfflineFallback();
             }
-        }, 2000);
+        }, 2500);
 
         // Offline Fallback System (Sorgt dafür, dass das POS bei Netzwerkausfall lokal weiterläuft!)
         function setupOfflineFallback() {
@@ -681,11 +681,16 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
 
-                // Wait for Auth (Rule 3)
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
+                // Wait for Auth (Rule 3) und fange gezielte Fehler ab
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (authError) {
+                    console.error("Auth error:", authError);
+                    showToast('Firebase-Auth-Fehler! Bitte "Anonyme Anmeldung" in der Firebase Console aktivieren!', 'error');
                 }
 
                 onAuthStateChanged(auth, (user) => {
@@ -722,12 +727,15 @@
         function getTargetDocRef() {
             if (!db) return null; // Guard
             const syncCode = getSyncRoomCodeValue();
+            // RULE 1: Strict Paths compliance
             return doc(db, 'artifacts', appId, 'public', 'data', 'pos_sync', `state_${syncCode}`);
         }
 
         function setupFirebaseSync() {
             const startSync = () => {
                 if (!db) return; // Guard
+                if (!auth || !auth.currentUser) return; // RULE 3: Guard firestore operation with Auth check
+                
                 if (unsubscribeSync) {
                     unsubscribeSync();
                 }
@@ -759,6 +767,12 @@
                     }
                 }, (error) => {
                     console.error("Firestore Listen Error:", error);
+                    // Proaktive Fehlermeldung für den User zur Fehlerbehebung
+                    if (error.code === 'permission-denied') {
+                        showToast('Fehlende Rechte! Prüfe deine Firestore Security Rules.', 'error');
+                    } else {
+                        showToast('Firebase-Fehler: ' + error.message, 'error');
+                    }
                 });
             };
 
@@ -775,7 +789,7 @@
                     
                     if (db) {
                         startSync();
-                        showToast('Verbindung geändert!', 'info');
+                        showToast('Kopplungs-ID geändert!', 'info');
                         
                         // Pre-fetch state of new code
                         const docRef = getTargetDocRef();
@@ -798,6 +812,8 @@
                                         updateCustomerUI();
                                     }
                                 }
+                            }).catch(err => {
+                                console.error("Error pre-fetching document:", err);
                             });
                         }
                     } else {
@@ -826,6 +842,11 @@
                     });
                 } catch (e) {
                     console.error("Error updating Firestore state:", e);
+                    if (e.code === 'permission-denied') {
+                        showToast('Firebase-Schreibfehler! Datenbankregeln (Rules) prüfen.', 'error');
+                    } else {
+                        showToast('Schreibfehler: ' + e.message, 'error');
+                    }
                 }
             };
 
@@ -840,6 +861,8 @@
                         if (data.salesHistory) window.appState.salesHistory = data.salesHistory;
                         if (window.appState.role === 'seller') updateSellerUI();
                     }
+                }).catch(err => {
+                    console.error("Error fetching initial state:", err);
                 });
             }
         }
@@ -920,7 +943,7 @@
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'scale-95');
                 setTimeout(() => toast.remove(), 300);
-            }, 2500);
+            }, 3500); // Etwas länger anzeigen für Fehlermeldungen
         }
 
         // SELLER RENDER SYSTEM
@@ -1056,7 +1079,6 @@
             showToast(`Tarif hinzugefügt: ${tariff.name}`, 'success');
         }
 
-        // ... existing script code remains exact and functional ...
         function changeCartQty(index, dir) {
             const item = window.appState.cart[index];
             item.qty += dir;
