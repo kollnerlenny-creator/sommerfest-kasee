@@ -554,13 +554,9 @@
     <!-- NOTIFICATION / TOAST CONTAINER -->
     <div id="toast-container" class="fixed bottom-4 right-4 z-50 pointer-events-none flex flex-col gap-2"></div>
 
-    <!-- Unified Script Module Setup (Binds events cleanly to global window) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Global state setup
+    <!-- Standard script block - evaluated immediately so UI functions are GUARANTEED to exist right away -->
+    <script>
+        // Global state setup (Available immediately)
         window.appState = {
             role: null, // 'seller' or 'customer'
             cart: [],
@@ -574,263 +570,56 @@
                 { id: 't2', name: 'Kinder (unter 7)', price: 0.00, icon: 'fa-child', color: 'bg-emerald-500' },
                 { id: 't3', name: 'Kinder (7-12 Jahre)', price: 7.50, icon: 'fa-child', color: 'bg-sky-500' }
             ],
-            lastSyncedData: null // CRITICAL CACHE: Holds latest received snapshot data
+            lastSyncedData: null
         };
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sommerfest-buffet-pos';
-        
-        // 👇 ========================================================= 👇
-        // 👇 HIER DEINE EIGENE FIREBASE CONFIG EINFÜGEN                👇
-        // 👇 (Überschreibe einfach das "null" mit deinem Config-Block) 👇
-        
-        const firebaseConfig = {
-  apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
-  authDomain: "sommerfest-kasse.firebaseapp.com",
-  projectId: "sommerfest-kasse",
-  storageBucket: "sommerfest-kasse.firebasestorage.app",
-  messagingSenderId: "899854905140",
-  appId: "1:899854905140:web:94be886a048356c7fb3f61"
-};
-        
-        let firebaseConfig = null;
-        try {
-            if (MEINE_FIREBASE_CONFIG) {
-                firebaseConfig = MEINE_FIREBASE_CONFIG; // Nutzt deine eingetragene Config
-            } else {
-                firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        // Fallback Local syncing logic
+        window.syncToFirebase = function() {
+            if (window.appState.role === 'customer') {
+                updateCustomerUI();
+            } else if (window.appState.role === 'seller') {
+                updateSellerUI();
             }
-        } catch (e) {
-            console.error("Failed to parse __firebase_config JSON:", e);
-        }
-        
-        let db = null;
-        let auth = null;
-        let unsubscribeSync = null;
+        };
 
-        // Offline Fallback System (Sorgt dafür, dass das POS bei Netzwerkausfall lokal weiterläuft!)
-        function setupOfflineFallback() {
-            window.syncToFirebase = async () => {
-                if (window.appState.role === 'customer') {
-                    updateCustomerUI();
-                } else if (window.appState.role === 'seller') {
-                    updateSellerUI();
-                }
-            };
+        // UI NOTIFICATION SYSTEM (Immediate availability)
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
             
-            // Lokale Sync-Listener für Kassen-IDs im Offline-Modus
-            const roomInputs = document.querySelectorAll('.sync-room-code-input');
-            roomInputs.forEach(input => {
-                input.addEventListener('input', (e) => {
-                    const newVal = e.target.value.toUpperCase();
-                    roomInputs.forEach(ri => { ri.value = newVal; });
-                    if (window.appState.role === 'seller') updateSellerUI();
-                    else if (window.appState.role === 'customer') updateCustomerUI();
-                });
-            });
-
-            // Falls die Rolle bereits gewählt wurde, Interfaces aktualisieren
-            if (window.appState.role === 'seller') updateSellerUI();
-            else if (window.appState.role === 'customer') updateCustomerUI();
-        }
-
-        async function initFirebase() {
-            try {
-                if (!firebaseConfig) {
-                    showToast('Lokaler Offline-Modus aktiv.', 'info');
-                    setupOfflineFallback();
-                    return;
-                }
-
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                // Wait for Auth (Rule 3) und fange gezielte Fehler ab
-                try {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                } catch (authError) {
-                    console.error("Auth error:", authError);
-                    showToast('Firebase-Auth-Fehler! Bitte "Anonyme Anmeldung" in der Firebase Console aktivieren!', 'error');
-                }
-
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        setupFirebaseSync();
-                    }
-                });
-
-            } catch (err) {
-                console.error("Firebase Initialization Error:", err);
-                showToast('Verbindungsfehler. Offline-Modus gestartet.', 'error');
-                setupOfflineFallback();
-            }
-        }
-
-        // Get the specific code input element value securely
-        function getSyncRoomCodeValue() {
-            const inputs = document.querySelectorAll('.sync-room-code-input');
-            let code = 'SOMMER-2026';
-            if (inputs && inputs.length > 0) {
-                code = inputs[0].value || 'SOMMER-2026';
-            }
-            return code.trim().toUpperCase();
-        }
-
-        function getTargetDocRef() {
-            if (!db) return null; // Guard
-            const syncCode = getSyncRoomCodeValue();
-            // RULE 1: Strict Paths compliance
-            return doc(db, 'artifacts', appId, 'public', 'data', 'pos_sync', `state_${syncCode}`);
-        }
-
-        function setupFirebaseSync() {
-            const startSync = () => {
-                if (!db) return; // Guard
-                if (!auth || !auth.currentUser) return; // RULE 3: Guard firestore operation with Auth check
-                
-                if (unsubscribeSync) {
-                    unsubscribeSync();
-                }
-                
-                const docRef = getTargetDocRef();
-                if (!docRef) return;
-                
-                unsubscribeSync = onSnapshot(docRef, (docSnap) => {
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        
-                        // Keep raw cache in memory
-                        window.appState.lastSyncedData = data;
-                        
-                        // Keep stats and tariffs always up-to-date
-                        window.appState.salesHistory = data.salesHistory || [];
-                        window.appState.tariffs = data.tariffs || window.appState.tariffs;
-                        
-                        if (window.appState.role === 'customer') {
-                            window.appState.cart = data.cart || [];
-                            window.appState.total = data.total || 0;
-                            window.appState.paid = data.paid || 0;
-                            window.appState.change = data.change || 0;
-                            window.appState.givenCash = data.givenCash || '';
-                            updateCustomerUI();
-                        } else if (window.appState.role === 'seller') {
-                            updateSellerUI();
-                        }
-                    }
-                }, (error) => {
-                    console.error("Firestore Listen Error:", error);
-                    // Proaktive Fehlermeldung für den User zur Fehlerbehebung
-                    if (error.code === 'permission-denied') {
-                        showToast('Fehlende Rechte! Prüfe deine Firestore Security Rules.', 'error');
-                    } else {
-                        showToast('Firebase-Fehler: ' + error.message, 'error');
-                    }
-                });
-            };
-
-            // Start Sync right away
-            startSync();
-            window.restartFirebaseSync = startSync;
-
-            // Synchronize the room code inputs and reload firestore sync seamlessly
-            const roomInputs = document.querySelectorAll('.sync-room-code-input');
-            roomInputs.forEach(input => {
-                input.addEventListener('input', (e) => {
-                    const newVal = e.target.value.toUpperCase();
-                    roomInputs.forEach(ri => { ri.value = newVal; });
-                    
-                    if (db) {
-                        startSync();
-                        showToast('Kopplungs-ID geändert!', 'info');
-                        
-                        // Pre-fetch state of new code
-                        const docRef = getTargetDocRef();
-                        if (docRef) {
-                            getDoc(docRef).then((docSnap) => {
-                                if (docSnap.exists()) {
-                                    const data = docSnap.data();
-                                    window.appState.lastSyncedData = data;
-                                    window.appState.tariffs = data.tariffs || window.appState.tariffs;
-                                    window.appState.salesHistory = data.salesHistory || [];
-                                    
-                                    if (window.appState.role === 'seller') {
-                                        updateSellerUI();
-                                    } else if (window.appState.role === 'customer') {
-                                        window.appState.cart = data.cart || [];
-                                        window.appState.total = data.total || 0;
-                                        window.appState.paid = data.paid || 0;
-                                        window.appState.change = data.change || 0;
-                                        window.appState.givenCash = data.givenCash || '';
-                                        updateCustomerUI();
-                                    }
-                                }
-                            }).catch(err => {
-                                console.error("Error pre-fetching document:", err);
-                            });
-                        }
-                    } else {
-                        // Offline mode local updates
-                        if (window.appState.role === 'seller') updateSellerUI();
-                        else if (window.appState.role === 'customer') updateCustomerUI();
-                    }
-                });
-            });
+            let bgClass = 'bg-white text-slate-800 border-slate-100';
+            let icon = 'fa-circle-info text-sky-500';
             
-            // Override window.syncToFirebase dynamically (Rule 3)
-            window.syncToFirebase = async () => {
-                if (!db || !auth || !auth.currentUser) return;
-                const docRef = getTargetDocRef();
-                if (!docRef) return;
-                try {
-                    await setDoc(docRef, {
-                        cart: window.appState.cart,
-                        total: window.appState.total,
-                        paid: window.appState.paid,
-                        change: window.appState.change,
-                        givenCash: window.appState.givenCash,
-                        tariffs: window.appState.tariffs,
-                        salesHistory: window.appState.salesHistory,
-                        lastUpdated: Date.now()
-                    });
-                } catch (e) {
-                    console.error("Error updating Firestore state:", e);
-                    if (e.code === 'permission-denied') {
-                        showToast('Firebase-Schreibfehler! Datenbankregeln (Rules) prüfen.', 'error');
-                    } else {
-                        showToast('Schreibfehler: ' + e.message, 'error');
-                    }
-                }
-            };
-
-            // Load initial state
-            const docRef = getTargetDocRef();
-            if (docRef) {
-                getDoc(docRef).then((docSnap) => {
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        window.appState.lastSyncedData = data;
-                        if (data.tariffs) window.appState.tariffs = data.tariffs;
-                        if (data.salesHistory) window.appState.salesHistory = data.salesHistory;
-                        if (window.appState.role === 'seller') updateSellerUI();
-                    }
-                }).catch(err => {
-                    console.error("Error fetching initial state:", err);
-                });
+            if (type === 'success') {
+                bgClass = 'bg-emerald-50 text-emerald-800 border-emerald-100';
+                icon = 'fa-circle-check text-emerald-500';
+            } else if (type === 'error') {
+                bgClass = 'bg-rose-50 text-rose-800 border-rose-100';
+                icon = 'fa-circle-xmark text-rose-500';
+            } else if (type === 'warning') {
+                bgClass = 'bg-amber-50 text-amber-800 border-amber-100';
+                icon = 'fa-triangle-exclamation text-amber-500';
             }
+            
+            toast.className = `p-3.5 rounded-2xl border shadow-md flex items-center gap-2.5 max-w-xs pointer-events-auto transition-all duration-300 ${bgClass}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${icon} text-sm shrink-0"></i>
+                <div class="text-[11px] font-bold">${message}</div>
+            `;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
         }
 
-        window.addEventListener('load', initFirebase);
-
-        // EXPORT COMPATIBLE INTERACTIVE LOGIC TO WINDOW OBJECT
-        
+        // ROLE MANAGEMENT FUNCTIONS (Clickable immediately)
         function selectRole(role) {
             window.appState.role = role;
             
-            // Apply cached snapshot data instantly if present to bypass waiting for next write
+            // Apply cached snapshot data instantly if present
             if (window.appState.lastSyncedData) {
                 const data = window.appState.lastSyncedData;
                 window.appState.salesHistory = data.salesHistory || [];
@@ -868,38 +657,6 @@
             document.getElementById('role-badge-container').classList.add('hidden');
             document.getElementById('view-role-selection').classList.remove('hidden');
             window.appState.role = null;
-        }
-
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            if (!container) return;
-            const toast = document.createElement('div');
-            
-            let bgClass = 'bg-white text-slate-800 border-slate-100';
-            let icon = 'fa-circle-info text-sky-500';
-            
-            if (type === 'success') {
-                bgClass = 'bg-emerald-50 text-emerald-800 border-emerald-100';
-                icon = 'fa-circle-check text-emerald-500';
-            } else if (type === 'error') {
-                bgClass = 'bg-rose-50 text-rose-800 border-rose-100';
-                icon = 'fa-circle-xmark text-rose-500';
-            } else if (type === 'warning') {
-                bgClass = 'bg-amber-50 text-amber-800 border-amber-100';
-                icon = 'fa-triangle-exclamation text-amber-500';
-            }
-            
-            toast.className = `p-3.5 rounded-2xl border shadow-md flex items-center gap-2.5 max-w-xs pointer-events-auto transition-all duration-300 ${bgClass}`;
-            toast.innerHTML = `
-                <i class="fa-solid ${icon} text-sm shrink-0"></i>
-                <div class="text-[11px] font-bold">${message}</div>
-            `;
-            container.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'scale-95');
-                setTimeout(() => toast.remove(), 300);
-            }, 3500); // Etwas länger anzeigen für Fehlermeldungen
         }
 
         // SELLER RENDER SYSTEM
@@ -1092,7 +849,6 @@
             triggerStateSync();
         }
 
-        // Set exact money received fast
         function setQuickCash(amount) {
             window.appState.givenCash = amount.toString();
             triggerStateSync();
@@ -1111,7 +867,6 @@
                 return;
             }
 
-            // Create new sale receipt entry for Sales History
             const currentSale = {
                 id: 'sale-' + Date.now(),
                 timestamp: Date.now(),
@@ -1121,10 +876,9 @@
                 change: window.appState.change
             };
 
-            window.appState.salesHistory.unshift(currentSale); // Add to beginning of array
+            window.appState.salesHistory.unshift(currentSale); 
             showToast('Verkauf erfolgreich abgeschlossen!', 'success');
             
-            // Reset checkout inputs
             window.appState.cart = [];
             window.appState.givenCash = '';
             window.appState.paid = 0;
@@ -1140,11 +894,10 @@
             }
         }
 
-        // Delete / Cancel Sale from history list
         function deleteSaleEntry(saleId) {
             const index = window.appState.salesHistory.findIndex(s => s.id === saleId);
             if (index !== -1) {
-                const removed = window.appState.salesHistory.splice(index, 1);
+                window.appState.salesHistory.splice(index, 1);
                 triggerStateSync();
                 renderHistorySalesList();
                 showToast('Buchung erfolgreich storniert', 'info');
@@ -1342,7 +1095,7 @@
             showToast(`Tarif "${removed[0].name}" gelöscht`, 'info');
         }
 
-        // BIND CORE ACTIONS TO WINDOW OBJECT FOR HTML INTERACTION (Rule 3)
+        // Global Event bindings for DOM interactions
         window.selectRole = selectRole;
         window.changeRole = changeRole;
         window.addToCart = addToCart;
@@ -1360,7 +1113,226 @@
         window.closeConfigModal = closeConfigModal;
         window.addNewTariff = addNewTariff;
         window.deleteTariff = deleteTariff;
-        window.showToast = showToast;
+    </script>
+
+    <!-- Firebase Async Module Block - runs quietly, upgrades capabilities when successfully loaded -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sommerfest-buffet-pos';
+        
+        // 👇 ========================================================= 👇
+        // 👇 HIER DEINE EIGENE FIREBASE CONFIG EINFÜGEN                👇
+        // 👇 (Überschreibe einfach das "null" mit deinem Config-Block) 👇
+        
+        const firebaseConfig = {
+  apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
+  authDomain: "sommerfest-kasse.firebaseapp.com",
+  projectId: "sommerfest-kasse",
+  storageBucket: "sommerfest-kasse.firebasestorage.app",
+  messagingSenderId: "899854905140",
+  appId: "1:899854905140:web:94be886a048356c7fb3f61"
+};
+        
+        let firebaseConfig = null;
+        try {
+            if (MEINE_FIREBASE_CONFIG) {
+                firebaseConfig = MEINE_FIREBASE_CONFIG; // Nutzt deine eingetragene Config
+            } else {
+                firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+            }
+        } catch (e) {
+            console.error("Failed to parse __firebase_config JSON:", e);
+        }
+        
+        let db = null;
+        let auth = null;
+        let unsubscribeSync = null;
+
+        // Get the specific code input element value securely
+        function getSyncRoomCodeValue() {
+            const inputs = document.querySelectorAll('.sync-room-code-input');
+            let code = 'SOMMER-2026';
+            if (inputs && inputs.length > 0) {
+                code = inputs[0].value || 'SOMMER-2026';
+            }
+            return code.trim().toUpperCase();
+        }
+
+        function getTargetDocRef() {
+            if (!db) return null;
+            const syncCode = getSyncRoomCodeValue();
+            return doc(db, 'artifacts', appId, 'public', 'data', 'pos_sync', `state_${syncCode}`);
+        }
+
+        function setupFirebaseSync() {
+            const startSync = () => {
+                if (!db) return;
+                if (!auth || !auth.currentUser) return; 
+                
+                if (unsubscribeSync) {
+                    unsubscribeSync();
+                }
+                
+                const docRef = getTargetDocRef();
+                if (!docRef) return;
+                
+                unsubscribeSync = onSnapshot(docRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        
+                        // Keep raw cache in memory
+                        window.appState.lastSyncedData = data;
+                        
+                        // Keep stats and tariffs always up-to-date
+                        window.appState.salesHistory = data.salesHistory || [];
+                        window.appState.tariffs = data.tariffs || window.appState.tariffs;
+                        
+                        if (window.appState.role === 'customer') {
+                            window.appState.cart = data.cart || [];
+                            window.appState.total = data.total || 0;
+                            window.appState.paid = data.paid || 0;
+                            window.appState.change = data.change || 0;
+                            window.appState.givenCash = data.givenCash || '';
+                            updateCustomerUI();
+                        } else if (window.appState.role === 'seller') {
+                            updateSellerUI();
+                        }
+                    }
+                }, (error) => {
+                    console.error("Firestore Listen Error:", error);
+                    if (error.code === 'permission-denied') {
+                        showToast('Fehlende Rechte! Prüfe deine Firestore Security Rules.', 'error');
+                    } else {
+                        showToast('Firebase-Fehler: ' + error.message, 'error');
+                    }
+                });
+            };
+
+            startSync();
+
+            // Synchronize the room code inputs and reload firestore sync seamlessly
+            const roomInputs = document.querySelectorAll('.sync-room-code-input');
+            roomInputs.forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const newVal = e.target.value.toUpperCase();
+                    roomInputs.forEach(ri => { ri.value = newVal; });
+                    
+                    if (db) {
+                        startSync();
+                        showToast('Kopplungs-ID geändert!', 'info');
+                        
+                        const docRef = getTargetDocRef();
+                        if (docRef) {
+                            getDoc(docRef).then((docSnap) => {
+                                if (docSnap.exists()) {
+                                    const data = docSnap.data();
+                                    window.appState.lastSyncedData = data;
+                                    window.appState.tariffs = data.tariffs || window.appState.tariffs;
+                                    window.appState.salesHistory = data.salesHistory || [];
+                                    
+                                    if (window.appState.role === 'seller') {
+                                        updateSellerUI();
+                                    } else if (window.appState.role === 'customer') {
+                                        window.appState.cart = data.cart || [];
+                                        window.appState.total = data.total || 0;
+                                        window.appState.paid = data.paid || 0;
+                                        window.appState.change = data.change || 0;
+                                        window.appState.givenCash = data.givenCash || '';
+                                        updateCustomerUI();
+                                    }
+                                }
+                            }).catch(err => {
+                                console.error("Error pre-fetching document:", err);
+                            });
+                        }
+                    }
+                });
+            });
+            
+            // Override window.syncToFirebase dynamically
+            window.syncToFirebase = async () => {
+                if (!db || !auth || !auth.currentUser) return;
+                const docRef = getTargetDocRef();
+                if (!docRef) return;
+                try {
+                    await setDoc(docRef, {
+                        cart: window.appState.cart,
+                        total: window.appState.total,
+                        paid: window.appState.paid,
+                        change: window.appState.change,
+                        givenCash: window.appState.givenCash,
+                        tariffs: window.appState.tariffs,
+                        salesHistory: window.appState.salesHistory,
+                        lastUpdated: Date.now()
+                    });
+                } catch (e) {
+                    console.error("Error updating Firestore state:", e);
+                    if (e.code === 'permission-denied') {
+                        showToast('Firebase-Schreibfehler! Datenbankregeln (Rules) prüfen.', 'error');
+                    } else {
+                        showToast('Schreibfehler: ' + e.message, 'error');
+                    }
+                }
+            };
+
+            // Load initial state
+            const docRef = getTargetDocRef();
+            if (docRef) {
+                getDoc(docRef).then((docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        window.appState.lastSyncedData = data;
+                        if (data.tariffs) window.appState.tariffs = data.tariffs;
+                        if (data.salesHistory) window.appState.salesHistory = data.salesHistory;
+                        if (window.appState.role === 'seller') updateSellerUI();
+                    }
+                }).catch(err => {
+                    console.error("Error fetching initial state:", err);
+                });
+            }
+        }
+
+        // Initialize Firebase quietly
+        async function initFirebase() {
+            try {
+                if (!firebaseConfig) {
+                    console.log("No Firebase config found. Running in offline fallback mode.");
+                    return;
+                }
+
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (authError) {
+                    console.error("Auth error:", authError);
+                    showToast('Anonyme Anmeldung fehlt in Firebase Console!', 'error');
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        showToast('Firebase Cloud-Synchronisation aktiv ☁️', 'success');
+                        setupFirebaseSync();
+                    }
+                });
+
+            } catch (err) {
+                console.error("Firebase Initialization Error:", err);
+                showToast('Verbindung fehlgeschlagen. Offline-Modus aktiv.', 'error');
+            }
+        }
+
+        // Kick off initialization
+        initFirebase();
     </script>
 </body>
 </html>
