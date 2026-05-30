@@ -9,7 +9,7 @@
     <!-- Google Fonts (Inter & Fredoka für sommerlichen Vibe) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght=300..700&family=Inter:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -1022,6 +1022,11 @@
             });
         }
 
+        // Exponiere Rendering-Funktionen global für das Firebase-Modul
+        window.updateCustomerUI = updateCustomerUI;
+        window.updateSellerUI = updateSellerUI;
+        window.showToast = showToast;
+
         function openConfigModal() {
             document.getElementById('modal-config').classList.remove('hidden');
             renderConfigTariffList();
@@ -1196,17 +1201,23 @@
                             window.appState.paid = data.paid || 0;
                             window.appState.change = data.change || 0;
                             window.appState.givenCash = data.givenCash || '';
-                            updateCustomerUI();
+                            if (window.updateCustomerUI) {
+                                window.updateCustomerUI();
+                            }
                         } else if (window.appState.role === 'seller') {
-                            updateSellerUI();
+                            if (window.updateSellerUI) {
+                                window.updateSellerUI();
+                            }
                         }
                     }
                 }, (error) => {
                     console.error("Firestore Listen Error:", error);
-                    if (error.code === 'permission-denied') {
-                        showToast('Fehlende Rechte! Prüfe deine Firestore Security Rules.', 'error');
-                    } else {
-                        showToast('Firebase-Fehler: ' + error.message, 'error');
+                    if (window.showToast) {
+                        if (error.code === 'permission-denied') {
+                            window.showToast('Fehlende Rechte! Prüfe deine Firestore Security Rules.', 'error');
+                        } else {
+                            window.showToast('Firebase-Fehler: ' + error.message, 'error');
+                        }
                     }
                 });
             };
@@ -1222,7 +1233,9 @@
                     
                     if (db) {
                         startSync();
-                        showToast('Kopplungs-ID geändert!', 'info');
+                        if (window.showToast) {
+                            window.showToast('Kopplungs-ID geändert!', 'info');
+                        }
                         
                         const docRef = getTargetDocRef();
                         if (docRef) {
@@ -1234,14 +1247,14 @@
                                     window.appState.salesHistory = data.salesHistory || [];
                                     
                                     if (window.appState.role === 'seller') {
-                                        updateSellerUI();
+                                        if (window.updateSellerUI) window.updateSellerUI();
                                     } else if (window.appState.role === 'customer') {
                                         window.appState.cart = data.cart || [];
                                         window.appState.total = data.total || 0;
                                         window.appState.paid = data.paid || 0;
                                         window.appState.change = data.change || 0;
                                         window.appState.givenCash = data.givenCash || '';
-                                        updateCustomerUI();
+                                        if (window.updateCustomerUI) window.updateCustomerUI();
                                     }
                                 }
                             }).catch(err => {
@@ -1270,10 +1283,12 @@
                     });
                 } catch (e) {
                     console.error("Error updating Firestore state:", e);
-                    if (e.code === 'permission-denied') {
-                        showToast('Firebase-Schreibfehler! Datenbankregeln (Rules) prüfen.', 'error');
-                    } else {
-                        showToast('Schreibfehler: ' + e.message, 'error');
+                    if (window.showToast) {
+                        if (e.code === 'permission-denied') {
+                            window.showToast('Firebase-Schreibfehler! Datenbankregeln (Rules) prüfen.', 'error');
+                        } else {
+                            window.showToast('Schreibfehler: ' + e.message, 'error');
+                        }
                     }
                 }
             };
@@ -1287,7 +1302,9 @@
                         window.appState.lastSyncedData = data;
                         if (data.tariffs) window.appState.tariffs = data.tariffs;
                         if (data.salesHistory) window.appState.salesHistory = data.salesHistory;
-                        if (window.appState.role === 'seller') updateSellerUI();
+                        if (window.appState.role === 'seller' && window.updateSellerUI) {
+                            window.updateSellerUI();
+                        }
                     }
                 }).catch(err => {
                     console.error("Error fetching initial state:", err);
@@ -1315,19 +1332,25 @@
                     }
                 } catch (authError) {
                     console.error("Auth error:", authError);
-                    showToast('Anonyme Anmeldung fehlt in Firebase Console!', 'error');
+                    if (window.showToast) {
+                        window.showToast('Anonyme Anmeldung fehlt in Firebase Console!', 'error');
+                    }
                 }
 
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
-                        showToast('Firebase Cloud-Synchronisation aktiv ☁️', 'success');
+                        if (window.showToast) {
+                            window.showToast('Firebase Cloud-Synchronisation aktiv ☁️', 'success');
+                        }
                         setupFirebaseSync();
                     }
                 });
 
             } catch (err) {
                 console.error("Firebase Initialization Error:", err);
-                showToast('Verbindung fehlgeschlagen. Offline-Modus aktiv.', 'error');
+                if (window.showToast) {
+                    window.showToast('Verbindung fehlgeschlagen. Offline-Modus aktiv.', 'error');
+                }
             }
         }
 
