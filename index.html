@@ -9,7 +9,7 @@
     <!-- Google Fonts (Inter & Fredoka für sommerlichen Vibe) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght=300..700&family=Inter:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -99,19 +99,6 @@
     </style>
 </head>
 <body class="bg-gradient-to-br from-amber-50 via-orange-50 to-sky-50 min-h-screen text-slate-800 flex flex-col antialiased selection:bg-orange-200">
-
-    <!-- Loading overlay before Firebase Connection -->
-    <div id="loading-overlay" class="fixed inset-0 bg-amber-500/10 backdrop-blur-md z-50 flex flex-col items-center justify-center transition-opacity duration-300">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center text-center max-w-sm border border-amber-200">
-            <div class="relative w-20 h-20 mb-6">
-                <div class="absolute inset-0 rounded-full border-4 border-amber-100 animate-pulse"></div>
-                <div class="absolute inset-0 rounded-full border-4 border-amber-500 border-t-transparent animate-spin"></div>
-                <span class="absolute inset-0 flex items-center justify-center text-3xl">☀️</span>
-            </div>
-            <h3 class="font-summer text-2xl text-amber-600 mb-2">Sommerfest Cloud</h3>
-            <p class="text-slate-500 text-sm">Verbindung wird hergestellt und synchronisiert...</p>
-        </div>
-    </div>
 
     <!-- MAIN APP CONTAINER (Optimiert für Tablet-Größen) -->
     <main class="flex-grow flex flex-col w-full max-w-7xl mx-auto px-3 py-3 md:px-5 md:py-4">
@@ -620,24 +607,6 @@
         let auth = null;
         let unsubscribeSync = null;
 
-        // Fallback: Max 2 Sekunden für Firebase-Ladevorgang, sonst radikaler Abbruch in Offline-Modus
-        const connectionTimeout = setTimeout(() => {
-            const overlay = document.getElementById('loading-overlay');
-            if (overlay && !overlay.classList.contains('hidden')) {
-                console.warn("Verbindungsaufbau überschritt Zeitlimit. Offline-Modus wird erzwungen.");
-                
-                // Overlay weich ausblenden
-                overlay.classList.add('opacity-0');
-                setTimeout(() => overlay.classList.add('hidden'), 300);
-                
-                // Nutzer informieren
-                showToast('Offline-Modus aktiv. (Keine Cloud-Sync)', 'warning');
-                
-                // Fallback-Funktionen aktivieren
-                setupOfflineFallback();
-            }
-        }, 2500);
-
         // Offline Fallback System (Sorgt dafür, dass das POS bei Netzwerkausfall lokal weiterläuft!)
         function setupOfflineFallback() {
             window.syncToFirebase = async () => {
@@ -667,13 +636,8 @@
         async function initFirebase() {
             try {
                 if (!firebaseConfig) {
-                    clearTimeout(connectionTimeout);
                     showToast('Lokaler Offline-Modus aktiv.', 'info');
-                    document.getElementById('loading-overlay').classList.add('opacity-0');
-                    setTimeout(() => {
-                        document.getElementById('loading-overlay').classList.add('hidden');
-                        setupOfflineFallback();
-                    }, 300);
+                    setupOfflineFallback();
                     return;
                 }
 
@@ -695,22 +659,14 @@
 
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
-                        clearTimeout(connectionTimeout);
-                        document.getElementById('loading-overlay').classList.add('opacity-0');
-                        setTimeout(() => document.getElementById('loading-overlay').classList.add('hidden'), 300);
                         setupFirebaseSync();
                     }
                 });
 
             } catch (err) {
-                clearTimeout(connectionTimeout);
                 console.error("Firebase Initialization Error:", err);
                 showToast('Verbindungsfehler. Offline-Modus gestartet.', 'error');
-                document.getElementById('loading-overlay').classList.add('opacity-0');
-                setTimeout(() => {
-                    document.getElementById('loading-overlay').classList.add('hidden');
-                    setupOfflineFallback();
-                }, 300);
+                setupOfflineFallback();
             }
         }
 
