@@ -9,7 +9,7 @@
     <!-- Google Fonts (Inter & Fredoka für sommerlichen Vibe) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght=300..700&family=Inter:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -22,6 +22,7 @@
         body {
             font-family: 'Inter', sans-serif;
             touch-action: manipulation; /* Optimiert Touch-Reaktionszeiten */
+            overflow: hidden; /* Verhindert das Scrollen der gesamten Seite */
         }
         .font-summer {
             font-family: 'Fredoka', sans-serif;
@@ -61,20 +62,29 @@
             50% { transform: translateX(-25%) translateZ(0) scaleY(0.85); }
         }
         
-        .animate-float-1 {
-            animation: float-slow 7s ease-in-out infinite;
+        .animate-float-1 { animation: float-slow 7s ease-in-out infinite; }
+        .animate-float-2 { animation: float-reverse 6s ease-in-out infinite; animation-delay: 1s; }
+        .animate-float-3 { animation: float-slow 8s ease-in-out infinite; animation-delay: 2s; }
+        .animate-pulse-soft { animation: pulse-soft 4s ease-in-out infinite; }
+        
+        /* Erfolgs-Animationen */
+        .animate-check {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: drawCheck 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+            animation-delay: 0.2s;
         }
-        .animate-float-2 {
-            animation: float-reverse 6s ease-in-out infinite;
-            animation-delay: 1s;
+        @keyframes drawCheck {
+            to { stroke-dashoffset: 0; }
         }
-        .animate-float-3 {
-            animation: float-slow 8s ease-in-out infinite;
-            animation-delay: 2s;
+        .scale-in-center {
+            animation: scaleIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
-        .animate-pulse-soft {
-            animation: pulse-soft 4s ease-in-out infinite;
+        @keyframes scaleIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
+
         .wave-bg {
             position: absolute;
             bottom: 0;
@@ -98,194 +108,193 @@
 
         /* Vergrößerte Touch-Flächen für das iPad */
         button {
-            min-height: 44px;
             user-select: none;
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-amber-50 via-orange-50 to-sky-50 min-h-screen text-slate-800 flex flex-col antialiased selection:bg-orange-200">
+<body class="bg-gradient-to-br from-amber-50 via-orange-50 to-sky-50 h-screen w-screen overflow-hidden text-slate-800 flex flex-col antialiased selection:bg-orange-200">
 
     <!-- MAIN APP CONTAINER -->
-    <main class="flex-grow flex flex-col w-full max-w-7xl mx-auto px-3 py-3 md:px-5 md:py-4">
+    <main class="flex-grow flex flex-col w-full max-w-7xl mx-auto px-2 py-2 md:px-4 md:py-3 h-full overflow-hidden">
         
         <!-- Header -->
-        <header class="flex flex-col sm:flex-row items-center justify-between gap-3 mb-3 pb-3 border-b border-orange-100/60 shrink-0">
-            <div class="flex items-center gap-2.5">
-                <div class="bg-gradient-to-tr from-amber-400 to-orange-500 text-white p-2.5 rounded-2xl shadow-md shadow-orange-500/20 transform rotate-3">
-                    <i class="fa-solid fa-utensils text-lg"></i>
+        <header class="flex flex-col sm:flex-row items-center justify-between gap-2 mb-2 pb-2 border-b border-orange-100/60 shrink-0">
+            <div class="flex items-center gap-2">
+                <div class="bg-gradient-to-tr from-amber-400 to-orange-500 text-white p-2 rounded-2xl shadow-md shadow-orange-500/20 transform rotate-3">
+                    <i class="fa-solid fa-utensils text-base"></i>
                 </div>
                 <div>
                     <div class="flex items-center gap-2 flex-wrap">
-                        <h1 class="font-summer text-xl md:text-2xl font-bold bg-gradient-to-r from-orange-600 to-amber-500 bg-clip-text text-transparent leading-none">Ess-Zone Buffet</h1>
-                        <div class="bg-gradient-to-r from-sky-400 to-blue-500 text-white text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-sm shrink-0">
-                            <i class="fa-solid fa-users text-[10px]"></i>
-                            <span id="header-guests-count" class="font-black text-xs">0</span> in der Zone
+                        <h1 class="font-summer text-lg md:text-xl font-bold bg-gradient-to-r from-orange-600 to-amber-500 bg-clip-text text-transparent leading-none">Ess-Zone Buffet</h1>
+                        <div class="bg-gradient-to-r from-sky-400 to-blue-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm shrink-0">
+                            <i class="fa-solid fa-users text-[9px]"></i>
+                            <span id="header-guests-count" class="font-black text-[11px]">0</span> in der Zone
                         </div>
                     </div>
-                    <p class="text-[9px] text-slate-400 font-bold tracking-wider uppercase mt-0.5">Sommerfest Bezahlsystem</p>
                 </div>
             </div>
             
             <div class="flex flex-wrap items-center gap-2 justify-end">
                 <!-- Live-Verbindungsstatus Ampelsystem -->
-                <div id="cloud-status-badge" class="flex items-center gap-2 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-xl text-[10px] font-bold text-slate-600 transition-all duration-300">
+                <div id="cloud-status-badge" class="flex items-center gap-1.5 bg-slate-100 border border-slate-200 px-2 py-1 rounded-xl text-[9px] font-bold text-slate-600 transition-all duration-300">
                     <span class="h-2 w-2 rounded-full bg-slate-400"></span>
                     <span id="cloud-status-text">Starte System...</span>
                 </div>
 
                 <!-- Kopplungs-Code -->
-                <div class="flex items-center bg-white/90 border border-orange-100 rounded-xl px-3 py-1.5 shadow-sm">
-                    <span class="text-[9px] font-black text-orange-400 uppercase mr-1.5 tracking-wider"><i class="fa-solid fa-wifi"></i> Kasse-ID:</span>
-                    <input type="text" value="SOMMER-2026" class="bg-transparent border-none text-[11px] font-black text-slate-700 uppercase focus:outline-none w-24 text-center sync-room-code-input" title="Nutze auf beiden Geräten dieselbe ID für die Live-Sync">
+                <div class="flex items-center bg-white/90 border border-orange-100 rounded-xl px-2 py-1 shadow-sm">
+                    <span class="text-[9px] font-black text-orange-400 uppercase mr-1 tracking-wider"><i class="fa-solid fa-wifi"></i> ID:</span>
+                    <input type="text" value="SOMMER-2026" class="bg-transparent border-none text-[10px] font-black text-slate-700 uppercase focus:outline-none w-20 text-center sync-room-code-input" title="Nutze auf beiden Geräten dieselbe ID für die Live-Sync">
                 </div>
 
                 <!-- Rolle wechseln -->
-                <div id="role-badge-container" class="hidden flex items-center gap-1.5 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-orange-100 shadow-sm">
-                    <span id="role-badge-text" class="text-[10px] font-black text-slate-500 uppercase leading-none">Aktiv</span>
-                    <button onclick="changeRole()" class="text-[10px] text-orange-500 hover:text-orange-600 font-bold ml-1 underline">Wechseln</button>
+                <div id="role-badge-container" class="hidden flex items-center gap-1.5 bg-white/80 backdrop-blur-md px-2 py-1 rounded-2xl border border-orange-100 shadow-sm">
+                    <span id="role-badge-text" class="text-[9px] font-black text-slate-500 uppercase leading-none">Aktiv</span>
+                    <button onclick="changeRole()" class="text-[9px] text-orange-500 hover:text-orange-600 font-bold ml-1 underline">Wechseln</button>
                 </div>
             </div>
         </header>
 
         <!-- ROLE SELECTION VIEW -->
         <section id="view-role-selection" class="flex-grow flex items-center justify-center py-4">
-            <div class="max-w-xl w-full grid grid-cols-1 sm:grid-cols-2 gap-5 px-4">
-                
-                <button onclick="selectRole('seller')" class="group relative bg-white hover:bg-gradient-to-b hover:from-white hover:to-amber-50/30 p-5 md:p-6 rounded-3xl border-2 border-slate-100 hover:border-amber-400 text-left transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-amber-100/50 flex flex-col justify-between h-64 overflow-hidden transform hover:-translate-y-1">
+            <div class="max-w-xl w-full flex flex-row gap-4 px-4 h-64">
+                <button onclick="selectRole('seller')" class="w-1/2 group relative bg-white hover:bg-gradient-to-b hover:from-white hover:to-amber-50/30 p-5 rounded-3xl border-2 border-slate-100 hover:border-amber-400 text-left transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-amber-100/50 flex flex-col justify-between overflow-hidden transform hover:-translate-y-1">
                     <div class="absolute -right-10 -top-10 w-24 h-24 bg-amber-100 rounded-full opacity-30 group-hover:scale-125 transition-transform duration-500"></div>
-                    <div class="bg-amber-100 group-hover:bg-amber-500 text-amber-600 group-hover:text-white p-2.5 rounded-2xl inline-block transition-colors duration-300">
+                    <div class="bg-amber-100 group-hover:bg-amber-500 text-amber-600 group-hover:text-white p-2.5 rounded-2xl inline-block transition-colors duration-300 self-start">
                         <i class="fa-solid fa-cash-register text-xl"></i>
                     </div>
                     <div>
-                        <h3 class="font-summer text-lg font-bold text-slate-800 mb-1">Verkäufer Terminal</h3>
-                        <p class="text-slate-500 text-[11px] leading-relaxed">Bestellungen aufnehmen, Tarife verwalten, Umsatz-Historie auswerten und Kundendisplay steuern.</p>
+                        <h3 class="font-summer text-lg font-bold text-slate-800 mb-1">Verkäufer</h3>
+                        <p class="text-slate-500 text-[10px] leading-relaxed">Bestellungen, Kasse & Numpad.</p>
                     </div>
-                    <span class="text-[11px] font-bold text-amber-600 flex items-center gap-1.5">
-                        Terminal öffnen <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                    </span>
                 </button>
 
-                <button onclick="selectRole('customer')" class="group relative bg-white hover:bg-gradient-to-b hover:from-white hover:to-sky-50/30 p-5 md:p-6 rounded-3xl border-2 border-slate-100 hover:border-sky-400 text-left transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-sky-100/50 flex flex-col justify-between h-64 overflow-hidden transform hover:-translate-y-1">
+                <button onclick="selectRole('customer')" class="w-1/2 group relative bg-white hover:bg-gradient-to-b hover:from-white hover:to-sky-50/30 p-5 rounded-3xl border-2 border-slate-100 hover:border-sky-400 text-left transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-sky-100/50 flex flex-col justify-between overflow-hidden transform hover:-translate-y-1">
                     <div class="absolute -right-10 -top-10 w-24 h-24 bg-sky-100 rounded-full opacity-30 group-hover:scale-125 transition-transform duration-500"></div>
-                    <div class="bg-sky-100 group-hover:bg-sky-500 text-sky-600 group-hover:text-white p-2.5 rounded-2xl inline-block transition-colors duration-300">
+                    <div class="bg-sky-100 group-hover:bg-sky-500 text-sky-600 group-hover:text-white p-2.5 rounded-2xl inline-block transition-colors duration-300 self-start">
                         <i class="fa-solid fa-desktop text-xl"></i>
                     </div>
                     <div>
                         <h3 class="font-summer text-lg font-bold text-slate-800 mb-1">Kunden Display</h3>
-                        <p class="text-slate-500 text-[11px] leading-relaxed">Ideal für ein zweites iPad. Zeigt dem Gast live seine Bestellung, Rückgeld und sommerliche Stempel-Infos.</p>
+                        <p class="text-slate-500 text-[10px] leading-relaxed">Live-Anzeige & Stempel-Info.</p>
                     </div>
-                    <span class="text-[11px] font-bold text-sky-600 flex items-center gap-1.5">
-                        Display starten <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                    </span>
                 </button>
             </div>
         </section>
 
-        <!-- SELLER VIEW -->
-        <section id="view-seller" class="hidden flex-grow grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 items-stretch overflow-hidden">
+        <!-- SELLER VIEW (STRICT SIDE-BY-SIDE) -->
+        <section id="view-seller" class="hidden flex-grow flex flex-row gap-2.5 md:gap-4 items-stretch overflow-hidden">
             
-            <div class="md:col-span-7 flex flex-col gap-3 overflow-hidden">
-                <div class="bg-white/70 backdrop-blur-md p-2.5 rounded-2xl border border-orange-100 shadow-sm flex items-center justify-between gap-3 shrink-0">
-                    <div class="flex items-center gap-2">
-                        <span class="bg-orange-100 text-orange-600 px-2 py-0.5 rounded-lg font-bold text-[10px]">Tarife</span>
-                        <h2 class="font-summer text-base font-bold text-slate-700">Buffet-Auswahl</h2>
+            <!-- Left Panel (Tariffs) -->
+            <div class="w-[58%] flex flex-col gap-2.5 overflow-hidden h-full">
+                <!-- Header -->
+                <div class="bg-white/70 backdrop-blur-md p-2 rounded-2xl border border-orange-100 shadow-sm flex items-center justify-between gap-2 shrink-0">
+                    <div class="flex items-center gap-1.5">
+                        <span class="bg-orange-100 text-orange-600 px-2 py-0.5 rounded-lg font-bold text-[9px]">Tarife</span>
+                        <h2 class="font-summer text-sm md:text-base font-bold text-slate-700">Buffet-Auswahl</h2>
                     </div>
                     
-                    <div class="flex items-center gap-2">
-                        <button onclick="openHistoryModal()" class="bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white px-3 py-1.5 rounded-xl text-[11px] font-black flex items-center gap-1.5 transition-all shadow-sm">
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="openHistoryModal()" class="bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white px-2.5 py-1 rounded-xl text-[10px] font-black flex items-center gap-1 transition-all shadow-sm">
                             <i class="fa-solid fa-chart-line"></i> Umsatz: <span id="seller-revenue-badge">0,00 €</span>
                         </button>
-                        <button onclick="openConfigModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-2.5 py-1.5 rounded-xl text-[10px] font-bold flex items-center gap-1 transition-all">
+                        <button onclick="openConfigModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-2.5 py-1 rounded-xl text-[10px] font-bold flex items-center gap-1 transition-all">
                             <i class="fa-solid fa-cog"></i> Anpassen
                         </button>
                     </div>
                 </div>
 
-                <div id="seller-tariffs-grid" class="grid grid-cols-2 gap-2.5 overflow-y-auto max-h-[220px] md:max-h-[340px] pr-1"></div>
+                <!-- Tariffs Grid (Scrollable) -->
+                <div id="seller-tariffs-grid" class="grid grid-cols-2 gap-2 overflow-y-auto pr-1 flex-grow content-start"></div>
 
-                <div class="bg-white/60 p-3 rounded-2xl border border-dashed border-orange-200 flex flex-row items-center justify-between gap-2 shrink-0 mt-auto">
+                <!-- Custom Price (Fixed at bottom) -->
+                <div class="bg-white/60 p-2 rounded-2xl border border-dashed border-orange-200 flex flex-row items-center justify-between gap-2 shrink-0">
                     <div class="flex items-center gap-2">
-                        <div class="bg-amber-100 text-amber-600 p-1.5 rounded-lg text-xs">
+                        <div class="bg-amber-100 text-amber-600 p-1.5 rounded-lg text-[10px]">
                             <i class="fa-solid fa-tag"></i>
                         </div>
                         <div>
-                            <h4 class="font-bold text-[11px] text-slate-700 leading-none">Freibetrag / Spende</h4>
-                            <p class="text-[9px] text-slate-400 mt-0.5">Sonderwünsche</p>
+                            <h4 class="font-bold text-[10px] text-slate-700 leading-none">Spende</h4>
                         </div>
                     </div>
-                    <div class="flex items-center gap-1.5">
-                        <input id="input-custom-price" type="number" step="0.50" placeholder="0.00" class="bg-white border border-slate-200 px-2 py-1.5 rounded-lg text-right font-bold text-slate-700 w-20 text-xs focus:outline-none focus:ring-1 focus:ring-orange-400">
-                        <span class="font-bold text-xs text-slate-400">€</span>
-                        <button onclick="addCustomPrice()" class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-3.5 py-1.5 rounded-lg font-bold text-xs transition-all shadow-sm">
+                    <div class="flex items-center gap-1">
+                        <input id="input-custom-price" type="number" step="0.50" placeholder="0.00" class="bg-white border border-slate-200 px-2 py-1 rounded-lg text-right font-bold text-slate-700 w-16 text-[11px] focus:outline-none focus:ring-1 focus:ring-orange-400">
+                        <span class="font-bold text-[11px] text-slate-400">€</span>
+                        <button onclick="addCustomPrice()" class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-3 py-1 rounded-lg font-bold text-[11px] transition-all shadow-sm">
                             +
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div class="md:col-span-5 flex flex-col gap-3 overflow-hidden">
-                <div class="bg-white p-3 rounded-2xl shadow-md border border-orange-100 flex flex-col max-h-[160px] md:max-h-[200px] overflow-hidden shrink-0">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-1.5 mb-1.5">
-                        <h3 class="font-summer text-xs font-bold text-slate-700 flex items-center gap-1">
+            <!-- Right Panel (Cart & Numpad) -->
+            <div class="w-[42%] flex flex-col gap-2.5 overflow-hidden h-full">
+                <!-- Live Cart Card (Takes remaining vertical space) -->
+                <div class="bg-white p-2 md:p-3 rounded-2xl shadow-md border border-orange-100 flex flex-col flex-grow overflow-hidden min-h-[120px]">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-1.5 mb-1.5 shrink-0">
+                        <h3 class="font-summer text-[11px] md:text-xs font-bold text-slate-700 flex items-center gap-1">
                             <i class="fa-solid fa-shopping-basket text-orange-500"></i> Bestellung
                         </h3>
-                        <button onclick="clearCart()" class="text-[10px] text-red-500 hover:text-red-600 font-bold flex items-center gap-0.5">
-                            <i class="fa-solid fa-trash-can text-[10px]"></i> Leeren
+                        <button onclick="clearCart()" class="text-[9px] md:text-[10px] text-red-500 hover:text-red-600 font-bold flex items-center gap-0.5">
+                            <i class="fa-solid fa-trash-can text-[9px]"></i> Leeren
                         </button>
                     </div>
 
+                    <!-- Scrollable Cart Items -->
                     <div id="seller-cart-items" class="flex-grow overflow-y-auto space-y-1 pr-1"></div>
 
-                    <div class="border-t border-slate-100 pt-1.5 mt-1.5 flex items-center justify-between shrink-0">
-                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Gesamt:</span>
-                        <span id="seller-total-price" class="font-summer text-xl font-extrabold text-orange-600">0.00 €</span>
+                    <!-- Cart Total -->
+                    <div class="border-t border-slate-100 pt-1 mt-1 flex items-center justify-between shrink-0">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Gesamt:</span>
+                        <span id="seller-total-price" class="font-summer text-lg md:text-xl font-extrabold text-orange-600">0.00 €</span>
                     </div>
                 </div>
 
-                <div class="bg-white p-3 rounded-2xl shadow-md border border-orange-100 flex flex-col gap-2 shrink-0">
-                    <div class="grid grid-cols-2 gap-2 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                <!-- Cash Numpad Card (Fixed Height at bottom) -->
+                <div class="bg-white p-2 md:p-2.5 rounded-2xl shadow-md border border-orange-100 flex flex-col gap-1.5 shrink-0">
+                    <div class="grid grid-cols-2 gap-1 bg-slate-50 p-1.5 rounded-xl border border-slate-100">
                         <div>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase block leading-none mb-0.5">Gegeben:</span>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase block leading-none mb-0.5">Gegeben:</span>
                             <div class="flex items-baseline gap-0.5">
-                                <span id="display-given-cash" class="font-mono text-lg font-extrabold text-slate-700">0,00</span>
-                                <span class="text-xs font-bold text-slate-400">€</span>
+                                <span id="display-given-cash" class="font-mono text-sm md:text-base font-extrabold text-slate-700">0,00</span>
+                                <span class="text-[10px] font-bold text-slate-400">€</span>
                             </div>
                         </div>
-                        <div class="text-right border-l border-slate-200/60 pl-2">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase block leading-none mb-0.5">Rückgeld:</span>
+                        <div class="text-right border-l border-slate-200/60 pl-1">
+                            <span class="text-[9px] font-bold text-slate-400 uppercase block leading-none mb-0.5">Rückgeld:</span>
                             <div class="flex items-baseline justify-end gap-0.5">
-                                <span id="display-change" class="font-mono text-xl font-black text-emerald-600">0,00</span>
-                                <span class="text-xs font-bold text-emerald-600">€</span>
+                                <span id="display-change" class="font-mono text-base md:text-lg font-black text-emerald-600">0,00</span>
+                                <span class="text-[10px] font-bold text-emerald-600">€</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-4 gap-1.5">
-                        <button onclick="setQuickCash(5)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-2 rounded-lg text-xs transition-all border border-slate-200">5 €</button>
-                        <button onclick="setQuickCash(10)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-2 rounded-lg text-xs transition-all border border-slate-200">10 €</button>
-                        <button onclick="setQuickCash(20)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-2 rounded-lg text-xs transition-all border border-slate-200">20 €</button>
-                        <button onclick="setQuickCash(50)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-2 rounded-lg text-xs transition-all border border-slate-200">50 €</button>
+                    <div class="grid grid-cols-4 gap-1">
+                        <button onclick="setQuickCash(5)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-[10px] transition-all border border-slate-200">5 €</button>
+                        <button onclick="setQuickCash(10)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-[10px] transition-all border border-slate-200">10 €</button>
+                        <button onclick="setQuickCash(20)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-[10px] transition-all border border-slate-200">20 €</button>
+                        <button onclick="setQuickCash(50)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-[10px] transition-all border border-slate-200">50 €</button>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-1.5">
-                        <button onclick="pressNumpad('7')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">7</button>
-                        <button onclick="pressNumpad('8')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">8</button>
-                        <button onclick="pressNumpad('9')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">9</button>
+                    <div class="grid grid-cols-3 gap-1">
+                        <button onclick="pressNumpad('7')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">7</button>
+                        <button onclick="pressNumpad('8')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">8</button>
+                        <button onclick="pressNumpad('9')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">9</button>
                         
-                        <button onclick="pressNumpad('4')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">4</button>
-                        <button onclick="pressNumpad('5')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">5</button>
-                        <button onclick="pressNumpad('6')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">6</button>
+                        <button onclick="pressNumpad('4')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">4</button>
+                        <button onclick="pressNumpad('5')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">5</button>
+                        <button onclick="pressNumpad('6')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">6</button>
                         
-                        <button onclick="pressNumpad('1')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">1</button>
-                        <button onclick="pressNumpad('2')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">2</button>
-                        <button onclick="pressNumpad('3')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">3</button>
+                        <button onclick="pressNumpad('1')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">1</button>
+                        <button onclick="pressNumpad('2')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">2</button>
+                        <button onclick="pressNumpad('3')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">3</button>
                         
-                        <button onclick="pressNumpad('C')" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 rounded-lg text-xs transition-all border border-red-100">C</button>
-                        <button onclick="pressNumpad('0')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">0</button>
-                        <button onclick="pressNumpad('.')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">,</button>
+                        <button onclick="pressNumpad('C')" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold py-1.5 md:py-2 rounded-lg text-xs transition-all border border-red-100 min-h-[36px]">C</button>
+                        <button onclick="pressNumpad('0')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">0</button>
+                        <button onclick="pressNumpad('.')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">,</button>
                     </div>
 
-                    <button onclick="completeSale()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-98 text-white py-2.5 rounded-xl font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-1.5">
+                    <button onclick="completeSale()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-98 text-white py-2 rounded-xl font-bold text-[11px] md:text-xs transition-all shadow-sm flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-circle-check text-sm"></i> Verkauf abschließen
                     </button>
                 </div>
@@ -293,9 +302,10 @@
         </section>
 
         <!-- CUSTOMER VIEW -->
-        <section id="view-customer" class="hidden flex-grow relative">
+        <section id="view-customer" class="hidden flex-grow relative overflow-hidden">
             
-            <div id="customer-screensaver" class="fixed inset-0 bg-gradient-to-br from-amber-400 via-orange-400 to-sky-300 overflow-hidden flex flex-col justify-between p-6 md:p-12 text-white transition-all duration-500 z-50">
+            <!-- SCREENSAVER OVERLAY -->
+            <div id="customer-screensaver" class="fixed inset-0 bg-gradient-to-br from-amber-400 via-orange-400 to-sky-300 overflow-hidden flex flex-col justify-between p-6 md:p-12 text-white transition-opacity duration-500 z-50">
                 <button onclick="changeRole()" class="absolute top-4 right-4 z-[60] bg-white/20 hover:bg-white/30 active:scale-95 text-white/95 hover:text-white px-4 py-2 rounded-xl text-xs font-bold border border-white/30 transition-all flex items-center gap-1.5 shadow-md">
                     <i class="fa-solid fa-arrow-left"></i> Beenden / Rolle wechseln
                 </button>
@@ -339,9 +349,24 @@
                 </div>
             </div>
 
-            <div id="customer-active-view" class="hidden h-full grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch transition-all duration-500">
-                <div class="md:col-span-7 bg-white p-5 rounded-3xl border border-orange-100 shadow-lg flex flex-col justify-between">
-                    <div>
+            <!-- SUCCESS OVERLAY (ANIMATED CHECKMARK) -->
+            <div id="customer-success-overlay" class="hidden fixed inset-0 bg-gradient-to-br from-emerald-400 to-teal-500 z-[60] flex flex-col items-center justify-center text-white transition-opacity duration-500 overflow-hidden">
+                <div class="scale-in-center flex flex-col items-center">
+                    <div class="bg-white/20 p-8 rounded-full mb-6 backdrop-blur-sm border border-white/30 shadow-lg">
+                        <svg class="w-32 h-32 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path class="animate-check" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <h2 class="font-summer text-4xl md:text-5xl font-black mb-3 drop-shadow-md">Bezahlung erfolgreich!</h2>
+                    <p class="text-emerald-50 font-bold text-lg md:text-xl drop-shadow-sm">Vielen Dank und guten Appetit!</p>
+                </div>
+            </div>
+
+            <!-- ACTIVE TRANSACTION CONTENT -->
+            <div id="customer-active-view" class="hidden h-full flex flex-row gap-3 md:gap-4 items-stretch transition-opacity duration-300 overflow-hidden">
+                
+                <div class="w-[55%] bg-white p-4 rounded-3xl border border-orange-100 shadow-lg flex flex-col h-full overflow-hidden">
+                    <div class="shrink-0">
                         <div class="flex items-center gap-2 mb-3 bg-orange-50 p-2.5 rounded-2xl border border-orange-100">
                             <span class="text-xl">🌴</span>
                             <div>
@@ -349,19 +374,19 @@
                                 <p class="text-[9px] text-slate-400 font-bold tracking-wide mt-1">Dein Eintritt in die Genießer-Zone</p>
                             </div>
                         </div>
-
                         <h3 class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Deine Auswahl:</h3>
-                        <div id="customer-live-items" class="space-y-2 max-h-[180px] md:max-h-[260px] overflow-y-auto pr-1"></div>
                     </div>
 
-                    <div class="mt-3 border-t border-slate-100 pt-2 flex items-center gap-2.5 text-[9px] text-amber-800 bg-amber-50/50 p-2.5 rounded-xl leading-relaxed">
+                    <div id="customer-live-items" class="space-y-2 flex-grow overflow-y-auto pr-1"></div>
+
+                    <div class="mt-3 border-t border-slate-100 pt-2 flex items-center gap-2 text-[9px] text-amber-800 bg-amber-50/50 p-2.5 rounded-xl leading-relaxed shrink-0">
                         <i class="fa-solid fa-circle-info text-sm text-amber-600 shrink-0"></i>
-                        <p><strong>Zutritt &amp; Stempel:</strong> Bitte genieß dein Essen innerhalb der markierten Ess-Zone. Das Weitergeben von Tellern an Personen ohne Einlassstempel ist nicht gestattet.</p>
+                        <p><strong>Zutritt &amp; Stempel:</strong> Bitte genieß dein Essen innerhalb der Ess-Zone. Das Weitergeben von Tellern an Personen ohne Einlassstempel ist nicht gestattet.</p>
                     </div>
                 </div>
 
-                <div class="md:col-span-5 flex flex-col gap-3">
-                    <div class="bg-gradient-to-tr from-orange-500 to-amber-400 text-white p-4 rounded-3xl shadow-md flex flex-col justify-between min-h-[100px] md:min-h-[120px] relative overflow-hidden">
+                <div class="w-[45%] flex flex-col gap-3 h-full overflow-hidden">
+                    <div class="bg-gradient-to-tr from-orange-500 to-amber-400 text-white p-4 rounded-3xl shadow-md flex flex-col justify-between shrink-0 relative overflow-hidden">
                         <div class="absolute -right-12 -top-12 w-24 h-24 bg-white/10 rounded-full"></div>
                         <div>
                             <span class="text-[10px] font-bold uppercase tracking-widest text-orange-100">Zu zahlen</span>
@@ -520,6 +545,7 @@
             change: 0,
             total: 0,
             salesHistory: [],
+            showSuccess: false, // Regelt das Einblenden der Erfolgs-Animation auf dem Kunden-Tablet
             tariffs: [
                 { id: 't1', name: 'Erwachsene (Flatrate)', price: 15.00, icon: 'fa-user', color: 'bg-amber-500' },
                 { id: 't2', name: 'Kinder (unter 7)', price: 0.00, icon: 'fa-child', color: 'bg-emerald-500' },
@@ -568,26 +594,20 @@
             const text = document.getElementById('cloud-status-text');
             if (!badge || !text) return;
             
-            badge.className = "flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all duration-300 "
+            badge.className = "flex items-center gap-2 px-2 py-1 rounded-xl text-[9px] font-bold transition-all duration-300 "
             
             if (state === 'offline') {
                 badge.className += "bg-slate-100 border border-slate-200 text-slate-600";
                 badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-slate-400"></span> <span>Offline (Lokaler Modus)</span>`;
             } else if (state === 'connecting') {
                 badge.className += "bg-amber-50 border border-amber-100 text-amber-700";
-                badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-amber-400 animate-ping"></span> <span>Verbinde mit Cloud...</span>`;
+                badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-amber-400 animate-ping"></span> <span>Verbinde...</span>`;
             } else if (state === 'connected') {
                 badge.className += "bg-emerald-50 border border-emerald-100 text-emerald-700";
                 badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span> <span>Cloud-Sync aktiv</span>`;
-            } else if (state === 'auth-error') {
+            } else if (state === 'auth-error' || state === 'permission-denied' || state === 'generic-error') {
                 badge.className += "bg-rose-50 border border-rose-100 text-rose-700";
-                badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-rose-500"></span> <span title="${details}">Fehler: Anonym-Auth aus!</span>`;
-            } else if (state === 'permission-denied') {
-                badge.className += "bg-rose-50 border border-rose-100 text-rose-700";
-                badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-rose-500"></span> <span title="${details}">Fehler: Schreibrechte verweigert!</span>`;
-            } else if (state === 'generic-error') {
-                badge.className += "bg-rose-50 border border-rose-100 text-rose-700";
-                badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-rose-400"></span> <span>Cloud-Fehler</span>`;
+                badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-rose-500"></span> <span title="${details}">Cloud-Fehler</span>`;
             }
         }
 
@@ -639,6 +659,7 @@
                         window.appState.lastSyncedData = data;
                         window.appState.salesHistory = data.salesHistory || [];
                         window.appState.tariffs = data.tariffs || window.appState.tariffs;
+                        window.appState.showSuccess = data.showSuccess || false;
                         
                         if (window.appState.role === 'customer') {
                             window.appState.cart = data.cart || [];
@@ -653,13 +674,7 @@
                     }
                 }, (error) => {
                     console.error("Firestore Listen Error:", error);
-                    if (error.code === 'permission-denied') {
-                        setConnectionStatus('permission-denied', error.message);
-                        showToast('Rechte blockiert! Prüfe deine Firestore Security Rules.', 'error');
-                    } else {
-                        setConnectionStatus('generic-error');
-                        showToast('Cloud-Fehler: ' + error.message, 'error');
-                    }
+                    setConnectionStatus('generic-error');
                 });
             };
 
@@ -674,29 +689,6 @@
                     if (db) {
                         startSync();
                         showToast('Kopplungs-ID geändert!', 'info');
-                        
-                        const docRef = getTargetDocRef();
-                        if (docRef) {
-                            docRef.get().then((docSnap) => {
-                                if (docSnap.exists) {
-                                    const data = docSnap.data();
-                                    window.appState.lastSyncedData = data;
-                                    window.appState.tariffs = data.tariffs || window.appState.tariffs;
-                                    window.appState.salesHistory = data.salesHistory || [];
-                                    
-                                    if (window.appState.role === 'seller') {
-                                        updateSellerUI();
-                                    } else if (window.appState.role === 'customer') {
-                                        window.appState.cart = data.cart || [];
-                                        window.appState.total = data.total || 0;
-                                        window.appState.paid = data.paid || 0;
-                                        window.appState.change = data.change || 0;
-                                        window.appState.givenCash = data.givenCash || '';
-                                        updateCustomerUI();
-                                    }
-                                }
-                            }).catch(err => console.error("Error pre-fetching document:", err));
-                        }
                     }
                 });
             });
@@ -714,31 +706,13 @@
                         givenCash: window.appState.givenCash,
                         tariffs: window.appState.tariffs,
                         salesHistory: window.appState.salesHistory,
+                        showSuccess: window.appState.showSuccess || false,
                         lastUpdated: Date.now()
                     });
                 } catch (e) {
                     console.error("Error updating Firestore state:", e);
-                    if (e.code === 'permission-denied') {
-                        setConnectionStatus('permission-denied', e.message);
-                        showToast('Firebase-Schreibfehler! Datenbankregeln (Rules) prüfen.', 'error');
-                    } else {
-                        showToast('Schreibfehler: ' + e.message, 'error');
-                    }
                 }
             };
-
-            const docRef = getTargetDocRef();
-            if (docRef) {
-                docRef.get().then((docSnap) => {
-                    if (docSnap.exists) {
-                        const data = docSnap.data();
-                        window.appState.lastSyncedData = data;
-                        if (data.tariffs) window.appState.tariffs = data.tariffs;
-                        if (data.salesHistory) window.appState.salesHistory = data.salesHistory;
-                        if (window.appState.role === 'seller') updateSellerUI();
-                    }
-                }).catch(err => console.error("Error fetching initial state:", err));
-            }
         }
 
         async function initFirebase() {
@@ -751,7 +725,6 @@
                 }
 
                 if (!finalConfig) {
-                    console.log("No Firebase config found. Running in offline fallback mode.");
                     setupOfflineFallback();
                     return;
                 }
@@ -765,26 +738,23 @@
                 db = firebase.firestore();
                 auth = firebase.auth();
 
-                // Failsafe-Anmeldesystem zur Vermeidung von "custom-token-mismatch"
                 let loggedIn = false;
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     try {
                         await auth.signInWithCustomToken(__initial_auth_token);
                         loggedIn = true;
                     } catch (tokenError) {
-                        // Bei Mismatch-Fehler fangen wir den Fehler geräuschlos ab und versuchen die anonyme Methode
                         console.warn("Custom Token passt nicht zum Projekt. Weiche auf anonyme Anmeldung aus.", tokenError);
                     }
                 }
 
-                // Wenn kein Token vorhanden war oder dieser ungültig war, anonym anmelden
                 if (!loggedIn) {
                     try {
                         await auth.signInAnonymously();
                     } catch (authError) {
                         console.error("Auth error:", authError);
                         setConnectionStatus('auth-error', authError.message);
-                        showToast('Anonyme Anmeldung deaktiviert! Aktiviere sie in der Firebase Console unter Authentication!', 'error');
+                        showToast('Anonyme Anmeldung deaktiviert! Aktiviere sie in der Firebase Console!', 'error');
                         setupOfflineFallback();
                         return;
                     }
@@ -793,7 +763,6 @@
                 auth.onAuthStateChanged((user) => {
                     if (user) {
                         setConnectionStatus('connected');
-                        showToast('Cloud-Synchronisation aktiv ☁️', 'success');
                         setupFirebaseSync();
                     } else {
                         setupOfflineFallback();
@@ -803,7 +772,6 @@
             } catch (err) {
                 console.error("Firebase Initialization Error:", err);
                 setConnectionStatus('generic-error');
-                showToast('Verbindung fehlgeschlagen. Offline-Modus aktiv.', 'error');
                 setupOfflineFallback();
             }
         }
@@ -816,6 +784,7 @@
                 const data = window.appState.lastSyncedData;
                 window.appState.salesHistory = data.salesHistory || [];
                 window.appState.tariffs = data.tariffs || window.appState.tariffs;
+                window.appState.showSuccess = data.showSuccess || false;
                 
                 if (role === 'customer') {
                     window.appState.cart = data.cart || [];
@@ -846,6 +815,7 @@
             document.getElementById('view-seller').classList.add('hidden');
             document.getElementById('view-customer').classList.add('hidden');
             document.getElementById('customer-screensaver').classList.add('hidden'); 
+            document.getElementById('customer-success-overlay').classList.add('hidden');
             document.getElementById('role-badge-container').classList.add('hidden');
             document.getElementById('view-role-selection').classList.remove('hidden');
             window.appState.role = null;
@@ -875,17 +845,17 @@
             window.appState.tariffs.forEach(tariff => {
                 const card = document.createElement('button');
                 card.onclick = () => addToCart(tariff);
-                card.className = "bg-white hover:bg-gradient-to-br hover:from-white hover:to-orange-50/10 p-3 rounded-2xl border-2 border-slate-100 hover:border-orange-300 text-left transition-all duration-300 shadow-sm flex flex-col justify-between h-24 relative overflow-hidden group active:scale-95";
+                card.className = "bg-white hover:bg-gradient-to-br hover:from-white hover:to-orange-50/10 p-2 md:p-3 rounded-2xl border-2 border-slate-100 hover:border-orange-300 text-left transition-all duration-300 shadow-sm flex flex-col justify-between h-20 md:h-24 relative overflow-hidden group active:scale-95";
                 card.innerHTML = `
                     <div class="flex items-center justify-between w-full">
-                        <div class="bg-orange-100 text-orange-600 p-1.5 rounded-xl group-hover:bg-orange-500 group-hover:text-white transition-all duration-300">
-                            <i class="fa-solid ${tariff.icon || 'fa-user'} text-xs"></i>
+                        <div class="bg-orange-100 text-orange-600 p-1 md:p-1.5 rounded-xl group-hover:bg-orange-500 group-hover:text-white transition-all duration-300">
+                            <i class="fa-solid ${tariff.icon || 'fa-user'} text-[10px] md:text-xs"></i>
                         </div>
-                        <span class="text-[8px] bg-slate-100 font-extrabold text-slate-400 px-1 py-0.5 rounded">All-You-Can-Eat</span>
+                        <span class="text-[7px] md:text-[8px] bg-slate-100 font-extrabold text-slate-400 px-1 py-0.5 rounded">All-You-Can-Eat</span>
                     </div>
                     <div>
-                        <h4 class="font-bold text-slate-700 text-[11px] group-hover:text-slate-900 transition-colors line-clamp-1 leading-none">${tariff.name}</h4>
-                        <p class="font-summer text-base font-black text-orange-600 mt-1">${tariff.price.toFixed(2)} <span class="text-[10px] font-bold">€</span></p>
+                        <h4 class="font-bold text-slate-700 text-[10px] md:text-[11px] group-hover:text-slate-900 transition-colors line-clamp-1 leading-none">${tariff.name}</h4>
+                        <p class="font-summer text-sm md:text-base font-black text-orange-600 mt-1">${tariff.price.toFixed(2)} <span class="text-[8px] md:text-[10px] font-bold">€</span></p>
                     </div>
                 `;
                 container.appendChild(card);
@@ -909,21 +879,21 @@
             
             window.appState.cart.forEach((item, index) => {
                 const row = document.createElement('div');
-                row.className = "flex items-center justify-between bg-slate-50 p-2 rounded-xl border border-slate-100/60";
+                row.className = "flex items-center justify-between bg-slate-50 p-1.5 md:p-2 rounded-xl border border-slate-100/60";
                 row.innerHTML = `
                     <div class="flex items-center gap-1.5 min-w-0">
-                        <span class="text-xs shrink-0">🍽️</span>
+                        <span class="text-[10px] md:text-xs shrink-0">🍽️</span>
                         <div class="min-w-0">
-                            <h5 class="font-bold text-[10px] text-slate-700 truncate max-w-[80px] sm:max-w-[120px] leading-tight">${item.name}</h5>
-                            <p class="text-[8px] text-slate-400 leading-none mt-0.5">${item.price.toFixed(2)} €</p>
+                            <h5 class="font-bold text-[9px] md:text-[10px] text-slate-700 truncate max-w-[80px] sm:max-w-[120px] leading-tight">${item.name}</h5>
+                            <p class="text-[7px] md:text-[8px] text-slate-400 leading-none mt-0.5">${item.price.toFixed(2)} €</p>
                         </div>
                     </div>
                     
-                    <div class="flex items-center gap-1.5 shrink-0">
-                        <button onclick="changeCartQty(${index}, -1)" class="w-5 h-5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-md font-bold text-xs flex items-center justify-center transition-all">-</button>
-                        <span class="font-bold text-[11px] text-slate-700 w-2.5 text-center">${item.qty}</span>
-                        <button onclick="changeCartQty(${index}, 1)" class="w-5 h-5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-md font-bold text-xs flex items-center justify-center transition-all">+</button>
-                        <span class="font-mono font-bold text-[10px] text-slate-700 w-12 text-right">${(item.price * item.qty).toFixed(2)} €</span>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <button onclick="changeCartQty(${index}, -1)" class="w-4 h-4 md:w-5 md:h-5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-md font-bold text-xs flex items-center justify-center transition-all min-h-0">-</button>
+                        <span class="font-bold text-[10px] md:text-[11px] text-slate-700 w-2.5 text-center">${item.qty}</span>
+                        <button onclick="changeCartQty(${index}, 1)" class="w-4 h-4 md:w-5 md:h-5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-md font-bold text-xs flex items-center justify-center transition-all min-h-0">+</button>
+                        <span class="font-mono font-bold text-[9px] md:text-[10px] text-slate-700 w-10 md:w-12 text-right">${(item.price * item.qty).toFixed(2)} €</span>
                     </div>
                 `;
                 container.appendChild(row);
@@ -962,7 +932,6 @@
             if (existing) existing.qty++;
             else window.appState.cart.push({ id: tariff.id, name: tariff.name, price: tariff.price, qty: 1 });
             triggerStateSync();
-            showToast(`Tarif hinzugefügt: ${tariff.name}`, 'success');
         }
 
         function changeCartQty(index, dir) {
@@ -976,7 +945,6 @@
             window.appState.cart = [];
             window.appState.givenCash = '';
             triggerStateSync();
-            showToast('Bestellung zurückgesetzt', 'info');
         }
 
         function addCustomPrice() {
@@ -989,7 +957,6 @@
             window.appState.cart.push({ id: 'custom-' + Date.now(), name: 'Sonderbuchung / Spende', price: price, qty: 1 });
             input.value = '';
             triggerStateSync();
-            showToast(`Sonderbuchung (${price.toFixed(2)} €) hinzugefügt`, 'success');
         }
 
         // Numpad Actions
@@ -1007,12 +974,14 @@
         function setQuickCash(amount) {
             window.appState.givenCash = amount.toString();
             triggerStateSync();
-            showToast(`${amount} € gewählt`, 'info');
         }
 
         function completeSale() {
             if (window.appState.cart.length === 0) return showToast('Warenkorb ist leer!', 'warning');
             if (window.appState.paid < window.appState.total) return showToast('Betrag reicht nicht aus!', 'warning');
+
+            // Set the success overlay active
+            window.appState.showSuccess = true;
 
             window.appState.salesHistory.unshift({
                 id: 'sale-' + Date.now(),
@@ -1022,14 +991,21 @@
                 paid: window.appState.paid,
                 change: window.appState.change
             }); 
-            showToast('Verkauf erfolgreich abgeschlossen!', 'success');
             
+            // Clear checkout parameters immediately
             window.appState.cart = [];
             window.appState.givenCash = '';
             window.appState.paid = 0;
             window.appState.change = 0;
             
+            // Trigger sync for checkmark animation!
             triggerStateSync();
+            
+            // After 3.5s, turn off the success overlay and let it fade into screensaver
+            setTimeout(() => {
+                window.appState.showSuccess = false;
+                triggerStateSync();
+            }, 3500);
         }
 
         function triggerStateSync() {
@@ -1061,7 +1037,27 @@
             updateGuestsBadge();
             const screensaverEl = document.getElementById('customer-screensaver');
             const activeViewEl = document.getElementById('customer-active-view');
+            const successOverlayEl = document.getElementById('customer-success-overlay');
 
+            // 1. Prioritize Success Checkmark Animation
+            if (window.appState.showSuccess) {
+                screensaverEl.classList.add('hidden');
+                activeViewEl.classList.add('hidden');
+                
+                // Show success screen and re-trigger checkmark animation
+                successOverlayEl.classList.remove('hidden');
+                const checkIcon = successOverlayEl.querySelector('.animate-check');
+                if (checkIcon) {
+                    checkIcon.style.animation = 'none';
+                    checkIcon.offsetHeight; // Trigger reflow
+                    checkIcon.style.animation = null; 
+                }
+                return; // Stop processing further views
+            } else {
+                successOverlayEl.classList.add('hidden');
+            }
+
+            // 2. Normal View Logic (Cart vs. Screensaver)
             const cart = window.appState.cart || [];
             if (cart.length === 0) {
                 screensaverEl.classList.remove('hidden');
@@ -1084,16 +1080,16 @@
 
             const banner = document.getElementById('customer-status-banner');
             if (change > 0) {
-                banner.className = "mt-1 p-2.5 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-100 text-center font-bold text-[10px] flex items-center justify-center gap-1";
+                banner.className = "mt-1 p-2 md:p-2.5 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-100 text-center font-bold text-[10px] flex items-center justify-center gap-1";
                 banner.innerHTML = `<i class="fa-solid fa-coins animate-bounce text-emerald-500 text-sm"></i> Bitte entnimm dein Rückgeld: ${formatStr(change)} €`;
             } else if (total > 0 && paid === total) {
-                banner.className = "mt-1 p-2.5 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-100 text-center font-bold text-[10px] flex items-center justify-center gap-1";
+                banner.className = "mt-1 p-2 md:p-2.5 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-100 text-center font-bold text-[10px] flex items-center justify-center gap-1";
                 banner.innerHTML = `<i class="fa-solid fa-heart animate-pulse text-rose-500 text-sm"></i> Passend bezahlt. Vielen Dank!`;
             } else if (total > 0) {
-                banner.className = "mt-1 p-2.5 rounded-2xl bg-orange-50 text-orange-800 border border-orange-100 text-center font-bold text-[10px] flex items-center justify-center gap-1";
+                banner.className = "mt-1 p-2 md:p-2.5 rounded-2xl bg-orange-50 text-orange-800 border border-orange-100 text-center font-bold text-[10px] flex items-center justify-center gap-1";
                 banner.innerHTML = `<i class="fa-solid fa-hourglass-half animate-spin text-orange-500 text-xs"></i> Warte auf Zahlung am Terminal...`;
             } else {
-                banner.className = "mt-1 p-2.5 rounded-2xl bg-sky-50 text-sky-700 border border-sky-100 text-center font-bold text-[10px] flex items-center justify-center gap-1";
+                banner.className = "mt-1 p-2 md:p-2.5 rounded-2xl bg-sky-50 text-sky-700 border border-sky-100 text-center font-bold text-[10px] flex items-center justify-center gap-1";
                 banner.innerHTML = `<i class="fa-solid fa-sun animate-spin text-sky-500" style="animation-duration: 10s"></i> Viel Spaß beim Sommerfest!`;
             }
 
@@ -1102,16 +1098,16 @@
 
             cart.forEach(item => {
                 const itemEl = document.createElement('div');
-                itemEl.className = "flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100 shadow-sm";
+                itemEl.className = "flex items-center justify-between p-2 md:p-2.5 rounded-xl bg-slate-50 border border-slate-100 shadow-sm";
                 itemEl.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <div class="bg-gradient-to-tr from-orange-400 to-amber-400 text-white w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[11px]">${item.qty}x</div>
+                    <div class="flex items-center gap-1.5 md:gap-2">
+                        <div class="bg-gradient-to-tr from-orange-400 to-amber-400 text-white w-6 h-6 md:w-7 md:h-7 rounded-lg flex items-center justify-center font-bold text-[10px] md:text-[11px]">${item.qty}x</div>
                         <div>
-                            <h4 class="font-bold text-slate-800 text-[10px] leading-tight">${item.name}</h4>
-                            <p class="text-[8px] text-slate-400 mt-0.5">${item.price.toFixed(2)} € pro Person</p>
+                            <h4 class="font-bold text-slate-800 text-[9px] md:text-[10px] leading-tight">${item.name}</h4>
+                            <p class="text-[7px] md:text-[8px] text-slate-400 mt-0.5">${item.price.toFixed(2)} € pro Person</p>
                         </div>
                     </div>
-                    <span class="font-mono font-extrabold text-slate-800 text-[11px]">${(item.price * item.qty).toFixed(2)} €</span>
+                    <span class="font-mono font-extrabold text-slate-800 text-[10px] md:text-[11px]">${(item.price * item.qty).toFixed(2)} €</span>
                 `;
                 list.appendChild(itemEl);
             });
@@ -1170,7 +1166,6 @@
             renderConfigTariffList();
         }
 
-        // Config Management
         function closeConfigModal() {
             document.getElementById('modal-config').classList.add('hidden');
         }
