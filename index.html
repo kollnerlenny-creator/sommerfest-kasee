@@ -29,7 +29,7 @@
         }
         /* Custom scrollbar */
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
         ::-webkit-scrollbar-track {
             background: transparent;
@@ -40,6 +40,23 @@
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
+        }
+
+        /* Sanfte Einblend-Animationen für das gesamte UI */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeOutSoft {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        .animate-fade-out-soft {
+            animation: fadeOutSoft 0.5s ease-out forwards;
         }
 
         /* Sommerliche Animationen für den Screensaver */
@@ -106,208 +123,219 @@
             transform-origin: bottom;
         }
 
-        /* Vergrößerte Touch-Flächen für das iPad */
+        /* Vergrößerte Touch-Flächen */
         button {
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Spezifische Numpad Touch-Ziel Größe */
+        .numpad-btn {
+            min-height: 52px; /* Super für kleine Tablets */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-amber-50 via-orange-50 to-sky-50 h-screen w-screen overflow-hidden text-slate-800 flex flex-col antialiased selection:bg-orange-200">
+<body class="bg-gradient-to-br from-amber-50 via-orange-50 to-sky-50 h-screen w-screen overflow-hidden text-slate-800 flex flex-col antialiased selection:bg-orange-200 transition-colors duration-500">
 
     <!-- MAIN APP CONTAINER -->
-    <main class="flex-grow flex flex-col w-full max-w-7xl mx-auto px-2 py-2 md:px-4 md:py-3 h-full overflow-hidden">
+    <main class="flex-grow flex flex-col w-full max-w-7xl mx-auto px-3 py-3 md:px-5 md:py-4 h-full overflow-hidden">
         
         <!-- Header -->
-        <header class="flex flex-col sm:flex-row items-center justify-between gap-2 mb-2 pb-2 border-b border-orange-100/60 shrink-0">
-            <div class="flex items-center gap-2">
-                <div class="bg-gradient-to-tr from-amber-400 to-orange-500 text-white p-2 rounded-2xl shadow-md shadow-orange-500/20 transform rotate-3">
-                    <i class="fa-solid fa-utensils text-base"></i>
+        <header class="flex flex-col sm:flex-row items-center justify-between gap-3 mb-3 pb-3 border-b border-orange-100/60 shrink-0 animate-fade-in">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-tr from-amber-400 to-orange-500 text-white p-2.5 rounded-2xl shadow-md shadow-orange-500/20 transform rotate-3">
+                    <i class="fa-solid fa-utensils text-xl"></i>
                 </div>
                 <div>
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <h1 class="font-summer text-lg md:text-xl font-bold bg-gradient-to-r from-orange-600 to-amber-500 bg-clip-text text-transparent leading-none">Ess-Zone Buffet</h1>
-                        <div class="bg-gradient-to-r from-sky-400 to-blue-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm shrink-0">
-                            <i class="fa-solid fa-users text-[9px]"></i>
-                            <span id="header-guests-count" class="font-black text-[11px]">0</span> in der Zone
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <h1 class="font-summer text-xl md:text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-500 bg-clip-text text-transparent leading-none">Ess-Zone Buffet</h1>
+                        <div class="bg-gradient-to-r from-sky-400 to-blue-500 text-white text-xs md:text-sm font-bold px-3 py-0.5 rounded-full flex items-center gap-1.5 shadow-sm shrink-0">
+                            <i class="fa-solid fa-users text-[10px] md:text-xs"></i>
+                            <span id="header-guests-count" class="font-black text-sm md:text-base">0</span> in der Zone
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div class="flex flex-wrap items-center gap-2 justify-end">
+            <div class="flex flex-wrap items-center gap-2.5 justify-end">
                 <!-- Live-Verbindungsstatus Ampelsystem -->
-                <div id="cloud-status-badge" class="flex items-center gap-1.5 bg-slate-100 border border-slate-200 px-2 py-1 rounded-xl text-[9px] font-bold text-slate-600 transition-all duration-300">
-                    <span class="h-2 w-2 rounded-full bg-slate-400"></span>
+                <div id="cloud-status-badge" class="flex items-center gap-1.5 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-xl text-[10px] md:text-xs font-bold text-slate-600 transition-all duration-300">
+                    <span class="h-2.5 w-2.5 rounded-full bg-slate-400"></span>
                     <span id="cloud-status-text">Starte System...</span>
                 </div>
 
                 <!-- Kopplungs-Code -->
-                <div class="flex items-center bg-white/90 border border-orange-100 rounded-xl px-2 py-1 shadow-sm">
-                    <span class="text-[9px] font-black text-orange-400 uppercase mr-1 tracking-wider"><i class="fa-solid fa-wifi"></i> ID:</span>
-                    <input type="text" value="SOMMER-2026" class="bg-transparent border-none text-[10px] font-black text-slate-700 uppercase focus:outline-none w-20 text-center sync-room-code-input" title="Nutze auf beiden Geräten dieselbe ID für die Live-Sync">
+                <div class="flex items-center bg-white/90 border border-orange-100 rounded-xl px-3 py-1.5 shadow-sm">
+                    <span class="text-[10px] md:text-xs font-black text-orange-400 uppercase mr-1.5 tracking-wider"><i class="fa-solid fa-wifi"></i> ID:</span>
+                    <input type="text" value="SOMMER-2026" class="bg-transparent border-none text-[11px] md:text-sm font-black text-slate-700 uppercase focus:outline-none w-24 md:w-32 text-center sync-room-code-input transition-all" title="Nutze auf beiden Geräten dieselbe ID für die Live-Sync">
                 </div>
 
                 <!-- Rolle wechseln -->
-                <div id="role-badge-container" class="hidden flex items-center gap-1.5 bg-white/80 backdrop-blur-md px-2 py-1 rounded-2xl border border-orange-100 shadow-sm">
-                    <span id="role-badge-text" class="text-[9px] font-black text-slate-500 uppercase leading-none">Aktiv</span>
-                    <button onclick="changeRole()" class="text-[9px] text-orange-500 hover:text-orange-600 font-bold ml-1 underline">Wechseln</button>
+                <div id="role-badge-container" class="hidden flex items-center gap-2 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-orange-100 shadow-sm transition-all duration-300">
+                    <span id="role-badge-text" class="text-[10px] md:text-xs font-black text-slate-500 uppercase leading-none mt-0.5">Aktiv</span>
+                    <button onclick="changeRole()" class="text-[11px] md:text-xs text-orange-500 hover:text-orange-600 font-bold ml-1 underline transition-colors">Wechseln</button>
                 </div>
             </div>
         </header>
 
         <!-- ROLE SELECTION VIEW -->
-        <section id="view-role-selection" class="flex-grow flex items-center justify-center py-4">
-            <div class="max-w-xl w-full flex flex-row gap-4 px-4 h-64">
-                <button onclick="selectRole('seller')" class="w-1/2 group relative bg-white hover:bg-gradient-to-b hover:from-white hover:to-amber-50/30 p-5 rounded-3xl border-2 border-slate-100 hover:border-amber-400 text-left transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-amber-100/50 flex flex-col justify-between overflow-hidden transform hover:-translate-y-1">
-                    <div class="absolute -right-10 -top-10 w-24 h-24 bg-amber-100 rounded-full opacity-30 group-hover:scale-125 transition-transform duration-500"></div>
-                    <div class="bg-amber-100 group-hover:bg-amber-500 text-amber-600 group-hover:text-white p-2.5 rounded-2xl inline-block transition-colors duration-300 self-start">
-                        <i class="fa-solid fa-cash-register text-xl"></i>
+        <section id="view-role-selection" class="flex-grow flex items-center justify-center py-4 animate-fade-in">
+            <div class="max-w-2xl w-full flex flex-col sm:flex-row gap-5 px-4">
+                
+                <button onclick="selectRole('seller')" class="w-full sm:w-1/2 group relative bg-white hover:bg-gradient-to-b hover:from-white hover:to-amber-50/30 p-6 md:p-8 rounded-3xl border-2 border-slate-100 hover:border-amber-400 text-left transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-amber-100/50 flex flex-col justify-between h-64 overflow-hidden transform hover:-translate-y-1">
+                    <div class="absolute -right-10 -top-10 w-32 h-32 bg-amber-100 rounded-full opacity-30 group-hover:scale-125 transition-transform duration-500"></div>
+                    <div class="bg-amber-100 group-hover:bg-amber-500 text-amber-600 group-hover:text-white p-3 md:p-4 rounded-2xl inline-block transition-colors duration-300 self-start">
+                        <i class="fa-solid fa-cash-register text-2xl md:text-3xl"></i>
                     </div>
                     <div>
-                        <h3 class="font-summer text-lg font-bold text-slate-800 mb-1">Verkäufer</h3>
-                        <p class="text-slate-500 text-[10px] leading-relaxed">Bestellungen, Kasse & Numpad.</p>
+                        <h3 class="font-summer text-xl md:text-2xl font-bold text-slate-800 mb-1.5">Verkäufer</h3>
+                        <p class="text-slate-500 text-xs md:text-sm leading-relaxed">Bestellungen aufnehmen, Kasse & Numpad bedienen.</p>
                     </div>
                 </button>
 
-                <button onclick="selectRole('customer')" class="w-1/2 group relative bg-white hover:bg-gradient-to-b hover:from-white hover:to-sky-50/30 p-5 rounded-3xl border-2 border-slate-100 hover:border-sky-400 text-left transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-sky-100/50 flex flex-col justify-between overflow-hidden transform hover:-translate-y-1">
-                    <div class="absolute -right-10 -top-10 w-24 h-24 bg-sky-100 rounded-full opacity-30 group-hover:scale-125 transition-transform duration-500"></div>
-                    <div class="bg-sky-100 group-hover:bg-sky-500 text-sky-600 group-hover:text-white p-2.5 rounded-2xl inline-block transition-colors duration-300 self-start">
-                        <i class="fa-solid fa-desktop text-xl"></i>
+                <button onclick="selectRole('customer')" class="w-full sm:w-1/2 group relative bg-white hover:bg-gradient-to-b hover:from-white hover:to-sky-50/30 p-6 md:p-8 rounded-3xl border-2 border-slate-100 hover:border-sky-400 text-left transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-sky-100/50 flex flex-col justify-between h-64 overflow-hidden transform hover:-translate-y-1">
+                    <div class="absolute -right-10 -top-10 w-32 h-32 bg-sky-100 rounded-full opacity-30 group-hover:scale-125 transition-transform duration-500"></div>
+                    <div class="bg-sky-100 group-hover:bg-sky-500 text-sky-600 group-hover:text-white p-3 md:p-4 rounded-2xl inline-block transition-colors duration-300 self-start">
+                        <i class="fa-solid fa-desktop text-2xl md:text-3xl"></i>
                     </div>
                     <div>
-                        <h3 class="font-summer text-lg font-bold text-slate-800 mb-1">Kunden Display</h3>
-                        <p class="text-slate-500 text-[10px] leading-relaxed">Live-Anzeige & Stempel-Info.</p>
+                        <h3 class="font-summer text-xl md:text-2xl font-bold text-slate-800 mb-1.5">Kunden Display</h3>
+                        <p class="text-slate-500 text-xs md:text-sm leading-relaxed">Live-Anzeige der Bestellung & Stempel-Info für den Gast.</p>
                     </div>
                 </button>
             </div>
         </section>
 
         <!-- SELLER VIEW (STRICT SIDE-BY-SIDE) -->
-        <section id="view-seller" class="hidden flex-grow flex flex-row gap-2.5 md:gap-4 items-stretch overflow-hidden">
+        <section id="view-seller" class="hidden flex-grow flex flex-row gap-3 md:gap-5 items-stretch overflow-hidden animate-fade-in">
             
             <!-- Left Panel (Tariffs) -->
-            <div class="w-[58%] flex flex-col gap-2.5 overflow-hidden h-full">
+            <div class="w-[55%] flex flex-col gap-3 overflow-hidden h-full">
                 <!-- Header -->
-                <div class="bg-white/70 backdrop-blur-md p-2 rounded-2xl border border-orange-100 shadow-sm flex items-center justify-between gap-2 shrink-0">
-                    <div class="flex items-center gap-1.5">
-                        <span class="bg-orange-100 text-orange-600 px-2 py-0.5 rounded-lg font-bold text-[9px]">Tarife</span>
-                        <h2 class="font-summer text-sm md:text-base font-bold text-slate-700">Buffet-Auswahl</h2>
+                <div class="bg-white/70 backdrop-blur-md p-2.5 rounded-2xl border border-orange-100 shadow-sm flex items-center justify-between gap-2 shrink-0">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-orange-100 text-orange-600 px-2.5 py-1 rounded-lg font-bold text-[10px] md:text-xs">Tarife</span>
+                        <h2 class="font-summer text-base md:text-lg font-bold text-slate-700">Buffet-Auswahl</h2>
                     </div>
                     
-                    <div class="flex items-center gap-1.5">
-                        <button onclick="openHistoryModal()" class="bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white px-2.5 py-1 rounded-xl text-[10px] font-black flex items-center gap-1 transition-all shadow-sm">
+                    <div class="flex items-center gap-2">
+                        <button onclick="openHistoryModal()" class="bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-black flex items-center gap-1.5 transition-all shadow-sm active:scale-95">
                             <i class="fa-solid fa-chart-line"></i> Umsatz: <span id="seller-revenue-badge">0,00 €</span>
                         </button>
-                        <button onclick="openConfigModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-2.5 py-1 rounded-xl text-[10px] font-bold flex items-center gap-1 transition-all">
+                        <button onclick="openConfigModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95">
                             <i class="fa-solid fa-cog"></i> Anpassen
                         </button>
                     </div>
                 </div>
 
                 <!-- Tariffs Grid (Scrollable) -->
-                <div id="seller-tariffs-grid" class="grid grid-cols-2 gap-2 overflow-y-auto pr-1 flex-grow content-start"></div>
+                <div id="seller-tariffs-grid" class="grid grid-cols-2 gap-2.5 md:gap-3 overflow-y-auto pr-2 flex-grow content-start"></div>
 
                 <!-- Custom Price (Fixed at bottom) -->
-                <div class="bg-white/60 p-2 rounded-2xl border border-dashed border-orange-200 flex flex-row items-center justify-between gap-2 shrink-0">
-                    <div class="flex items-center gap-2">
-                        <div class="bg-amber-100 text-amber-600 p-1.5 rounded-lg text-[10px]">
+                <div class="bg-white/80 backdrop-blur-md p-3 rounded-2xl border border-dashed border-orange-300 flex flex-row items-center justify-between gap-3 shrink-0">
+                    <div class="flex items-center gap-2.5">
+                        <div class="bg-amber-100 text-amber-600 p-2 rounded-xl text-xs md:text-sm">
                             <i class="fa-solid fa-tag"></i>
                         </div>
                         <div>
-                            <h4 class="font-bold text-[10px] text-slate-700 leading-none">Spende</h4>
+                            <h4 class="font-bold text-xs md:text-sm text-slate-800 leading-none">Spende / Sonderbetrag</h4>
                         </div>
                     </div>
-                    <div class="flex items-center gap-1">
-                        <input id="input-custom-price" type="number" step="0.50" placeholder="0.00" class="bg-white border border-slate-200 px-2 py-1 rounded-lg text-right font-bold text-slate-700 w-16 text-[11px] focus:outline-none focus:ring-1 focus:ring-orange-400">
-                        <span class="font-bold text-[11px] text-slate-400">€</span>
-                        <button onclick="addCustomPrice()" class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-3 py-1 rounded-lg font-bold text-[11px] transition-all shadow-sm">
-                            +
+                    <div class="flex items-center gap-2">
+                        <input id="input-custom-price" type="number" step="0.50" placeholder="0.00" class="bg-white border border-slate-200 px-3 py-2 rounded-xl text-right font-bold text-slate-700 w-20 md:w-24 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all">
+                        <span class="font-bold text-sm text-slate-500">€</span>
+                        <button onclick="addCustomPrice()" class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all shadow-md active:scale-95">
+                            <i class="fa-solid fa-plus"></i>
                         </button>
                     </div>
                 </div>
             </div>
 
             <!-- Right Panel (Cart & Numpad) -->
-            <div class="w-[42%] flex flex-col gap-2.5 overflow-hidden h-full">
+            <div class="w-[45%] flex flex-col gap-3 overflow-hidden h-full">
                 <!-- Live Cart Card (Takes remaining vertical space) -->
-                <div class="bg-white p-2 md:p-3 rounded-2xl shadow-md border border-orange-100 flex flex-col flex-grow overflow-hidden min-h-[120px]">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-1.5 mb-1.5 shrink-0">
-                        <h3 class="font-summer text-[11px] md:text-xs font-bold text-slate-700 flex items-center gap-1">
+                <div class="bg-white p-3 md:p-4 rounded-3xl shadow-md border border-orange-100 flex flex-col flex-grow overflow-hidden min-h-[140px]">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-2 shrink-0">
+                        <h3 class="font-summer text-sm md:text-base font-bold text-slate-800 flex items-center gap-1.5">
                             <i class="fa-solid fa-shopping-basket text-orange-500"></i> Bestellung
                         </h3>
-                        <button onclick="clearCart()" class="text-[9px] md:text-[10px] text-red-500 hover:text-red-600 font-bold flex items-center gap-0.5">
-                            <i class="fa-solid fa-trash-can text-[9px]"></i> Leeren
+                        <button onclick="clearCart()" class="text-[10px] md:text-xs text-red-500 hover:text-red-600 font-bold flex items-center gap-1 bg-red-50 hover:bg-red-100 px-2 py-1 rounded-lg transition-colors">
+                            <i class="fa-solid fa-trash-can text-[10px]"></i> Leeren
                         </button>
                     </div>
 
                     <!-- Scrollable Cart Items -->
-                    <div id="seller-cart-items" class="flex-grow overflow-y-auto space-y-1 pr-1"></div>
+                    <div id="seller-cart-items" class="flex-grow overflow-y-auto space-y-1.5 pr-2"></div>
 
                     <!-- Cart Total -->
-                    <div class="border-t border-slate-100 pt-1 mt-1 flex items-center justify-between shrink-0">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Gesamt:</span>
-                        <span id="seller-total-price" class="font-summer text-lg md:text-xl font-extrabold text-orange-600">0.00 €</span>
+                    <div class="border-t border-slate-100 pt-2 mt-2 flex items-center justify-between shrink-0">
+                        <span class="text-xs md:text-sm font-black text-slate-400 uppercase tracking-wider">Gesamt:</span>
+                        <span id="seller-total-price" class="font-summer text-2xl md:text-3xl font-extrabold text-orange-600 transition-all duration-300">0.00 €</span>
                     </div>
                 </div>
 
                 <!-- Cash Numpad Card (Fixed Height at bottom) -->
-                <div class="bg-white p-2 md:p-2.5 rounded-2xl shadow-md border border-orange-100 flex flex-col gap-1.5 shrink-0">
-                    <div class="grid grid-cols-2 gap-1 bg-slate-50 p-1.5 rounded-xl border border-slate-100">
+                <div class="bg-white p-3 md:p-4 rounded-3xl shadow-lg border border-orange-100 flex flex-col gap-2 md:gap-2.5 shrink-0">
+                    
+                    <div class="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded-2xl border border-slate-100">
                         <div>
-                            <span class="text-[9px] font-bold text-slate-400 uppercase block leading-none mb-0.5">Gegeben:</span>
-                            <div class="flex items-baseline gap-0.5">
-                                <span id="display-given-cash" class="font-mono text-sm md:text-base font-extrabold text-slate-700">0,00</span>
-                                <span class="text-[10px] font-bold text-slate-400">€</span>
+                            <span class="text-[10px] md:text-xs font-bold text-slate-400 uppercase block leading-none mb-1">Gegeben:</span>
+                            <div class="flex items-baseline gap-1">
+                                <span id="display-given-cash" class="font-mono text-xl md:text-2xl font-black text-slate-700 transition-all duration-200">0,00</span>
+                                <span class="text-xs md:text-sm font-bold text-slate-400">€</span>
                             </div>
                         </div>
-                        <div class="text-right border-l border-slate-200/60 pl-1">
-                            <span class="text-[9px] font-bold text-slate-400 uppercase block leading-none mb-0.5">Rückgeld:</span>
-                            <div class="flex items-baseline justify-end gap-0.5">
-                                <span id="display-change" class="font-mono text-base md:text-lg font-black text-emerald-600">0,00</span>
-                                <span class="text-[10px] font-bold text-emerald-600">€</span>
+                        <div class="text-right border-l border-slate-200/60 pl-2">
+                            <span class="text-[10px] md:text-xs font-bold text-slate-400 uppercase block leading-none mb-1">Rückgeld:</span>
+                            <div class="flex items-baseline justify-end gap-1">
+                                <span id="display-change" class="font-mono text-2xl md:text-3xl font-black text-emerald-600 transition-all duration-200">0,00</span>
+                                <span class="text-sm font-bold text-emerald-600">€</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-4 gap-1">
-                        <button onclick="setQuickCash(5)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-[10px] transition-all border border-slate-200">5 €</button>
-                        <button onclick="setQuickCash(10)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-[10px] transition-all border border-slate-200">10 €</button>
-                        <button onclick="setQuickCash(20)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-[10px] transition-all border border-slate-200">20 €</button>
-                        <button onclick="setQuickCash(50)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-[10px] transition-all border border-slate-200">50 €</button>
+                    <div class="grid grid-cols-4 gap-1.5 md:gap-2">
+                        <button onclick="setQuickCash(5)" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 active:scale-95 text-slate-700 font-bold py-2.5 md:py-3 rounded-xl text-xs md:text-sm transition-all border border-slate-200">5 €</button>
+                        <button onclick="setQuickCash(10)" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 active:scale-95 text-slate-700 font-bold py-2.5 md:py-3 rounded-xl text-xs md:text-sm transition-all border border-slate-200">10 €</button>
+                        <button onclick="setQuickCash(20)" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 active:scale-95 text-slate-700 font-bold py-2.5 md:py-3 rounded-xl text-xs md:text-sm transition-all border border-slate-200">20 €</button>
+                        <button onclick="setQuickCash(50)" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 active:scale-95 text-slate-700 font-bold py-2.5 md:py-3 rounded-xl text-xs md:text-sm transition-all border border-slate-200">50 €</button>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-1">
-                        <button onclick="pressNumpad('7')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">7</button>
-                        <button onclick="pressNumpad('8')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">8</button>
-                        <button onclick="pressNumpad('9')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">9</button>
+                    <div class="grid grid-cols-3 gap-1.5 md:gap-2">
+                        <button onclick="pressNumpad('7')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-xl text-lg md:text-xl transition-all border border-slate-200 shadow-sm">7</button>
+                        <button onclick="pressNumpad('8')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-xl text-lg md:text-xl transition-all border border-slate-200 shadow-sm">8</button>
+                        <button onclick="pressNumpad('9')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-xl text-lg md:text-xl transition-all border border-slate-200 shadow-sm">9</button>
                         
-                        <button onclick="pressNumpad('4')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">4</button>
-                        <button onclick="pressNumpad('5')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">5</button>
-                        <button onclick="pressNumpad('6')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">6</button>
+                        <button onclick="pressNumpad('4')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-xl text-lg md:text-xl transition-all border border-slate-200 shadow-sm">4</button>
+                        <button onclick="pressNumpad('5')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-xl text-lg md:text-xl transition-all border border-slate-200 shadow-sm">5</button>
+                        <button onclick="pressNumpad('6')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-xl text-lg md:text-xl transition-all border border-slate-200 shadow-sm">6</button>
                         
-                        <button onclick="pressNumpad('1')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">1</button>
-                        <button onclick="pressNumpad('2')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">2</button>
-                        <button onclick="pressNumpad('3')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">3</button>
+                        <button onclick="pressNumpad('1')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-xl text-lg md:text-xl transition-all border border-slate-200 shadow-sm">1</button>
+                        <button onclick="pressNumpad('2')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-xl text-lg md:text-xl transition-all border border-slate-200 shadow-sm">2</button>
+                        <button onclick="pressNumpad('3')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-xl text-lg md:text-xl transition-all border border-slate-200 shadow-sm">3</button>
                         
-                        <button onclick="pressNumpad('C')" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold py-1.5 md:py-2 rounded-lg text-xs transition-all border border-red-100 min-h-[36px]">C</button>
-                        <button onclick="pressNumpad('0')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">0</button>
-                        <button onclick="pressNumpad('.')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-1.5 md:py-2 rounded-lg text-sm transition-all border border-slate-100 min-h-[36px]">,</button>
+                        <button onclick="pressNumpad('C')" class="numpad-btn bg-red-50 hover:bg-red-100 active:bg-red-200 active:scale-95 text-red-600 font-bold rounded-xl text-sm transition-all border border-red-200 shadow-sm">C</button>
+                        <button onclick="pressNumpad('0')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-xl text-lg md:text-xl transition-all border border-slate-200 shadow-sm">0</button>
+                        <button onclick="pressNumpad('.')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-xl text-xl transition-all border border-slate-200 shadow-sm">,</button>
                     </div>
 
-                    <button onclick="completeSale()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-98 text-white py-2 rounded-xl font-bold text-[11px] md:text-xs transition-all shadow-sm flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-circle-check text-sm"></i> Verkauf abschließen
+                    <button onclick="completeSale()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-95 text-white py-3 md:py-4 rounded-xl font-bold text-sm md:text-base transition-all shadow-md flex items-center justify-center gap-2 mt-1">
+                        <i class="fa-solid fa-circle-check text-lg"></i> Verkauf abschließen
                     </button>
                 </div>
             </div>
         </section>
 
         <!-- CUSTOMER VIEW -->
-        <section id="view-customer" class="hidden flex-grow relative overflow-hidden">
+        <section id="view-customer" class="hidden flex-grow relative overflow-hidden animate-fade-in">
             
             <!-- SCREENSAVER OVERLAY -->
-            <div id="customer-screensaver" class="fixed inset-0 bg-gradient-to-br from-amber-400 via-orange-400 to-sky-300 overflow-hidden flex flex-col justify-between p-6 md:p-12 text-white transition-opacity duration-500 z-50">
-                <button onclick="changeRole()" class="absolute top-4 right-4 z-[60] bg-white/20 hover:bg-white/30 active:scale-95 text-white/95 hover:text-white px-4 py-2 rounded-xl text-xs font-bold border border-white/30 transition-all flex items-center gap-1.5 shadow-md">
-                    <i class="fa-solid fa-arrow-left"></i> Beenden / Rolle wechseln
+            <div id="customer-screensaver" class="fixed inset-0 bg-gradient-to-br from-amber-400 via-orange-400 to-sky-300 overflow-hidden flex flex-col justify-between p-6 md:p-12 text-white transition-opacity duration-700 z-50 animate-fade-in">
+                <button onclick="changeRole()" class="absolute top-5 right-5 z-[60] bg-white/20 hover:bg-white/30 active:scale-95 text-white/95 hover:text-white px-5 py-2.5 rounded-2xl text-sm font-bold border border-white/30 transition-all flex items-center gap-2 shadow-md">
+                    <i class="fa-solid fa-arrow-left"></i> Beenden
                 </button>
 
                 <div class="absolute top-16 left-10 text-6xl opacity-20 animate-float-1">🌴</div>
@@ -319,104 +347,104 @@
                 <div class="wave-bg"></div>
                 <div class="wave-bg-2"></div>
 
-                <div class="flex justify-between items-center z-20 flex-wrap gap-2">
-                    <span class="font-summer text-base md:text-lg font-bold tracking-wide text-amber-50 drop-shadow-sm flex items-center gap-2">
-                        ☀️ Ess-Zone Buffet-Flatrate
+                <div class="flex justify-between items-center z-20 flex-wrap gap-2 pt-2">
+                    <span class="font-summer text-lg md:text-2xl font-bold tracking-wide text-amber-50 drop-shadow-sm flex items-center gap-2">
+                        ☀️ Ess-Zone Buffet
                     </span>
-                    <div class="flex items-center bg-white/20 backdrop-blur-md rounded-xl px-3 py-1.5 border border-white/20 text-white">
-                        <span class="text-[9px] font-black uppercase mr-1.5 tracking-wider">Kasse-ID:</span>
-                        <input type="text" value="SOMMER-2026" class="bg-transparent border-none text-[11px] font-black text-white uppercase focus:outline-none w-20 text-center sync-room-code-input" title="Nutze dieselbe ID wie am Verkäufer-Terminal">
+                    <div class="flex items-center bg-white/20 backdrop-blur-md rounded-xl px-4 py-2 border border-white/20 text-white">
+                        <span class="text-[10px] md:text-xs font-black uppercase mr-2 tracking-wider">Kasse-ID:</span>
+                        <input type="text" value="SOMMER-2026" class="bg-transparent border-none text-xs md:text-sm font-black text-white uppercase focus:outline-none w-24 md:w-32 text-center sync-room-code-input transition-all" title="Nutze dieselbe ID wie am Verkäufer-Terminal">
                     </div>
                 </div>
 
                 <div class="text-center my-auto z-20 flex flex-col items-center justify-center">
-                    <div class="bg-white/10 p-5 rounded-full border border-white/20 animate-pulse-soft mb-3">
-                        <span class="text-5xl md:text-6xl block transform hover:rotate-45 transition-transform duration-1000">☀️</span>
+                    <div class="bg-white/10 p-6 md:p-8 rounded-full border border-white/20 animate-pulse-soft mb-4">
+                        <span class="text-6xl md:text-7xl block transform hover:rotate-45 transition-transform duration-1000">☀️</span>
                     </div>
-                    <h2 class="font-summer text-2xl md:text-4xl font-black tracking-wide drop-shadow-md mb-2">Genießer-Oase</h2>
-                    <p class="text-xs md:text-base text-orange-50 font-medium max-w-sm drop-shadow-sm leading-relaxed mb-5">
+                    <h2 class="font-summer text-4xl md:text-6xl font-black tracking-wide drop-shadow-md mb-3">Genießer-Oase</h2>
+                    <p class="text-sm md:text-xl text-orange-50 font-medium max-w-md drop-shadow-sm leading-relaxed mb-8">
                         Dein All-You-Can-Eat Buffet. Hol dir dein Einlassbändchen direkt an der Kasse!
                     </p>
 
-                    <div class="bg-orange-600/40 border-2 border-dashed border-white/40 px-6 py-4 rounded-2xl transform -rotate-1 shadow-md max-w-sm backdrop-blur-sm animate-pulse-soft">
-                        <span class="text-xs font-bold block text-amber-200">ℹ️ ZUTRITT NUR MIT STEMPEL:</span>
-                        <p class="text-xs font-black tracking-wide mt-1 text-white uppercase">Hier bezahlen &amp; direkt Einlassstempel abholen!</p>
+                    <div class="bg-orange-600/40 border-2 border-dashed border-white/40 px-8 py-5 rounded-3xl transform -rotate-2 shadow-xl max-w-md backdrop-blur-sm animate-pulse-soft">
+                        <span class="text-sm md:text-base font-bold block text-amber-200">ℹ️ ZUTRITT NUR MIT STEMPEL:</span>
+                        <p class="text-base md:text-lg font-black tracking-wide mt-1.5 text-white uppercase">Hier bezahlen &amp; direkt Einlassstempel abholen!</p>
                     </div>
                 </div>
 
-                <div class="text-center z-20 text-[10px] text-sky-900/80 font-bold bg-white/45 backdrop-blur-md py-2 px-3 rounded-xl max-w-md mx-auto border border-white/40 shadow-sm leading-tight">
+                <div class="text-center z-20 text-xs md:text-sm text-sky-900/80 font-bold bg-white/45 backdrop-blur-md py-3 px-5 rounded-2xl max-w-xl mx-auto border border-white/40 shadow-sm leading-tight mb-4">
                     ⚠️ Wichtige Regel: Speisen & Getränke bitte ausschließlich innerhalb der abgegrenzten Ess-Zone verzehren.
                 </div>
             </div>
 
             <!-- SUCCESS OVERLAY (ANIMATED CHECKMARK) -->
-            <div id="customer-success-overlay" class="hidden fixed inset-0 bg-gradient-to-br from-emerald-400 to-teal-500 z-[60] flex flex-col items-center justify-center text-white transition-opacity duration-500 overflow-hidden">
+            <div id="customer-success-overlay" class="hidden fixed inset-0 bg-gradient-to-br from-emerald-400 to-teal-500 z-[60] flex flex-col items-center justify-center text-white transition-opacity duration-500 overflow-hidden opacity-100">
                 <div class="scale-in-center flex flex-col items-center">
-                    <div class="bg-white/20 p-8 rounded-full mb-6 backdrop-blur-sm border border-white/30 shadow-lg">
-                        <svg class="w-32 h-32 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <div class="bg-white/20 p-10 rounded-full mb-8 backdrop-blur-sm border border-white/30 shadow-2xl">
+                        <svg class="w-40 h-40 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path class="animate-check" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
                         </svg>
                     </div>
-                    <h2 class="font-summer text-4xl md:text-5xl font-black mb-3 drop-shadow-md">Bezahlung erfolgreich!</h2>
-                    <p class="text-emerald-50 font-bold text-lg md:text-xl drop-shadow-sm">Vielen Dank und guten Appetit!</p>
+                    <h2 class="font-summer text-5xl md:text-7xl font-black mb-4 drop-shadow-lg text-center leading-tight">Bezahlung<br>erfolgreich!</h2>
+                    <p class="text-emerald-50 font-bold text-2xl md:text-3xl drop-shadow-md text-center bg-black/10 px-6 py-2 rounded-full">Vielen Dank und guten Appetit!</p>
                 </div>
             </div>
 
             <!-- ACTIVE TRANSACTION CONTENT -->
-            <div id="customer-active-view" class="hidden h-full flex flex-row gap-3 md:gap-4 items-stretch transition-opacity duration-300 overflow-hidden">
+            <div id="customer-active-view" class="hidden h-full flex flex-row gap-4 md:gap-6 items-stretch transition-all duration-500 overflow-hidden animate-fade-in">
                 
-                <div class="w-[55%] bg-white p-4 rounded-3xl border border-orange-100 shadow-lg flex flex-col h-full overflow-hidden">
+                <div class="w-[55%] bg-white p-5 md:p-6 rounded-[2rem] border border-orange-100 shadow-xl flex flex-col h-full overflow-hidden">
                     <div class="shrink-0">
-                        <div class="flex items-center gap-2 mb-3 bg-orange-50 p-2.5 rounded-2xl border border-orange-100">
-                            <span class="text-xl">🌴</span>
+                        <div class="flex items-center gap-3 mb-4 bg-orange-50 p-3 md:p-4 rounded-2xl border border-orange-100">
+                            <span class="text-2xl md:text-3xl">🌴</span>
                             <div>
-                                <h2 class="font-summer text-base font-bold text-slate-800 leading-none">Deine Auswahl am Buffet</h2>
-                                <p class="text-[9px] text-slate-400 font-bold tracking-wide mt-1">Dein Eintritt in die Genießer-Zone</p>
+                                <h2 class="font-summer text-xl md:text-2xl font-bold text-slate-800 leading-none">Deine Auswahl</h2>
+                                <p class="text-[10px] md:text-xs text-slate-500 font-bold tracking-wide mt-1.5">Eintritt in die Ess-Zone</p>
                             </div>
                         </div>
-                        <h3 class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Deine Auswahl:</h3>
+                        <h3 class="text-[10px] md:text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2.5">Auf der Rechnung:</h3>
                     </div>
 
-                    <div id="customer-live-items" class="space-y-2 flex-grow overflow-y-auto pr-1"></div>
+                    <div id="customer-live-items" class="space-y-2.5 flex-grow overflow-y-auto pr-2"></div>
 
-                    <div class="mt-3 border-t border-slate-100 pt-2 flex items-center gap-2 text-[9px] text-amber-800 bg-amber-50/50 p-2.5 rounded-xl leading-relaxed shrink-0">
-                        <i class="fa-solid fa-circle-info text-sm text-amber-600 shrink-0"></i>
-                        <p><strong>Zutritt &amp; Stempel:</strong> Bitte genieß dein Essen innerhalb der Ess-Zone. Das Weitergeben von Tellern an Personen ohne Einlassstempel ist nicht gestattet.</p>
+                    <div class="mt-4 border-t border-slate-100 pt-3 flex items-center gap-3 text-xs md:text-sm text-amber-800 bg-amber-50/50 p-3 md:p-4 rounded-2xl leading-relaxed shrink-0">
+                        <i class="fa-solid fa-circle-info text-lg text-amber-600 shrink-0"></i>
+                        <p><strong>Zutritt &amp; Stempel:</strong> Bitte genieß dein Essen innerhalb der Ess-Zone. Das Weitergeben von Tellern an unbefugte Personen ist nicht gestattet.</p>
                     </div>
                 </div>
 
-                <div class="w-[45%] flex flex-col gap-3 h-full overflow-hidden">
-                    <div class="bg-gradient-to-tr from-orange-500 to-amber-400 text-white p-4 rounded-3xl shadow-md flex flex-col justify-between shrink-0 relative overflow-hidden">
-                        <div class="absolute -right-12 -top-12 w-24 h-24 bg-white/10 rounded-full"></div>
+                <div class="w-[45%] flex flex-col gap-4 md:gap-6 h-full overflow-hidden">
+                    <div class="bg-gradient-to-tr from-orange-500 to-amber-400 text-white p-6 md:p-8 rounded-[2rem] shadow-xl flex flex-col justify-between shrink-0 relative overflow-hidden min-h-[140px] md:min-h-[180px]">
+                        <div class="absolute -right-10 -top-10 w-32 h-32 md:w-40 md:h-40 bg-white/10 rounded-full"></div>
                         <div>
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-orange-100">Zu zahlen</span>
-                            <h2 class="font-summer text-3xl md:text-4xl font-black mt-0.5" id="customer-total-price">0.00 €</h2>
+                            <span class="text-xs md:text-sm font-black uppercase tracking-widest text-orange-100 drop-shadow-sm">Zu zahlen</span>
+                            <h2 class="font-summer text-5xl md:text-6xl font-black mt-1 md:mt-2 drop-shadow-md" id="customer-total-price">0.00 €</h2>
                         </div>
-                        <div class="flex items-center gap-1 mt-1.5 text-[9px] bg-white/20 px-2.5 py-0.5 rounded-lg backdrop-blur-sm self-start font-bold">
-                            <i class="fa-solid fa-shield-halved text-[8px]"></i> All-You-Can-Eat Flatrate
+                        <div class="flex items-center gap-1.5 mt-3 text-[10px] md:text-xs bg-white/20 px-3.5 py-1.5 rounded-xl backdrop-blur-sm self-start font-bold border border-white/20">
+                            <i class="fa-solid fa-shield-halved"></i> All-You-Can-Eat Flatrate
                         </div>
                     </div>
 
-                    <div class="bg-white p-4 rounded-3xl shadow-lg border border-orange-100 flex-grow flex flex-col justify-center gap-3">
+                    <div class="bg-white p-5 md:p-6 rounded-[2rem] shadow-xl border border-orange-100 flex-grow flex flex-col justify-center gap-4 md:gap-6">
                         <div>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Gegebenes Bargeld:</span>
-                            <div class="flex items-baseline gap-1">
-                                <span class="font-mono text-2xl md:text-3xl font-extrabold text-slate-700" id="customer-given">0,00</span>
-                                <span class="text-sm font-bold text-slate-400">€</span>
+                            <span class="text-xs md:text-sm font-black text-slate-400 uppercase tracking-wider block mb-1">Gegebenes Bargeld:</span>
+                            <div class="flex items-baseline gap-1.5">
+                                <span class="font-mono text-4xl md:text-5xl font-extrabold text-slate-700 transition-all duration-300" id="customer-given">0,00</span>
+                                <span class="text-xl md:text-2xl font-bold text-slate-400">€</span>
                             </div>
                         </div>
 
-                        <hr class="border-slate-100">
+                        <hr class="border-slate-100 border-2 rounded-full">
 
                         <div>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Dein Rückgeld:</span>
-                            <div class="flex items-baseline gap-1">
-                                <span class="font-mono text-3xl md:text-4xl font-black text-emerald-600 animate-pulse-soft" id="customer-change">0,00</span>
-                                <span class="text-base font-bold text-emerald-600">€</span>
+                            <span class="text-xs md:text-sm font-black text-slate-400 uppercase tracking-wider block mb-1">Dein Rückgeld:</span>
+                            <div class="flex items-baseline gap-1.5">
+                                <span class="font-mono text-5xl md:text-6xl font-black text-emerald-600 animate-pulse-soft transition-all duration-300" id="customer-change">0,00</span>
+                                <span class="text-2xl md:text-3xl font-bold text-emerald-600">€</span>
                             </div>
                         </div>
 
-                        <div id="customer-status-banner" class="mt-1 p-2.5 rounded-xl text-center font-bold text-[10px] flex items-center justify-center gap-1.5"></div>
+                        <div id="customer-status-banner" class="mt-2 p-3 md:p-4 rounded-2xl text-center font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition-colors duration-300"></div>
                     </div>
                 </div>
             </div>
@@ -424,80 +452,80 @@
 
     </main>
 
-    <!-- SALES HISTORY & REVENUE MODAL -->
-    <div id="modal-history" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg border border-slate-100 overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-[80vh]">
-            <div class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-5 py-3.5 flex items-center justify-between shrink-0">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-receipt text-lg"></i>
-                    <h3 class="font-summer text-base font-bold">Verkaufsverlauf &amp; Umsatz</h3>
+    <!-- SALES HISTORY MODAL -->
+    <div id="modal-history" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-opacity duration-300">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg border border-slate-100 overflow-hidden transform transition-all duration-300 flex flex-col max-h-[85vh] animate-fade-in">
+            <div class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-6 py-4 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-receipt text-xl"></i>
+                    <h3 class="font-summer text-lg md:text-xl font-bold">Verkaufsverlauf &amp; Umsatz</h3>
                 </div>
-                <button onclick="closeHistoryModal()" class="text-white/80 hover:text-white text-lg">
+                <button onclick="closeHistoryModal()" class="text-white/80 hover:text-white text-2xl transition-colors">
                     <i class="fa-solid fa-times"></i>
                 </button>
             </div>
 
-            <div class="p-5 overflow-y-auto flex-grow flex flex-col gap-4">
-                <div class="grid grid-cols-2 gap-3 bg-gradient-to-tr from-slate-50 to-emerald-50/40 p-3.5 rounded-2xl border border-emerald-100 shrink-0">
+            <div class="p-6 overflow-y-auto flex-grow flex flex-col gap-5">
+                <div class="grid grid-cols-2 gap-4 bg-gradient-to-tr from-slate-50 to-emerald-50/40 p-4 rounded-2xl border border-emerald-100 shrink-0">
                     <div>
-                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Gesamtumsatz (Gewinn)</span>
-                        <span id="stats-total-revenue" class="font-summer text-xl md:text-2xl font-black text-emerald-600">0,00 €</span>
+                        <span class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Gesamtumsatz (Gewinn)</span>
+                        <span id="stats-total-revenue" class="font-summer text-2xl md:text-3xl font-black text-emerald-600">0,00 €</span>
                     </div>
                     <div class="text-right">
-                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Transaktionen</span>
-                        <span id="stats-total-sales" class="font-summer text-xl md:text-2xl font-black text-slate-700">0 Verkäufe</span>
+                        <span class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Transaktionen</span>
+                        <span id="stats-total-sales" class="font-summer text-2xl md:text-3xl font-black text-slate-700">0 Verkäufe</span>
                     </div>
                 </div>
 
                 <div>
-                    <h4 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Einzelne Buchungen</h4>
-                    <div id="history-sales-list" class="space-y-2"></div>
+                    <h4 class="text-[10px] md:text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-3">Einzelne Buchungen</h4>
+                    <div id="history-sales-list" class="space-y-2.5"></div>
                 </div>
             </div>
 
-            <div class="bg-slate-50 px-5 py-3 flex justify-end gap-2.5 border-t border-slate-100 shrink-0">
-                <button onclick="clearAllSalesHistory()" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-3 py-1.5 rounded-lg text-[10px] transition-all flex items-center gap-1 mr-auto">
+            <div class="bg-slate-50 px-6 py-4 flex justify-end gap-3 border-t border-slate-100 shrink-0">
+                <button onclick="clearAllSalesHistory()" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-4 py-2.5 rounded-xl text-xs md:text-sm transition-all flex items-center gap-1.5 mr-auto active:scale-95">
                     <i class="fa-solid fa-triangle-exclamation"></i> Alles löschen
                 </button>
-                <button onclick="closeHistoryModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-1.5 rounded-lg text-xs transition-all">
+                <button onclick="closeHistoryModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-6 py-2.5 rounded-xl text-xs md:text-sm transition-all active:scale-95">
                     Schließen
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- CONFIG / SETTINGS MODAL -->
-    <div id="modal-config" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg border border-slate-100 overflow-hidden transform scale-95 transition-transform duration-300">
-            <div class="bg-gradient-to-r from-orange-500 to-amber-400 text-white px-5 py-4 flex items-center justify-between">
-                <div class="flex items-center gap-2.5">
-                    <i class="fa-solid fa-sliders text-lg"></i>
-                    <h3 class="font-summer text-base font-bold">Buffet-Tarife verwalten</h3>
+    <!-- CONFIG MODAL -->
+    <div id="modal-config" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-opacity duration-300">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg border border-slate-100 overflow-hidden transform transition-all duration-300 flex flex-col max-h-[85vh] animate-fade-in">
+            <div class="bg-gradient-to-r from-orange-500 to-amber-400 text-white px-6 py-4 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-sliders text-xl"></i>
+                    <h3 class="font-summer text-lg md:text-xl font-bold">Buffet-Tarife verwalten</h3>
                 </div>
-                <button onclick="closeConfigModal()" class="text-white/80 hover:text-white text-lg">
+                <button onclick="closeConfigModal()" class="text-white/80 hover:text-white text-2xl transition-colors">
                     <i class="fa-solid fa-times"></i>
                 </button>
             </div>
 
-            <div class="p-5 max-h-[50vh] overflow-y-auto flex flex-col gap-4">
+            <div class="p-6 overflow-y-auto flex-grow flex flex-col gap-5">
                 <div>
-                    <h4 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Aktuelle Preisliste</h4>
-                    <div id="config-tariffs-list" class="space-y-1.5"></div>
+                    <h4 class="text-[10px] md:text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-3">Aktuelle Preisliste</h4>
+                    <div id="config-tariffs-list" class="space-y-2"></div>
                 </div>
 
-                <div class="bg-orange-50/50 p-3.5 rounded-xl border border-orange-100/60">
-                    <h4 class="text-[10px] font-extrabold text-orange-700 uppercase tracking-wider mb-2">Neuen Tarif hinzufügen</h4>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
-                        <input id="new-tariff-name" type="text" placeholder="z.B. Jugendliche (12-16)" class="bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-orange-400 font-medium">
-                        <div class="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-1.5 rounded-lg">
-                            <input id="new-tariff-price" type="number" step="0.10" placeholder="Preis" class="w-full text-right text-xs focus:outline-none font-bold">
-                            <span class="text-xs font-bold text-slate-400">€</span>
+                <div class="bg-orange-50/50 p-4 rounded-2xl border border-orange-100/60">
+                    <h4 class="text-[10px] md:text-xs font-extrabold text-orange-700 uppercase tracking-wider mb-3">Neuen Tarif hinzufügen</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                        <input id="new-tariff-name" type="text" placeholder="z.B. Jugendliche (12-16)" class="bg-white border border-slate-200 px-4 py-2.5 rounded-xl text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 font-medium transition-all">
+                        <div class="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2.5 rounded-xl focus-within:ring-2 focus-within:ring-orange-400 transition-all">
+                            <input id="new-tariff-price" type="number" step="0.10" placeholder="Preis" class="w-full text-right text-xs md:text-sm focus:outline-none font-bold">
+                            <span class="text-xs md:text-sm font-bold text-slate-400">€</span>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <div class="flex items-center gap-1.5">
-                            <span class="text-[10px] font-bold text-slate-500">Icon:</span>
-                            <select id="new-tariff-icon" class="bg-white border border-slate-200 px-2 py-1 rounded-lg text-xs w-full">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-slate-500 shrink-0">Icon:</span>
+                            <select id="new-tariff-icon" class="bg-white border border-slate-200 px-3 py-2.5 rounded-xl text-xs md:text-sm w-full font-medium">
                                 <option value="fa-user">Standard Gast 👤</option>
                                 <option value="fa-child">Kind 👶</option>
                                 <option value="fa-user-graduate">Jugendlicher 🎒</option>
@@ -506,15 +534,15 @@
                                 <option value="fa-ice-cream">Nachtisch 🍦</option>
                             </select>
                         </div>
-                        <button onclick="addNewTariff()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition-all shadow-md self-end">
+                        <button onclick="addNewTariff()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 px-4 rounded-xl text-xs md:text-sm transition-all shadow-md self-end active:scale-95">
                             Hinzufügen
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-slate-50 px-5 py-3.5 flex justify-end gap-2.5 border-t border-slate-100">
-                <button onclick="closeConfigModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-1.5 rounded-lg text-xs transition-all">
+            <div class="bg-slate-50 px-6 py-4 flex justify-end gap-3 border-t border-slate-100 shrink-0">
+                <button onclick="closeConfigModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-6 py-2.5 rounded-xl text-xs md:text-sm transition-all active:scale-95">
                     Schließen
                 </button>
             </div>
@@ -522,11 +550,10 @@
     </div>
 
     <!-- NOTIFICATION / TOAST CONTAINER -->
-    <div id="toast-container" class="fixed bottom-4 right-4 z-50 pointer-events-none flex flex-col gap-2"></div>
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 pointer-events-none flex flex-col gap-3"></div>
 
     <!-- MAIN JAVASCRIPT BLOCK -->
     <script>
-        // Deine Firebase Config wurde hier eingefügt
         const MEINE_FIREBASE_CONFIG = {
             apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
             authDomain: "sommerfest-kasse.firebaseapp.com",
@@ -545,7 +572,7 @@
             change: 0,
             total: 0,
             salesHistory: [],
-            showSuccess: false, // Regelt das Einblenden der Erfolgs-Animation auf dem Kunden-Tablet
+            showSuccess: false, 
             tariffs: [
                 { id: 't1', name: 'Erwachsene (Flatrate)', price: 15.00, icon: 'fa-user', color: 'bg-amber-500' },
                 { id: 't2', name: 'Kinder (unter 7)', price: 0.00, icon: 'fa-child', color: 'bg-emerald-500' },
@@ -579,14 +606,14 @@
                 icon = 'fa-triangle-exclamation text-amber-500';
             }
             
-            toast.className = `p-3.5 rounded-2xl border shadow-md flex items-center gap-2.5 max-w-xs pointer-events-auto transition-all duration-300 ${bgClass}`;
-            toast.innerHTML = `<i class="fa-solid ${icon} text-sm shrink-0"></i><div class="text-[11px] font-bold">${message}</div>`;
+            toast.className = `p-4 md:p-5 rounded-2xl border shadow-xl flex items-center gap-3 max-w-sm pointer-events-auto transition-all duration-300 animate-fade-in ${bgClass}`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-lg md:text-xl shrink-0"></i><div class="text-xs md:text-sm font-bold">${message}</div>`;
             container.appendChild(toast);
             
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'scale-95');
                 setTimeout(() => toast.remove(), 300);
-            }, 4000);
+            }, 3500);
         }
 
         function setConnectionStatus(state, details = '') {
@@ -594,20 +621,20 @@
             const text = document.getElementById('cloud-status-text');
             if (!badge || !text) return;
             
-            badge.className = "flex items-center gap-2 px-2 py-1 rounded-xl text-[9px] font-bold transition-all duration-300 "
+            badge.className = "flex items-center gap-1.5 md:gap-2 px-3 py-1.5 rounded-xl text-[10px] md:text-xs font-bold transition-all duration-300 "
             
             if (state === 'offline') {
                 badge.className += "bg-slate-100 border border-slate-200 text-slate-600";
-                badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-slate-400"></span> <span>Offline (Lokaler Modus)</span>`;
+                badge.innerHTML = `<span class="h-2.5 w-2.5 rounded-full bg-slate-400"></span> <span>Offline (Lokaler Modus)</span>`;
             } else if (state === 'connecting') {
                 badge.className += "bg-amber-50 border border-amber-100 text-amber-700";
-                badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-amber-400 animate-ping"></span> <span>Verbinde...</span>`;
+                badge.innerHTML = `<span class="h-2.5 w-2.5 rounded-full bg-amber-400 animate-ping"></span> <span>Verbinde...</span>`;
             } else if (state === 'connected') {
                 badge.className += "bg-emerald-50 border border-emerald-100 text-emerald-700";
-                badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span> <span>Cloud-Sync aktiv</span>`;
+                badge.innerHTML = `<span class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span> <span>Cloud-Sync aktiv</span>`;
             } else if (state === 'auth-error' || state === 'permission-denied' || state === 'generic-error') {
                 badge.className += "bg-rose-50 border border-rose-100 text-rose-700";
-                badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-rose-500"></span> <span title="${details}">Cloud-Fehler</span>`;
+                badge.innerHTML = `<span class="h-2.5 w-2.5 rounded-full bg-rose-500"></span> <span title="${details}">Cloud-Fehler</span>`;
             }
         }
 
@@ -674,7 +701,13 @@
                     }
                 }, (error) => {
                     console.error("Firestore Listen Error:", error);
-                    setConnectionStatus('generic-error');
+                    if (error.code === 'permission-denied') {
+                        setConnectionStatus('permission-denied', error.message);
+                        showToast('Rechte blockiert! Prüfe deine Firestore Security Rules.', 'error');
+                    } else {
+                        setConnectionStatus('generic-error');
+                        showToast('Cloud-Fehler: ' + error.message, 'error');
+                    }
                 });
             };
 
@@ -689,6 +722,29 @@
                     if (db) {
                         startSync();
                         showToast('Kopplungs-ID geändert!', 'info');
+                        
+                        const docRef = getTargetDocRef();
+                        if (docRef) {
+                            docRef.get().then((docSnap) => {
+                                if (docSnap.exists) {
+                                    const data = docSnap.data();
+                                    window.appState.lastSyncedData = data;
+                                    window.appState.tariffs = data.tariffs || window.appState.tariffs;
+                                    window.appState.salesHistory = data.salesHistory || [];
+                                    
+                                    if (window.appState.role === 'seller') {
+                                        updateSellerUI();
+                                    } else if (window.appState.role === 'customer') {
+                                        window.appState.cart = data.cart || [];
+                                        window.appState.total = data.total || 0;
+                                        window.appState.paid = data.paid || 0;
+                                        window.appState.change = data.change || 0;
+                                        window.appState.givenCash = data.givenCash || '';
+                                        updateCustomerUI();
+                                    }
+                                }
+                            }).catch(err => console.error("Error pre-fetching document:", err));
+                        }
                     }
                 });
             });
@@ -845,17 +901,17 @@
             window.appState.tariffs.forEach(tariff => {
                 const card = document.createElement('button');
                 card.onclick = () => addToCart(tariff);
-                card.className = "bg-white hover:bg-gradient-to-br hover:from-white hover:to-orange-50/10 p-2 md:p-3 rounded-2xl border-2 border-slate-100 hover:border-orange-300 text-left transition-all duration-300 shadow-sm flex flex-col justify-between h-20 md:h-24 relative overflow-hidden group active:scale-95";
+                card.className = "bg-white hover:bg-gradient-to-br hover:from-white hover:to-orange-50/20 p-3 md:p-4 rounded-3xl border-2 border-slate-100 hover:border-orange-300 text-left transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between min-h-[96px] md:min-h-[110px] relative overflow-hidden group active:scale-95";
                 card.innerHTML = `
                     <div class="flex items-center justify-between w-full">
-                        <div class="bg-orange-100 text-orange-600 p-1 md:p-1.5 rounded-xl group-hover:bg-orange-500 group-hover:text-white transition-all duration-300">
-                            <i class="fa-solid ${tariff.icon || 'fa-user'} text-[10px] md:text-xs"></i>
+                        <div class="bg-orange-100 text-orange-600 p-1.5 md:p-2.5 rounded-xl group-hover:bg-orange-500 group-hover:text-white transition-all duration-300">
+                            <i class="fa-solid ${tariff.icon || 'fa-user'} text-xs md:text-base"></i>
                         </div>
-                        <span class="text-[7px] md:text-[8px] bg-slate-100 font-extrabold text-slate-400 px-1 py-0.5 rounded">All-You-Can-Eat</span>
+                        <span class="text-[8px] md:text-[10px] bg-slate-100 font-extrabold text-slate-400 px-1.5 py-1 rounded-md">All-You-Can-Eat</span>
                     </div>
                     <div>
-                        <h4 class="font-bold text-slate-700 text-[10px] md:text-[11px] group-hover:text-slate-900 transition-colors line-clamp-1 leading-none">${tariff.name}</h4>
-                        <p class="font-summer text-sm md:text-base font-black text-orange-600 mt-1">${tariff.price.toFixed(2)} <span class="text-[8px] md:text-[10px] font-bold">€</span></p>
+                        <h4 class="font-bold text-slate-700 text-[11px] md:text-sm group-hover:text-slate-900 transition-colors line-clamp-1 leading-tight">${tariff.name}</h4>
+                        <p class="font-summer text-base md:text-xl font-black text-orange-600 mt-1">${tariff.price.toFixed(2)} <span class="text-[9px] md:text-xs font-bold">€</span></p>
                     </div>
                 `;
                 container.appendChild(card);
@@ -869,9 +925,9 @@
             
             if (window.appState.cart.length === 0) {
                 container.innerHTML = `
-                    <div class="flex flex-col items-center justify-center py-4 text-slate-400">
-                        <i class="fa-solid fa-cookie text-xl mb-1 text-slate-300"></i>
-                        <p class="text-[9px] font-semibold">Der Warenkorb ist leer.</p>
+                    <div class="flex flex-col items-center justify-center py-6 text-slate-400 animate-fade-in">
+                        <i class="fa-solid fa-cookie text-2xl md:text-3xl mb-2 text-slate-300"></i>
+                        <p class="text-[10px] md:text-xs font-semibold">Der Warenkorb ist leer.</p>
                     </div>
                 `;
                 return;
@@ -879,21 +935,21 @@
             
             window.appState.cart.forEach((item, index) => {
                 const row = document.createElement('div');
-                row.className = "flex items-center justify-between bg-slate-50 p-1.5 md:p-2 rounded-xl border border-slate-100/60";
+                row.className = "flex items-center justify-between bg-slate-50 p-2 md:p-3 rounded-2xl border border-slate-100/60 transition-all";
                 row.innerHTML = `
-                    <div class="flex items-center gap-1.5 min-w-0">
-                        <span class="text-[10px] md:text-xs shrink-0">🍽️</span>
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="text-xs md:text-base shrink-0">🍽️</span>
                         <div class="min-w-0">
-                            <h5 class="font-bold text-[9px] md:text-[10px] text-slate-700 truncate max-w-[80px] sm:max-w-[120px] leading-tight">${item.name}</h5>
-                            <p class="text-[7px] md:text-[8px] text-slate-400 leading-none mt-0.5">${item.price.toFixed(2)} €</p>
+                            <h5 class="font-bold text-[11px] md:text-sm text-slate-800 truncate max-w-[90px] sm:max-w-[140px] leading-tight">${item.name}</h5>
+                            <p class="text-[9px] md:text-[11px] text-slate-500 leading-none mt-1">${item.price.toFixed(2)} €</p>
                         </div>
                     </div>
                     
-                    <div class="flex items-center gap-1 shrink-0">
-                        <button onclick="changeCartQty(${index}, -1)" class="w-4 h-4 md:w-5 md:h-5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-md font-bold text-xs flex items-center justify-center transition-all min-h-0">-</button>
-                        <span class="font-bold text-[10px] md:text-[11px] text-slate-700 w-2.5 text-center">${item.qty}</span>
-                        <button onclick="changeCartQty(${index}, 1)" class="w-4 h-4 md:w-5 md:h-5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-md font-bold text-xs flex items-center justify-center transition-all min-h-0">+</button>
-                        <span class="font-mono font-bold text-[9px] md:text-[10px] text-slate-700 w-10 md:w-12 text-right">${(item.price * item.qty).toFixed(2)} €</span>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button onclick="changeCartQty(${index}, -1)" class="w-6 h-6 md:w-8 md:h-8 bg-white hover:bg-slate-200 border border-slate-200 text-slate-700 rounded-lg font-bold text-sm md:text-lg flex items-center justify-center transition-colors active:scale-95">-</button>
+                        <span class="font-bold text-[12px] md:text-[15px] text-slate-800 w-4 text-center">${item.qty}</span>
+                        <button onclick="changeCartQty(${index}, 1)" class="w-6 h-6 md:w-8 md:h-8 bg-white hover:bg-slate-200 border border-slate-200 text-slate-700 rounded-lg font-bold text-sm md:text-lg flex items-center justify-center transition-colors active:scale-95">+</button>
+                        <span class="font-mono font-bold text-[11px] md:text-sm text-slate-800 w-12 md:w-16 text-right">${(item.price * item.qty).toFixed(2)} €</span>
                     </div>
                 `;
                 container.appendChild(row);
@@ -1001,11 +1057,23 @@
             // Trigger sync for checkmark animation!
             triggerStateSync();
             
-            // After 3.5s, turn off the success overlay and let it fade into screensaver
+            // After 3 seconds, gracefully fade out the checkmark and sync
             setTimeout(() => {
-                window.appState.showSuccess = false;
-                triggerStateSync();
-            }, 3500);
+                const overlay = document.getElementById('customer-success-overlay');
+                if (overlay && !overlay.classList.contains('hidden')) {
+                    overlay.classList.add('animate-fade-out-soft');
+                    
+                    // Wait for fade out to complete before full logical hide
+                    setTimeout(() => {
+                        window.appState.showSuccess = false;
+                        triggerStateSync();
+                        overlay.classList.remove('animate-fade-out-soft');
+                    }, 500); 
+                } else {
+                    window.appState.showSuccess = false;
+                    triggerStateSync();
+                }
+            }, 3000);
         }
 
         function triggerStateSync() {
@@ -1041,32 +1109,40 @@
 
             // 1. Prioritize Success Checkmark Animation
             if (window.appState.showSuccess) {
-                screensaverEl.classList.add('hidden');
-                activeViewEl.classList.add('hidden');
-                
-                // Show success screen and re-trigger checkmark animation
-                successOverlayEl.classList.remove('hidden');
-                const checkIcon = successOverlayEl.querySelector('.animate-check');
-                if (checkIcon) {
-                    checkIcon.style.animation = 'none';
-                    checkIcon.offsetHeight; // Trigger reflow
-                    checkIcon.style.animation = null; 
+                if (!successOverlayEl.classList.contains('hidden') && !successOverlayEl.classList.contains('animate-fade-out-soft')) {
+                    // Already showing, don't interrupt
+                } else {
+                    screensaverEl.classList.add('hidden');
+                    activeViewEl.classList.add('hidden');
+                    
+                    successOverlayEl.classList.remove('hidden', 'animate-fade-out-soft');
+                    const checkIcon = successOverlayEl.querySelector('.animate-check');
+                    if (checkIcon) {
+                        checkIcon.style.animation = 'none';
+                        checkIcon.offsetHeight; // Trigger reflow
+                        checkIcon.style.animation = null; 
+                    }
                 }
                 return; // Stop processing further views
             } else {
                 successOverlayEl.classList.add('hidden');
+                successOverlayEl.classList.remove('animate-fade-out-soft');
             }
 
             // 2. Normal View Logic (Cart vs. Screensaver)
             const cart = window.appState.cart || [];
             if (cart.length === 0) {
-                screensaverEl.classList.remove('hidden');
-                activeViewEl.classList.add('hidden');
+                if (screensaverEl.classList.contains('hidden')) {
+                    activeViewEl.classList.add('hidden');
+                    screensaverEl.classList.remove('hidden');
+                }
                 return;
             }
 
-            screensaverEl.classList.add('hidden');
-            activeViewEl.classList.remove('hidden');
+            if (activeViewEl.classList.contains('hidden')) {
+                screensaverEl.classList.add('hidden');
+                activeViewEl.classList.remove('hidden');
+            }
 
             const total = window.appState.total || 0;
             const paid = window.appState.paid || 0;
@@ -1080,16 +1156,16 @@
 
             const banner = document.getElementById('customer-status-banner');
             if (change > 0) {
-                banner.className = "mt-1 p-2 md:p-2.5 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-100 text-center font-bold text-[10px] flex items-center justify-center gap-1";
-                banner.innerHTML = `<i class="fa-solid fa-coins animate-bounce text-emerald-500 text-sm"></i> Bitte entnimm dein Rückgeld: ${formatStr(change)} €`;
+                banner.className = "mt-2 p-3 md:p-4 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-100 text-center font-bold text-xs md:text-sm flex items-center justify-center gap-1.5 transition-all duration-300";
+                banner.innerHTML = `<i class="fa-solid fa-coins animate-bounce text-emerald-500 text-lg"></i> Bitte entnimm dein Rückgeld: ${formatStr(change)} €`;
             } else if (total > 0 && paid === total) {
-                banner.className = "mt-1 p-2 md:p-2.5 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-100 text-center font-bold text-[10px] flex items-center justify-center gap-1";
-                banner.innerHTML = `<i class="fa-solid fa-heart animate-pulse text-rose-500 text-sm"></i> Passend bezahlt. Vielen Dank!`;
+                banner.className = "mt-2 p-3 md:p-4 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-100 text-center font-bold text-xs md:text-sm flex items-center justify-center gap-1.5 transition-all duration-300";
+                banner.innerHTML = `<i class="fa-solid fa-heart animate-pulse text-rose-500 text-lg"></i> Passend bezahlt. Vielen Dank!`;
             } else if (total > 0) {
-                banner.className = "mt-1 p-2 md:p-2.5 rounded-2xl bg-orange-50 text-orange-800 border border-orange-100 text-center font-bold text-[10px] flex items-center justify-center gap-1";
-                banner.innerHTML = `<i class="fa-solid fa-hourglass-half animate-spin text-orange-500 text-xs"></i> Warte auf Zahlung am Terminal...`;
+                banner.className = "mt-2 p-3 md:p-4 rounded-2xl bg-orange-50 text-orange-800 border border-orange-100 text-center font-bold text-xs md:text-sm flex items-center justify-center gap-1.5 transition-all duration-300";
+                banner.innerHTML = `<i class="fa-solid fa-hourglass-half animate-spin text-orange-500 text-base"></i> Warte auf Zahlung am Terminal...`;
             } else {
-                banner.className = "mt-1 p-2 md:p-2.5 rounded-2xl bg-sky-50 text-sky-700 border border-sky-100 text-center font-bold text-[10px] flex items-center justify-center gap-1";
+                banner.className = "mt-2 p-3 md:p-4 rounded-2xl bg-sky-50 text-sky-700 border border-sky-100 text-center font-bold text-xs md:text-sm flex items-center justify-center gap-1.5 transition-all duration-300";
                 banner.innerHTML = `<i class="fa-solid fa-sun animate-spin text-sky-500" style="animation-duration: 10s"></i> Viel Spaß beim Sommerfest!`;
             }
 
@@ -1098,16 +1174,16 @@
 
             cart.forEach(item => {
                 const itemEl = document.createElement('div');
-                itemEl.className = "flex items-center justify-between p-2 md:p-2.5 rounded-xl bg-slate-50 border border-slate-100 shadow-sm";
+                itemEl.className = "flex items-center justify-between p-3 md:p-4 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm animate-fade-in";
                 itemEl.innerHTML = `
-                    <div class="flex items-center gap-1.5 md:gap-2">
-                        <div class="bg-gradient-to-tr from-orange-400 to-amber-400 text-white w-6 h-6 md:w-7 md:h-7 rounded-lg flex items-center justify-center font-bold text-[10px] md:text-[11px]">${item.qty}x</div>
+                    <div class="flex items-center gap-2.5 md:gap-3">
+                        <div class="bg-gradient-to-tr from-orange-400 to-amber-400 text-white w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center font-black text-sm md:text-base shadow-sm">${item.qty}x</div>
                         <div>
-                            <h4 class="font-bold text-slate-800 text-[9px] md:text-[10px] leading-tight">${item.name}</h4>
-                            <p class="text-[7px] md:text-[8px] text-slate-400 mt-0.5">${item.price.toFixed(2)} € pro Person</p>
+                            <h4 class="font-bold text-slate-800 text-xs md:text-[15px] leading-tight">${item.name}</h4>
+                            <p class="text-[10px] md:text-xs text-slate-500 mt-1">${item.price.toFixed(2)} € pro Person</p>
                         </div>
                     </div>
-                    <span class="font-mono font-extrabold text-slate-800 text-[10px] md:text-[11px]">${(item.price * item.qty).toFixed(2)} €</span>
+                    <span class="font-mono font-black text-slate-800 text-sm md:text-lg">${(item.price * item.qty).toFixed(2)} €</span>
                 `;
                 list.appendChild(itemEl);
             });
@@ -1132,8 +1208,8 @@
             if (sales.length === 0) {
                 container.innerHTML = `
                     <div class="flex flex-col items-center justify-center py-8 text-slate-400">
-                        <i class="fa-solid fa-box-open text-2xl mb-1 text-slate-300"></i>
-                        <p class="text-[10px] font-semibold">Bisher wurden keine Buchungen erfasst.</p>
+                        <i class="fa-solid fa-box-open text-3xl mb-2 text-slate-300"></i>
+                        <p class="text-xs md:text-sm font-semibold">Bisher wurden keine Buchungen erfasst.</p>
                     </div>
                 `;
                 return;
@@ -1144,17 +1220,17 @@
                 const itemsList = sale.items.map(item => `${item.qty}x ${item.name}`).join(', ');
 
                 const itemDiv = document.createElement('div');
-                itemDiv.className = "bg-slate-50 p-2.5 rounded-xl border border-slate-200/60 flex items-center justify-between gap-3";
+                itemDiv.className = "bg-slate-50 p-3 md:p-4 rounded-2xl border border-slate-200/60 flex items-center justify-between gap-3 shadow-sm";
                 itemDiv.innerHTML = `
                     <div class="min-w-0 flex-grow">
-                        <div class="flex items-center gap-1.5">
-                            <span class="bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded text-[8px]">${timeString} Uhr</span>
-                            <span class="font-mono font-bold text-[11px] text-slate-700">${sale.total.toFixed(2)} €</span>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded-lg text-[9px] md:text-xs">${timeString} Uhr</span>
+                            <span class="font-mono font-bold text-[13px] md:text-base text-slate-700">${sale.total.toFixed(2)} €</span>
                         </div>
-                        <p class="text-[9px] text-slate-500 truncate mt-1">${itemsList}</p>
+                        <p class="text-[10px] md:text-xs text-slate-500 truncate mt-1.5">${itemsList}</p>
                     </div>
-                    <button onclick="deleteSaleEntry('${sale.id}')" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-colors" title="Diese Buchung löschen">
-                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    <button onclick="deleteSaleEntry('${sale.id}')" class="text-red-500 hover:text-red-700 p-2 rounded-xl hover:bg-red-50 transition-colors" title="Diese Buchung löschen">
+                        <i class="fa-solid fa-trash-can text-sm md:text-base"></i>
                     </button>
                 `;
                 container.appendChild(itemDiv);
@@ -1177,19 +1253,19 @@
 
             window.appState.tariffs.forEach((tariff, index) => {
                 const div = document.createElement('div');
-                div.className = "flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-200/60";
+                div.className = "flex items-center justify-between bg-slate-50 p-3 md:p-4 rounded-2xl border border-slate-200/60 shadow-sm";
                 div.innerHTML = `
-                    <div class="flex items-center gap-2.5">
-                        <span class="bg-slate-200 text-slate-600 w-6 h-6 rounded-lg flex items-center justify-center text-xs">
+                    <div class="flex items-center gap-3">
+                        <span class="bg-slate-200 text-slate-600 w-8 h-8 rounded-xl flex items-center justify-center text-sm md:text-base">
                             <i class="fa-solid ${tariff.icon || 'fa-user'}"></i>
                         </span>
                         <div>
-                            <span class="font-bold text-[10px] text-slate-700 block leading-tight">${tariff.name}</span>
-                            <span class="text-[9px] font-semibold text-orange-600">${tariff.price.toFixed(2)} €</span>
+                            <span class="font-bold text-xs md:text-sm text-slate-800 block leading-tight">${tariff.name}</span>
+                            <span class="text-[10px] md:text-xs font-semibold text-orange-600">${tariff.price.toFixed(2)} €</span>
                         </div>
                     </div>
-                    <button onclick="deleteTariff(${index})" class="text-rose-500 hover:text-rose-600 p-1.5 text-xs transition-all">
-                        <i class="fa-solid fa-trash-can"></i>
+                    <button onclick="deleteTariff(${index})" class="text-rose-500 hover:text-rose-600 p-2 rounded-xl hover:bg-rose-50 transition-all">
+                        <i class="fa-solid fa-trash-can text-sm"></i>
                     </button>
                 `;
                 container.appendChild(div);
