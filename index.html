@@ -9,7 +9,7 @@
     <!-- Google Fonts (Inter & Fredoka für sommerlichen Vibe) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght=300..700&family=Inter:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -136,6 +136,16 @@
             align-items: center;
             justify-content: center;
         }
+
+        /* Rüttel-Animation bei falschem Code */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-amber-50 via-orange-50 to-sky-50 h-screen w-screen overflow-hidden text-slate-800 flex flex-col antialiased selection:bg-orange-200 transition-colors duration-500">
@@ -143,8 +153,8 @@
     <!-- MAIN APP CONTAINER -->
     <main class="flex-grow flex flex-col w-full max-w-7xl mx-auto px-3 py-3 md:px-5 md:py-4 h-full overflow-hidden">
         
-        <!-- Header -->
-        <header class="flex flex-col sm:flex-row items-center justify-between gap-3 mb-3 pb-3 border-b border-orange-100/60 shrink-0 animate-fade-in">
+        <!-- Header (Wird erst nach Passcode-Eingabe voll sichtbar) -->
+        <header id="app-header" class="hidden flex flex-col sm:flex-row items-center justify-between gap-3 mb-3 pb-3 border-b border-orange-100/60 shrink-0 animate-fade-in">
             <div class="flex items-center gap-3">
                 <div class="bg-gradient-to-tr from-amber-400 to-orange-500 text-white p-2.5 rounded-2xl shadow-md shadow-orange-500/20 transform rotate-3">
                     <i class="fa-solid fa-utensils text-xl"></i>
@@ -181,8 +191,46 @@
             </div>
         </header>
 
-        <!-- ROLE SELECTION VIEW -->
-        <section id="view-role-selection" class="flex-grow flex items-center justify-center py-4 animate-fade-in">
+        <!-- SECURITY PASSCODE LOCK SCREEN -->
+        <section id="view-passcode-lock" class="flex-grow flex flex-col items-center justify-center py-4 animate-fade-in z-[100]">
+            <div id="passcode-card" class="bg-white p-6 md:p-8 rounded-[2rem] shadow-xl border border-orange-100 w-full max-w-sm flex flex-col items-center text-center transition-all duration-300">
+                <div class="bg-amber-100 text-amber-600 p-4 rounded-full mb-3 shadow-inner">
+                    <i class="fa-solid fa-lock text-2xl md:text-3xl animate-pulse-soft"></i>
+                </div>
+                <h2 class="font-summer text-xl md:text-2xl font-black text-slate-800 mb-1">Kassensperre</h2>
+                <p class="text-slate-500 text-xs md:text-sm mb-5">Bitte gib den 4-stelligen Freischaltcode ein:</p>
+                
+                <!-- Code Indicator Dots -->
+                <div class="flex gap-4 mb-6" id="passcode-dots">
+                    <span class="w-4 h-4 rounded-full border-2 border-slate-300 bg-transparent transition-all duration-200"></span>
+                    <span class="w-4 h-4 rounded-full border-2 border-slate-300 bg-transparent transition-all duration-200"></span>
+                    <span class="w-4 h-4 rounded-full border-2 border-slate-300 bg-transparent transition-all duration-200"></span>
+                    <span class="w-4 h-4 rounded-full border-2 border-slate-300 bg-transparent transition-all duration-200"></span>
+                </div>
+
+                <!-- Passcode Numpad -->
+                <div class="grid grid-cols-3 gap-3 w-full">
+                    <button onclick="pressPasscodeDigit('1')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:scale-90 text-slate-800 font-black rounded-2xl text-lg transition-all border border-slate-100">1</button>
+                    <button onclick="pressPasscodeDigit('2')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:scale-90 text-slate-800 font-black rounded-2xl text-lg transition-all border border-slate-100">2</button>
+                    <button onclick="pressPasscodeDigit('3')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:scale-90 text-slate-800 font-black rounded-2xl text-lg transition-all border border-slate-100">3</button>
+                    
+                    <button onclick="pressPasscodeDigit('4')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:scale-90 text-slate-800 font-black rounded-2xl text-lg transition-all border border-slate-100">4</button>
+                    <button onclick="pressPasscodeDigit('5')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:scale-90 text-slate-800 font-black rounded-2xl text-lg transition-all border border-slate-100">5</button>
+                    <button onclick="pressPasscodeDigit('6')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:scale-90 text-slate-800 font-black rounded-2xl text-lg transition-all border border-slate-100">6</button>
+                    
+                    <button onclick="pressPasscodeDigit('7')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:scale-90 text-slate-800 font-black rounded-2xl text-lg transition-all border border-slate-100">7</button>
+                    <button onclick="pressPasscodeDigit('8')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:scale-90 text-slate-800 font-black rounded-2xl text-lg transition-all border border-slate-100">8</button>
+                    <button onclick="pressPasscodeDigit('9')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:scale-90 text-slate-800 font-black rounded-2xl text-lg transition-all border border-slate-100">9</button>
+                    
+                    <button onclick="clearPasscode()" class="numpad-btn bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-2xl text-xs transition-all border border-red-200">C</button>
+                    <button onclick="pressPasscodeDigit('0')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:scale-90 text-slate-800 font-black rounded-2xl text-lg transition-all border border-slate-100">0</button>
+                    <button class="numpad-btn opacity-0 cursor-default pointer-events-none"></button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ROLE SELECTION VIEW (Hidden by default, unlocked by PIN) -->
+        <section id="view-role-selection" class="hidden flex-grow flex items-center justify-center py-4 animate-fade-in">
             <div class="max-w-2xl w-full flex flex-col sm:flex-row gap-5 px-4">
                 
                 <button onclick="selectRole('seller')" class="w-full sm:w-1/2 group relative bg-white hover:bg-gradient-to-b hover:from-white hover:to-amber-50/30 p-6 md:p-8 rounded-3xl border-2 border-slate-100 hover:border-amber-400 text-left transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-amber-100/50 flex flex-col justify-between h-64 overflow-hidden transform hover:-translate-y-1">
@@ -209,7 +257,7 @@
             </div>
         </section>
 
-        <!-- SELLER VIEW (STRICT SIDE-BY-SIDE) -->
+        <!-- SELLER VIEW -->
         <section id="view-seller" class="hidden flex-grow flex flex-row gap-3 md:gap-5 items-stretch overflow-hidden animate-fade-in">
             
             <!-- Left Panel (Tariffs) -->
@@ -578,13 +626,75 @@
                 { id: 't2', name: 'Kinder (unter 7)', price: 0.00, icon: 'fa-child', color: 'bg-emerald-500' },
                 { id: 't3', name: 'Kinder (7-12 Jahre)', price: 7.50, icon: 'fa-child', color: 'bg-sky-500' }
             ],
-            lastSyncedData: null
+            lastSyncedData: null,
+            enteredPasscode: '', // Speichert die PIN-Eingabe
+            correctPasscode: '5657' // Der festgelegte Code
         };
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'sommerfest-buffet-pos';
         let db = null;
         let auth = null;
         let unsubscribeSync = null;
+
+        // Passcode Lock Funktionen
+        function pressPasscodeDigit(digit) {
+            if (window.appState.enteredPasscode.length < 4) {
+                window.appState.enteredPasscode += digit;
+                updatePasscodeDots();
+                
+                if (window.appState.enteredPasscode.length === 4) {
+                    // Warte kurz für visuelles Feedback und prüfe dann
+                    setTimeout(checkPasscode, 200);
+                }
+            }
+        }
+
+        function clearPasscode() {
+            window.appState.enteredPasscode = '';
+            updatePasscodeDots();
+        }
+
+        function updatePasscodeDots() {
+            const dots = document.querySelectorAll('#passcode-dots span');
+            const len = window.appState.enteredPasscode.length;
+            dots.forEach((dot, idx) => {
+                if (idx < len) {
+                    dot.className = "w-4 h-4 rounded-full border-2 border-amber-500 bg-amber-500 scale-110 transition-all duration-150";
+                } else {
+                    dot.className = "w-4 h-4 rounded-full border-2 border-slate-300 bg-transparent transition-all duration-150";
+                }
+            });
+        }
+
+        function checkPasscode() {
+            const card = document.getElementById('passcode-card');
+            const dots = document.querySelectorAll('#passcode-dots span');
+            
+            if (window.appState.enteredPasscode === window.appState.correctPasscode) {
+                // PIN ist richtig!
+                showToast('Kasse erfolgreich freigeschaltet!', 'success');
+                
+                // Übergangsanimation
+                document.getElementById('view-passcode-lock').classList.add('hidden');
+                document.getElementById('app-header').classList.remove('hidden');
+                document.getElementById('view-role-selection').classList.remove('hidden');
+            } else {
+                // PIN falsch!
+                showToast('Falscher Code! Versuche es noch einmal.', 'error');
+                
+                // Rüttel-Animation hinzufügen
+                card.classList.add('animate-shake');
+                dots.forEach(dot => {
+                    dot.className = "w-4 h-4 rounded-full border-2 border-red-500 bg-red-500 scale-105 transition-all duration-150";
+                });
+
+                // Nach der Animation zurücksetzen
+                setTimeout(() => {
+                    card.classList.remove('animate-shake');
+                    clearPasscode();
+                }, 400);
+            }
+        }
 
         // UI NOTIFICATION SYSTEM
         function showToast(message, type = 'info') {
@@ -665,6 +775,7 @@
             return (inputs && inputs.length > 0) ? (inputs[0].value || 'SOMMER-2026').trim().toUpperCase() : 'SOMMER-2026';
         }
 
+        // Complies with Rule 1
         function getTargetDocRef() {
             if (!db) return null;
             const syncCode = getSyncRoomCodeValue();
@@ -749,6 +860,7 @@
                 });
             });
             
+            // Rule 3 - Auth checked
             window.syncToFirebase = async () => {
                 if (!db || !auth || !auth.currentUser) return;
                 const docRef = getTargetDocRef();
@@ -1255,8 +1367,8 @@
                 const div = document.createElement('div');
                 div.className = "flex items-center justify-between bg-slate-50 p-3 md:p-4 rounded-2xl border border-slate-200/60 shadow-sm";
                 div.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <span class="bg-slate-200 text-slate-600 w-8 h-8 rounded-xl flex items-center justify-center text-sm md:text-base">
+                    <div class="flex items-center gap-2.5">
+                        <span class="bg-slate-200 text-slate-600 w-6 h-6 rounded-lg flex items-center justify-center text-sm md:text-base">
                             <i class="fa-solid ${tariff.icon || 'fa-user'}"></i>
                         </span>
                         <div>
@@ -1301,8 +1413,28 @@
         }
 
         // Global Bindings
-        window.selectRole = selectRole; window.changeRole = changeRole; window.addToCart = addToCart; window.changeCartQty = changeCartQty; window.clearCart = clearCart; window.addCustomPrice = addCustomPrice; window.pressNumpad = pressNumpad; window.setQuickCash = setQuickCash; window.completeSale = completeSale; window.deleteSaleEntry = deleteSaleEntry; window.clearAllSalesHistory = clearAllSalesHistory; window.openHistoryModal = openHistoryModal; window.closeHistoryModal = closeHistoryModal; window.openConfigModal = openConfigModal; window.closeConfigModal = closeConfigModal; window.addNewTariff = addNewTariff; window.deleteTariff = deleteTariff;
+        window.selectRole = selectRole; 
+        window.changeRole = changeRole;
+        window.addToCart = addToCart; 
+        window.changeCartQty = changeCartQty; 
+        window.clearCart = clearCart; 
+        window.addCustomPrice = addCustomPrice; 
+        window.pressNumpad = pressNumpad; 
+        window.setQuickCash = setQuickCash; 
+        window.completeSale = completeSale; 
+        window.deleteSaleEntry = deleteSaleEntry; 
+        window.clearAllSalesHistory = clearAllSalesHistory; 
+        window.openHistoryModal = openHistoryModal; 
+        window.closeHistoryModal = closeHistoryModal; 
+        window.openConfigModal = openConfigModal; 
+        window.closeConfigModal = closeConfigModal; 
+        window.addNewTariff = addNewTariff; 
+        window.deleteTariff = deleteTariff;
         
+        // Passcode bindings
+        window.pressPasscodeDigit = pressPasscodeDigit;
+        window.clearPasscode = clearPasscode;
+
         // Start Initialization
         document.addEventListener("DOMContentLoaded", initFirebase);
 
