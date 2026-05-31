@@ -9,10 +9,15 @@
     <!-- Google Fonts (Inter & Fredoka für sommerlichen Vibe) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght=300..700&family=Inter:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Firebase SDK (Universelle Compat-Version für problemlose iPad Nutzung) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -100,11 +105,11 @@
 </head>
 <body class="bg-gradient-to-br from-amber-50 via-orange-50 to-sky-50 min-h-screen text-slate-800 flex flex-col antialiased selection:bg-orange-200">
 
-    <!-- MAIN APP CONTAINER (Optimiert für Tablet-Größen) -->
+    <!-- MAIN APP CONTAINER -->
     <main class="flex-grow flex flex-col w-full max-w-7xl mx-auto px-3 py-3 md:px-5 md:py-4">
         
-        <!-- Header (Fest-Branding - Kompakter auf iPads) -->
-        <header class="flex flex-row items-center justify-between gap-3 mb-3 pb-3 border-b border-orange-100/60 shrink-0">
+        <!-- Header -->
+        <header class="flex flex-col sm:flex-row items-center justify-between gap-3 mb-3 pb-3 border-b border-orange-100/60 shrink-0">
             <div class="flex items-center gap-2.5">
                 <div class="bg-gradient-to-tr from-amber-400 to-orange-500 text-white p-2.5 rounded-2xl shadow-md shadow-orange-500/20 transform rotate-3">
                     <i class="fa-solid fa-utensils text-lg"></i>
@@ -112,7 +117,6 @@
                 <div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <h1 class="font-summer text-xl md:text-2xl font-bold bg-gradient-to-r from-orange-600 to-amber-500 bg-clip-text text-transparent leading-none">Ess-Zone Buffet</h1>
-                        <!-- Live Personen-Zähler Badge -->
                         <div class="bg-gradient-to-r from-sky-400 to-blue-500 text-white text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-sm shrink-0">
                             <i class="fa-solid fa-users text-[10px]"></i>
                             <span id="header-guests-count" class="font-black text-xs">0</span> in der Zone
@@ -122,21 +126,23 @@
                 </div>
             </div>
             
-            <!-- Connection State / Device Badge & Kopplungs-Code -->
-            <div class="flex items-center gap-2">
-                <!-- Kopplungs-Code Input -->
+            <div class="flex flex-wrap items-center gap-2 justify-end">
+                <!-- Live-Verbindungsstatus Ampelsystem -->
+                <div id="cloud-status-badge" class="flex items-center gap-2 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-xl text-[10px] font-bold text-slate-600 transition-all duration-300">
+                    <span class="h-2 w-2 rounded-full bg-slate-400"></span>
+                    <span id="cloud-status-text">Starte System...</span>
+                </div>
+
+                <!-- Kopplungs-Code -->
                 <div class="flex items-center bg-white/90 border border-orange-100 rounded-xl px-3 py-1.5 shadow-sm">
                     <span class="text-[9px] font-black text-orange-400 uppercase mr-1.5 tracking-wider"><i class="fa-solid fa-wifi"></i> Kasse-ID:</span>
                     <input type="text" value="SOMMER-2026" class="bg-transparent border-none text-[11px] font-black text-slate-700 uppercase focus:outline-none w-24 text-center sync-room-code-input" title="Nutze auf beiden Geräten dieselbe ID für die Live-Sync">
                 </div>
 
-                <div id="role-badge-container" class="hidden flex items-center gap-2 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-orange-100 shadow-sm">
-                    <span class="relative flex h-2 w-2">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                    </span>
-                    <span id="role-badge-text" class="text-[10px] font-bold text-slate-600">Verbindung aktiv</span>
-                    <button onclick="changeRole()" class="text-[10px] text-orange-500 hover:text-orange-600 font-bold ml-1.5 underline">Rolle wechseln</button>
+                <!-- Rolle wechseln -->
+                <div id="role-badge-container" class="hidden flex items-center gap-1.5 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-orange-100 shadow-sm">
+                    <span id="role-badge-text" class="text-[10px] font-black text-slate-500 uppercase leading-none">Aktiv</span>
+                    <button onclick="changeRole()" class="text-[10px] text-orange-500 hover:text-orange-600 font-bold ml-1 underline">Wechseln</button>
                 </div>
             </div>
         </header>
@@ -145,7 +151,6 @@
         <section id="view-role-selection" class="flex-grow flex items-center justify-center py-4">
             <div class="max-w-xl w-full grid grid-cols-1 sm:grid-cols-2 gap-5 px-4">
                 
-                <!-- Verkäufer Card -->
                 <button onclick="selectRole('seller')" class="group relative bg-white hover:bg-gradient-to-b hover:from-white hover:to-amber-50/30 p-5 md:p-6 rounded-3xl border-2 border-slate-100 hover:border-amber-400 text-left transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-amber-100/50 flex flex-col justify-between h-64 overflow-hidden transform hover:-translate-y-1">
                     <div class="absolute -right-10 -top-10 w-24 h-24 bg-amber-100 rounded-full opacity-30 group-hover:scale-125 transition-transform duration-500"></div>
                     <div class="bg-amber-100 group-hover:bg-amber-500 text-amber-600 group-hover:text-white p-2.5 rounded-2xl inline-block transition-colors duration-300">
@@ -160,7 +165,6 @@
                     </span>
                 </button>
 
-                <!-- Kunden Display Card -->
                 <button onclick="selectRole('customer')" class="group relative bg-white hover:bg-gradient-to-b hover:from-white hover:to-sky-50/30 p-5 md:p-6 rounded-3xl border-2 border-slate-100 hover:border-sky-400 text-left transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-sky-100/50 flex flex-col justify-between h-64 overflow-hidden transform hover:-translate-y-1">
                     <div class="absolute -right-10 -top-10 w-24 h-24 bg-sky-100 rounded-full opacity-30 group-hover:scale-125 transition-transform duration-500"></div>
                     <div class="bg-sky-100 group-hover:bg-sky-500 text-sky-600 group-hover:text-white p-2.5 rounded-2xl inline-block transition-colors duration-300">
@@ -177,21 +181,17 @@
             </div>
         </section>
 
-        <!-- SELLER VIEW (md-optimiert für iPad Querformat) -->
+        <!-- SELLER VIEW -->
         <section id="view-seller" class="hidden flex-grow grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 items-stretch overflow-hidden">
             
-            <!-- Left Panel: Menu Items (7 Cols) -->
             <div class="md:col-span-7 flex flex-col gap-3 overflow-hidden">
-                <!-- Quick Controls & Menu Title -->
                 <div class="bg-white/70 backdrop-blur-md p-2.5 rounded-2xl border border-orange-100 shadow-sm flex items-center justify-between gap-3 shrink-0">
                     <div class="flex items-center gap-2">
                         <span class="bg-orange-100 text-orange-600 px-2 py-0.5 rounded-lg font-bold text-[10px]">Tarife</span>
                         <h2 class="font-summer text-base font-bold text-slate-700">Buffet-Auswahl</h2>
                     </div>
                     
-                    <!-- Stats & Config Actions -->
                     <div class="flex items-center gap-2">
-                        <!-- Revenue / Profit Stats Trigger -->
                         <button onclick="openHistoryModal()" class="bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white px-3 py-1.5 rounded-xl text-[11px] font-black flex items-center gap-1.5 transition-all shadow-sm">
                             <i class="fa-solid fa-chart-line"></i> Umsatz: <span id="seller-revenue-badge">0,00 €</span>
                         </button>
@@ -201,12 +201,8 @@
                     </div>
                 </div>
 
-                <!-- Tariff Grid (Optimierter Raster für iPad) -->
-                <div id="seller-tariffs-grid" class="grid grid-cols-2 gap-2.5 overflow-y-auto max-h-[220px] md:max-h-[340px] pr-1">
-                    <!-- Dynamic content injected here -->
-                </div>
+                <div id="seller-tariffs-grid" class="grid grid-cols-2 gap-2.5 overflow-y-auto max-h-[220px] md:max-h-[340px] pr-1"></div>
 
-                <!-- Custom Price quick adder -->
                 <div class="bg-white/60 p-3 rounded-2xl border border-dashed border-orange-200 flex flex-row items-center justify-between gap-2 shrink-0 mt-auto">
                     <div class="flex items-center gap-2">
                         <div class="bg-amber-100 text-amber-600 p-1.5 rounded-lg text-xs">
@@ -227,9 +223,7 @@
                 </div>
             </div>
 
-            <!-- Right Panel: Checkout, Numpad & Payment (5 Cols) -->
             <div class="md:col-span-5 flex flex-col gap-3 overflow-hidden">
-                <!-- Live Cart Card (Kompakter auf Tablets) -->
                 <div class="bg-white p-3 rounded-2xl shadow-md border border-orange-100 flex flex-col max-h-[160px] md:max-h-[200px] overflow-hidden shrink-0">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-1.5 mb-1.5">
                         <h3 class="font-summer text-xs font-bold text-slate-700 flex items-center gap-1">
@@ -240,21 +234,15 @@
                         </button>
                     </div>
 
-                    <!-- Cart Items List (Scrollable) -->
-                    <div id="seller-cart-items" class="flex-grow overflow-y-auto space-y-1 pr-1">
-                        <!-- Dynamic items -->
-                    </div>
+                    <div id="seller-cart-items" class="flex-grow overflow-y-auto space-y-1 pr-1"></div>
 
-                    <!-- Cart Total display -->
                     <div class="border-t border-slate-100 pt-1.5 mt-1.5 flex items-center justify-between shrink-0">
                         <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Gesamt:</span>
                         <span id="seller-total-price" class="font-summer text-xl font-extrabold text-orange-600">0.00 €</span>
                     </div>
                 </div>
 
-                <!-- Cash Numpad Card (Tastenhöhe für iPad kompakt optimiert) -->
                 <div class="bg-white p-3 rounded-2xl shadow-md border border-orange-100 flex flex-col gap-2 shrink-0">
-                    <!-- Given Cash Display -->
                     <div class="grid grid-cols-2 gap-2 bg-slate-50 p-2 rounded-xl border border-slate-100">
                         <div>
                             <span class="text-[10px] font-bold text-slate-400 uppercase block leading-none mb-0.5">Gegeben:</span>
@@ -272,7 +260,6 @@
                         </div>
                     </div>
 
-                    <!-- Quick Cash Selector Buttons (Vergrößert für Finger) -->
                     <div class="grid grid-cols-4 gap-1.5">
                         <button onclick="setQuickCash(5)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-2 rounded-lg text-xs transition-all border border-slate-200">5 €</button>
                         <button onclick="setQuickCash(10)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-2 rounded-lg text-xs transition-all border border-slate-200">10 €</button>
@@ -280,7 +267,6 @@
                         <button onclick="setQuickCash(50)" class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-2 rounded-lg text-xs transition-all border border-slate-200">50 €</button>
                     </div>
 
-                    <!-- Numpad Grid (Extrem haptisch und kontrastreich für das iPad) -->
                     <div class="grid grid-cols-3 gap-1.5">
                         <button onclick="pressNumpad('7')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">7</button>
                         <button onclick="pressNumpad('8')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">8</button>
@@ -299,7 +285,6 @@
                         <button onclick="pressNumpad('.')" class="bg-slate-50 hover:bg-amber-100/50 active:scale-95 text-slate-700 font-bold py-2.5 rounded-lg text-base transition-all border border-slate-100">,</button>
                     </div>
 
-                    <!-- Complete Payment button -->
                     <button onclick="completeSale()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-98 text-white py-2.5 rounded-xl font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-circle-check text-sm"></i> Verkauf abschließen
                     </button>
@@ -307,42 +292,34 @@
             </div>
         </section>
 
-        <!-- CUSTOMER VIEW (Wechselt zwischen Screensaver und Aktiver Anzeige) -->
+        <!-- CUSTOMER VIEW -->
         <section id="view-customer" class="hidden flex-grow relative">
             
-            <!-- SCREENSAVER OVERLAY (True Fullscreen sommerlicher Ruhezustand) -->
             <div id="customer-screensaver" class="fixed inset-0 bg-gradient-to-br from-amber-400 via-orange-400 to-sky-300 overflow-hidden flex flex-col justify-between p-6 md:p-12 text-white transition-all duration-500 z-50">
-                <!-- Exit button to escape screensaver gracefully -->
                 <button onclick="changeRole()" class="absolute top-4 right-4 z-[60] bg-white/20 hover:bg-white/30 active:scale-95 text-white/95 hover:text-white px-4 py-2 rounded-xl text-xs font-bold border border-white/30 transition-all flex items-center gap-1.5 shadow-md">
                     <i class="fa-solid fa-arrow-left"></i> Beenden / Rolle wechseln
                 </button>
 
-                <!-- Floating Icons in Background -->
                 <div class="absolute top-16 left-10 text-6xl opacity-20 animate-float-1">🌴</div>
                 <div class="absolute top-1/4 right-16 text-7xl opacity-15 animate-float-2">🍦</div>
                 <div class="absolute bottom-24 left-20 text-6xl opacity-20 animate-float-3">🍉</div>
                 <div class="absolute bottom-1/3 right-1/4 text-5xl opacity-15 animate-float-1">🌊</div>
                 <div class="absolute top-10 right-1/3 text-6xl opacity-10 animate-float-2">🍋</div>
                 
-                <!-- Animated Waves on bottom -->
                 <div class="wave-bg"></div>
                 <div class="wave-bg-2"></div>
 
-                <!-- Top Row Info -->
                 <div class="flex justify-between items-center z-20 flex-wrap gap-2">
                     <span class="font-summer text-base md:text-lg font-bold tracking-wide text-amber-50 drop-shadow-sm flex items-center gap-2">
                         ☀️ Ess-Zone Buffet-Flatrate
                     </span>
-                    <!-- Room code also on Screensaver for easy configuration -->
                     <div class="flex items-center bg-white/20 backdrop-blur-md rounded-xl px-3 py-1.5 border border-white/20 text-white">
                         <span class="text-[9px] font-black uppercase mr-1.5 tracking-wider">Kasse-ID:</span>
                         <input type="text" value="SOMMER-2026" class="bg-transparent border-none text-[11px] font-black text-white uppercase focus:outline-none w-20 text-center sync-room-code-input" title="Nutze dieselbe ID wie am Verkäufer-Terminal">
                     </div>
                 </div>
 
-                <!-- Center Banner (Pulsing and Summer styled) -->
                 <div class="text-center my-auto z-20 flex flex-col items-center justify-center">
-                    <!-- Big Sun Icon -->
                     <div class="bg-white/10 p-5 rounded-full border border-white/20 animate-pulse-soft mb-3">
                         <span class="text-5xl md:text-6xl block transform hover:rotate-45 transition-transform duration-1000">☀️</span>
                     </div>
@@ -351,25 +328,20 @@
                         Dein All-You-Can-Eat Buffet. Hol dir dein Einlassbändchen direkt an der Kasse!
                     </p>
 
-                    <!-- Stamp Callout Badge -->
                     <div class="bg-orange-600/40 border-2 border-dashed border-white/40 px-6 py-4 rounded-2xl transform -rotate-1 shadow-md max-w-sm backdrop-blur-sm animate-pulse-soft">
                         <span class="text-xs font-bold block text-amber-200">ℹ️ ZUTRITT NUR MIT STEMPEL:</span>
                         <p class="text-xs font-black tracking-wide mt-1 text-white uppercase">Hier bezahlen &amp; direkt Einlassstempel abholen!</p>
                     </div>
                 </div>
 
-                <!-- Bottom Reminder -->
                 <div class="text-center z-20 text-[10px] text-sky-900/80 font-bold bg-white/45 backdrop-blur-md py-2 px-3 rounded-xl max-w-md mx-auto border border-white/40 shadow-sm leading-tight">
                     ⚠️ Wichtige Regel: Speisen & Getränke bitte ausschließlich innerhalb der abgegrenzten Ess-Zone verzehren.
                 </div>
             </div>
 
-            <!-- ACTIVE TRANSACTION CONTENT (Blendet sich ein, wenn etwas im Warenkorb ist) -->
             <div id="customer-active-view" class="hidden h-full grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch transition-all duration-500">
-                <!-- Left Side: Active Order Summary (7 Cols) -->
                 <div class="md:col-span-7 bg-white p-5 rounded-3xl border border-orange-100 shadow-lg flex flex-col justify-between">
                     <div>
-                        <!-- Welcome Guest -->
                         <div class="flex items-center gap-2 mb-3 bg-orange-50 p-2.5 rounded-2xl border border-orange-100">
                             <span class="text-xl">🌴</span>
                             <div>
@@ -378,23 +350,17 @@
                             </div>
                         </div>
 
-                        <!-- Live items list -->
                         <h3 class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Deine Auswahl:</h3>
-                        <div id="customer-live-items" class="space-y-2 max-h-[180px] md:max-h-[260px] overflow-y-auto pr-1">
-                            <!-- Dynamic items injected here -->
-                        </div>
+                        <div id="customer-live-items" class="space-y-2 max-h-[180px] md:max-h-[260px] overflow-y-auto pr-1"></div>
                     </div>
 
-                    <!-- Footer reminder about rules -->
                     <div class="mt-3 border-t border-slate-100 pt-2 flex items-center gap-2.5 text-[9px] text-amber-800 bg-amber-50/50 p-2.5 rounded-xl leading-relaxed">
                         <i class="fa-solid fa-circle-info text-sm text-amber-600 shrink-0"></i>
                         <p><strong>Zutritt &amp; Stempel:</strong> Bitte genieß dein Essen innerhalb der markierten Ess-Zone. Das Weitergeben von Tellern an Personen ohne Einlassstempel ist nicht gestattet.</p>
                     </div>
                 </div>
 
-                <!-- Right Side: Pay / Total Display (5 Cols) -->
                 <div class="md:col-span-5 flex flex-col gap-3">
-                    <!-- Golden Total Box -->
                     <div class="bg-gradient-to-tr from-orange-500 to-amber-400 text-white p-4 rounded-3xl shadow-md flex flex-col justify-between min-h-[100px] md:min-h-[120px] relative overflow-hidden">
                         <div class="absolute -right-12 -top-12 w-24 h-24 bg-white/10 rounded-full"></div>
                         <div>
@@ -406,9 +372,7 @@
                         </div>
                     </div>
 
-                    <!-- Live Money calculations (Große Touch-Zahlen!) -->
                     <div class="bg-white p-4 rounded-3xl shadow-lg border border-orange-100 flex-grow flex flex-col justify-center gap-3">
-                        <!-- Paid -->
                         <div>
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Gegebenes Bargeld:</span>
                             <div class="flex items-baseline gap-1">
@@ -417,10 +381,8 @@
                             </div>
                         </div>
 
-                        <!-- Divider -->
                         <hr class="border-slate-100">
 
-                        <!-- Change -->
                         <div>
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Dein Rückgeld:</span>
                             <div class="flex items-baseline gap-1">
@@ -429,10 +391,7 @@
                             </div>
                         </div>
 
-                        <!-- Summer status sticker -->
-                        <div id="customer-status-banner" class="mt-1 p-2.5 rounded-xl text-center font-bold text-[10px] flex items-center justify-center gap-1.5">
-                            <!-- Injected banner message -->
-                        </div>
+                        <div id="customer-status-banner" class="mt-1 p-2.5 rounded-xl text-center font-bold text-[10px] flex items-center justify-center gap-1.5"></div>
                     </div>
                 </div>
             </div>
@@ -443,7 +402,6 @@
     <!-- SALES HISTORY & REVENUE MODAL -->
     <div id="modal-history" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg border border-slate-100 overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-[80vh]">
-            <!-- Modal Header -->
             <div class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-5 py-3.5 flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-receipt text-lg"></i>
@@ -454,9 +412,7 @@
                 </button>
             </div>
 
-            <!-- Modal Body (History List) -->
             <div class="p-5 overflow-y-auto flex-grow flex flex-col gap-4">
-                <!-- Total Statistics Banner -->
                 <div class="grid grid-cols-2 gap-3 bg-gradient-to-tr from-slate-50 to-emerald-50/40 p-3.5 rounded-2xl border border-emerald-100 shrink-0">
                     <div>
                         <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Gesamtumsatz (Gewinn)</span>
@@ -468,16 +424,12 @@
                     </div>
                 </div>
 
-                <!-- Real-time Sales Entries -->
                 <div>
                     <h4 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Einzelne Buchungen</h4>
-                    <div id="history-sales-list" class="space-y-2">
-                        <!-- Dynamic history logs injected here -->
-                    </div>
+                    <div id="history-sales-list" class="space-y-2"></div>
                 </div>
             </div>
 
-            <!-- Modal Footer -->
             <div class="bg-slate-50 px-5 py-3 flex justify-end gap-2.5 border-t border-slate-100 shrink-0">
                 <button onclick="clearAllSalesHistory()" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-3 py-1.5 rounded-lg text-[10px] transition-all flex items-center gap-1 mr-auto">
                     <i class="fa-solid fa-triangle-exclamation"></i> Alles löschen
@@ -492,7 +444,6 @@
     <!-- CONFIG / SETTINGS MODAL -->
     <div id="modal-config" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg border border-slate-100 overflow-hidden transform scale-95 transition-transform duration-300">
-            <!-- Modal Header -->
             <div class="bg-gradient-to-r from-orange-500 to-amber-400 text-white px-5 py-4 flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
                     <i class="fa-solid fa-sliders text-lg"></i>
@@ -503,17 +454,12 @@
                 </button>
             </div>
 
-            <!-- Modal Body -->
             <div class="p-5 max-h-[50vh] overflow-y-auto flex flex-col gap-4">
-                <!-- Tariff List -->
                 <div>
                     <h4 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Aktuelle Preisliste</h4>
-                    <div id="config-tariffs-list" class="space-y-1.5">
-                        <!-- Dynamic pricing list -->
-                    </div>
+                    <div id="config-tariffs-list" class="space-y-1.5"></div>
                 </div>
 
-                <!-- Add New Tariff Form -->
                 <div class="bg-orange-50/50 p-3.5 rounded-xl border border-orange-100/60">
                     <h4 class="text-[10px] font-extrabold text-orange-700 uppercase tracking-wider mb-2">Neuen Tarif hinzufügen</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
@@ -542,7 +488,6 @@
                 </div>
             </div>
 
-            <!-- Modal Footer -->
             <div class="bg-slate-50 px-5 py-3.5 flex justify-end gap-2.5 border-t border-slate-100">
                 <button onclick="closeConfigModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-1.5 rounded-lg text-xs transition-all">
                     Schließen
@@ -554,17 +499,27 @@
     <!-- NOTIFICATION / TOAST CONTAINER -->
     <div id="toast-container" class="fixed bottom-4 right-4 z-50 pointer-events-none flex flex-col gap-2"></div>
 
-    <!-- Standard script block - evaluated immediately so UI functions are GUARANTEED to exist right away -->
+    <!-- MAIN JAVASCRIPT BLOCK -->
     <script>
-        // Global state setup (Available immediately)
+        // Deine Firebase Config wurde hier eingefügt
+        const MEINE_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
+            authDomain: "sommerfest-kasse.firebaseapp.com",
+            projectId: "sommerfest-kasse",
+            storageBucket: "sommerfest-kasse.firebasestorage.app",
+            messagingSenderId: "899854905140",
+            appId: "1:899854905140:web:94be886a048356c7fb3f61"
+        };
+
+        // Global state setup
         window.appState = {
-            role: null, // 'seller' or 'customer'
+            role: null,
             cart: [],
             givenCash: '',
             paid: 0,
             change: 0,
             total: 0,
-            salesHistory: [], // Holds array of completed sales objects
+            salesHistory: [],
             tariffs: [
                 { id: 't1', name: 'Erwachsene (Flatrate)', price: 15.00, icon: 'fa-user', color: 'bg-amber-500' },
                 { id: 't2', name: 'Kinder (unter 7)', price: 0.00, icon: 'fa-child', color: 'bg-emerald-500' },
@@ -573,16 +528,12 @@
             lastSyncedData: null
         };
 
-        // Fallback Local syncing logic
-        window.syncToFirebase = function() {
-            if (window.appState.role === 'customer') {
-                updateCustomerUI();
-            } else if (window.appState.role === 'seller') {
-                updateSellerUI();
-            }
-        };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sommerfest-buffet-pos';
+        let db = null;
+        let auth = null;
+        let unsubscribeSync = null;
 
-        // UI NOTIFICATION SYSTEM (Immediate availability)
+        // UI NOTIFICATION SYSTEM
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             if (!container) return;
@@ -603,23 +554,264 @@
             }
             
             toast.className = `p-3.5 rounded-2xl border shadow-md flex items-center gap-2.5 max-w-xs pointer-events-auto transition-all duration-300 ${bgClass}`;
-            toast.innerHTML = `
-                <i class="fa-solid ${icon} text-sm shrink-0"></i>
-                <div class="text-[11px] font-bold">${message}</div>
-            `;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-sm shrink-0"></i><div class="text-[11px] font-bold">${message}</div>`;
             container.appendChild(toast);
             
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'scale-95');
                 setTimeout(() => toast.remove(), 300);
-            }, 3500);
+            }, 4000);
         }
 
-        // ROLE MANAGEMENT FUNCTIONS (Clickable immediately)
+        function setConnectionStatus(state, details = '') {
+            const badge = document.getElementById('cloud-status-badge');
+            const text = document.getElementById('cloud-status-text');
+            if (!badge || !text) return;
+            
+            badge.className = "flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all duration-300 "
+            
+            if (state === 'offline') {
+                badge.className += "bg-slate-100 border border-slate-200 text-slate-600";
+                badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-slate-400"></span> <span>Offline (Lokaler Modus)</span>`;
+            } else if (state === 'connecting') {
+                badge.className += "bg-amber-50 border border-amber-100 text-amber-700";
+                badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-amber-400 animate-ping"></span> <span>Verbinde mit Cloud...</span>`;
+            } else if (state === 'connected') {
+                badge.className += "bg-emerald-50 border border-emerald-100 text-emerald-700";
+                badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span> <span>Cloud-Sync aktiv</span>`;
+            } else if (state === 'auth-error') {
+                badge.className += "bg-rose-50 border border-rose-100 text-rose-700";
+                badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-rose-500"></span> <span title="${details}">Fehler: Anonym-Auth aus!</span>`;
+            } else if (state === 'permission-denied') {
+                badge.className += "bg-rose-50 border border-rose-100 text-rose-700";
+                badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-rose-500"></span> <span title="${details}">Fehler: Schreibrechte verweigert!</span>`;
+            } else if (state === 'generic-error') {
+                badge.className += "bg-rose-50 border border-rose-100 text-rose-700";
+                badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-rose-400"></span> <span>Cloud-Fehler</span>`;
+            }
+        }
+
+        function setupOfflineFallback() {
+            setConnectionStatus('offline');
+            
+            window.syncToFirebase = async () => {
+                if (window.appState.role === 'customer') updateCustomerUI();
+                else if (window.appState.role === 'seller') updateSellerUI();
+            };
+            
+            const roomInputs = document.querySelectorAll('.sync-room-code-input');
+            roomInputs.forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const newVal = e.target.value.toUpperCase();
+                    roomInputs.forEach(ri => { ri.value = newVal; });
+                    if (window.appState.role === 'seller') updateSellerUI();
+                    else if (window.appState.role === 'customer') updateCustomerUI();
+                });
+            });
+
+            if (window.appState.role === 'seller') updateSellerUI();
+            else if (window.appState.role === 'customer') updateCustomerUI();
+        }
+
+        function getSyncRoomCodeValue() {
+            const inputs = document.querySelectorAll('.sync-room-code-input');
+            return (inputs && inputs.length > 0) ? (inputs[0].value || 'SOMMER-2026').trim().toUpperCase() : 'SOMMER-2026';
+        }
+
+        function getTargetDocRef() {
+            if (!db) return null;
+            const syncCode = getSyncRoomCodeValue();
+            return db.doc(`artifacts/${appId}/public/data/pos_sync/state_${syncCode}`);
+        }
+
+        function setupFirebaseSync() {
+            const startSync = () => {
+                if (!db || !auth || !auth.currentUser) return; 
+                
+                if (unsubscribeSync) unsubscribeSync();
+                
+                const docRef = getTargetDocRef();
+                if (!docRef) return;
+                
+                unsubscribeSync = docRef.onSnapshot((docSnap) => {
+                    if (docSnap.exists) {
+                        const data = docSnap.data();
+                        window.appState.lastSyncedData = data;
+                        window.appState.salesHistory = data.salesHistory || [];
+                        window.appState.tariffs = data.tariffs || window.appState.tariffs;
+                        
+                        if (window.appState.role === 'customer') {
+                            window.appState.cart = data.cart || [];
+                            window.appState.total = data.total || 0;
+                            window.appState.paid = data.paid || 0;
+                            window.appState.change = data.change || 0;
+                            window.appState.givenCash = data.givenCash || '';
+                            updateCustomerUI();
+                        } else if (window.appState.role === 'seller') {
+                            updateSellerUI();
+                        }
+                    }
+                }, (error) => {
+                    console.error("Firestore Listen Error:", error);
+                    if (error.code === 'permission-denied') {
+                        setConnectionStatus('permission-denied', error.message);
+                        showToast('Rechte blockiert! Prüfe deine Firestore Security Rules.', 'error');
+                    } else {
+                        setConnectionStatus('generic-error');
+                        showToast('Cloud-Fehler: ' + error.message, 'error');
+                    }
+                });
+            };
+
+            startSync();
+
+            const roomInputs = document.querySelectorAll('.sync-room-code-input');
+            roomInputs.forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const newVal = e.target.value.toUpperCase();
+                    roomInputs.forEach(ri => { ri.value = newVal; });
+                    
+                    if (db) {
+                        startSync();
+                        showToast('Kopplungs-ID geändert!', 'info');
+                        
+                        const docRef = getTargetDocRef();
+                        if (docRef) {
+                            docRef.get().then((docSnap) => {
+                                if (docSnap.exists) {
+                                    const data = docSnap.data();
+                                    window.appState.lastSyncedData = data;
+                                    window.appState.tariffs = data.tariffs || window.appState.tariffs;
+                                    window.appState.salesHistory = data.salesHistory || [];
+                                    
+                                    if (window.appState.role === 'seller') {
+                                        updateSellerUI();
+                                    } else if (window.appState.role === 'customer') {
+                                        window.appState.cart = data.cart || [];
+                                        window.appState.total = data.total || 0;
+                                        window.appState.paid = data.paid || 0;
+                                        window.appState.change = data.change || 0;
+                                        window.appState.givenCash = data.givenCash || '';
+                                        updateCustomerUI();
+                                    }
+                                }
+                            }).catch(err => console.error("Error pre-fetching document:", err));
+                        }
+                    }
+                });
+            });
+            
+            window.syncToFirebase = async () => {
+                if (!db || !auth || !auth.currentUser) return;
+                const docRef = getTargetDocRef();
+                if (!docRef) return;
+                try {
+                    await docRef.set({
+                        cart: window.appState.cart,
+                        total: window.appState.total,
+                        paid: window.appState.paid,
+                        change: window.appState.change,
+                        givenCash: window.appState.givenCash,
+                        tariffs: window.appState.tariffs,
+                        salesHistory: window.appState.salesHistory,
+                        lastUpdated: Date.now()
+                    });
+                } catch (e) {
+                    console.error("Error updating Firestore state:", e);
+                    if (e.code === 'permission-denied') {
+                        setConnectionStatus('permission-denied', e.message);
+                        showToast('Firebase-Schreibfehler! Datenbankregeln (Rules) prüfen.', 'error');
+                    } else {
+                        showToast('Schreibfehler: ' + e.message, 'error');
+                    }
+                }
+            };
+
+            const docRef = getTargetDocRef();
+            if (docRef) {
+                docRef.get().then((docSnap) => {
+                    if (docSnap.exists) {
+                        const data = docSnap.data();
+                        window.appState.lastSyncedData = data;
+                        if (data.tariffs) window.appState.tariffs = data.tariffs;
+                        if (data.salesHistory) window.appState.salesHistory = data.salesHistory;
+                        if (window.appState.role === 'seller') updateSellerUI();
+                    }
+                }).catch(err => console.error("Error fetching initial state:", err));
+            }
+        }
+
+        async function initFirebase() {
+            try {
+                let finalConfig = null;
+                if (typeof MEINE_FIREBASE_CONFIG !== 'undefined' && MEINE_FIREBASE_CONFIG) {
+                    finalConfig = MEINE_FIREBASE_CONFIG;
+                } else if (typeof __firebase_config !== 'undefined') {
+                    finalConfig = JSON.parse(__firebase_config);
+                }
+
+                if (!finalConfig) {
+                    console.log("No Firebase config found. Running in offline fallback mode.");
+                    setupOfflineFallback();
+                    return;
+                }
+
+                setConnectionStatus('connecting');
+                
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(finalConfig);
+                }
+                
+                db = firebase.firestore();
+                auth = firebase.auth();
+
+                // Failsafe-Anmeldesystem zur Vermeidung von "custom-token-mismatch"
+                let loggedIn = false;
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    try {
+                        await auth.signInWithCustomToken(__initial_auth_token);
+                        loggedIn = true;
+                    } catch (tokenError) {
+                        // Bei Mismatch-Fehler fangen wir den Fehler geräuschlos ab und versuchen die anonyme Methode
+                        console.warn("Custom Token passt nicht zum Projekt. Weiche auf anonyme Anmeldung aus.", tokenError);
+                    }
+                }
+
+                // Wenn kein Token vorhanden war oder dieser ungültig war, anonym anmelden
+                if (!loggedIn) {
+                    try {
+                        await auth.signInAnonymously();
+                    } catch (authError) {
+                        console.error("Auth error:", authError);
+                        setConnectionStatus('auth-error', authError.message);
+                        showToast('Anonyme Anmeldung deaktiviert! Aktiviere sie in der Firebase Console unter Authentication!', 'error');
+                        setupOfflineFallback();
+                        return;
+                    }
+                }
+
+                auth.onAuthStateChanged((user) => {
+                    if (user) {
+                        setConnectionStatus('connected');
+                        showToast('Cloud-Synchronisation aktiv ☁️', 'success');
+                        setupFirebaseSync();
+                    } else {
+                        setupOfflineFallback();
+                    }
+                });
+
+            } catch (err) {
+                console.error("Firebase Initialization Error:", err);
+                setConnectionStatus('generic-error');
+                showToast('Verbindung fehlgeschlagen. Offline-Modus aktiv.', 'error');
+                setupOfflineFallback();
+            }
+        }
+
+        // ROLE MANAGEMENT FUNCTIONS
         function selectRole(role) {
             window.appState.role = role;
             
-            // Apply cached snapshot data instantly if present
             if (window.appState.lastSyncedData) {
                 const data = window.appState.lastSyncedData;
                 window.appState.salesHistory = data.salesHistory || [];
@@ -639,11 +831,11 @@
             const badgeText = document.getElementById('role-badge-text');
             
             if (role === 'seller') {
-                badgeText.innerText = 'Verkäufer-Terminal';
+                badgeText.innerText = 'Verkäufer';
                 document.getElementById('view-seller').classList.remove('hidden');
                 updateSellerUI();
             } else if (role === 'customer') {
-                badgeText.innerText = 'Kunden-Display';
+                badgeText.innerText = 'Kunde';
                 document.getElementById('view-customer').classList.remove('hidden');
                 updateCustomerUI();
             }
@@ -670,13 +862,9 @@
 
         function updateGuestsBadge() {
             const history = window.appState.salesHistory || [];
-            const totalGuests = history.reduce((sum, sale) => {
-                return sum + (sale.items ? sale.items.reduce((itemSum, item) => itemSum + item.qty, 0) : 0);
-            }, 0);
+            const totalGuests = history.reduce((sum, sale) => sum + (sale.items ? sale.items.reduce((itemSum, item) => itemSum + item.qty, 0) : 0), 0);
             const badgeEl = document.getElementById('header-guests-count');
-            if (badgeEl) {
-                badgeEl.innerText = totalGuests;
-            }
+            if (badgeEl) badgeEl.innerText = totalGuests;
         }
 
         function renderSellerTariffs() {
@@ -743,51 +931,36 @@
         }
 
         function renderNumpadAndTotals() {
-            calculateCartTotals();
+            window.appState.total = window.appState.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             
             const totalVal = window.appState.total || 0;
             document.getElementById('seller-total-price').innerText = `${totalVal.toFixed(2)} €`;
             
             const rawCash = window.appState.givenCash || '0';
             const parsedCash = parseFloat(rawCash);
-            document.getElementById('display-given-cash').innerText = isNaN(parsedCash) ? '0,00' : formatEuroDisplay(parsedCash);
+            document.getElementById('display-given-cash').innerText = isNaN(parsedCash) ? '0,00' : (parsedCash || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             
             const change = isNaN(parsedCash) ? 0 : Math.max(0, parsedCash - totalVal);
             window.appState.change = change;
             window.appState.paid = isNaN(parsedCash) ? 0 : parsedCash;
-            document.getElementById('display-change').innerText = formatEuroDisplay(change);
+            document.getElementById('display-change').innerText = (change || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
         function updateRevenueStats() {
             const history = window.appState.salesHistory || [];
             const totalRevenue = history.reduce((sum, sale) => sum + (sale.total || 0), 0);
+            const displayStr = `${(totalRevenue || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
             
-            document.getElementById('seller-revenue-badge').innerText = `${formatEuroDisplay(totalRevenue)} €`;
-            document.getElementById('stats-total-revenue').innerText = `${formatEuroDisplay(totalRevenue)} €`;
+            document.getElementById('seller-revenue-badge').innerText = displayStr;
+            document.getElementById('stats-total-revenue').innerText = displayStr;
             document.getElementById('stats-total-sales').innerText = `${history.length} ${history.length === 1 ? 'Verkauf' : 'Verkäufe'}`;
-        }
-
-        function calculateCartTotals() {
-            window.appState.total = window.appState.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-        }
-
-        function formatEuroDisplay(val) {
-            return (val || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
         // Cart Modifiers
         function addToCart(tariff) {
             const existing = window.appState.cart.find(item => item.id === tariff.id);
-            if (existing) {
-                existing.qty++;
-            } else {
-                window.appState.cart.push({
-                    id: tariff.id,
-                    name: tariff.name,
-                    price: tariff.price,
-                    qty: 1
-                });
-            }
+            if (existing) existing.qty++;
+            else window.appState.cart.push({ id: tariff.id, name: tariff.name, price: tariff.price, qty: 1 });
             triggerStateSync();
             showToast(`Tarif hinzugefügt: ${tariff.name}`, 'success');
         }
@@ -795,9 +968,7 @@
         function changeCartQty(index, dir) {
             const item = window.appState.cart[index];
             item.qty += dir;
-            if (item.qty <= 0) {
-                window.appState.cart.splice(index, 1);
-            }
+            if (item.qty <= 0) window.appState.cart.splice(index, 1);
             triggerStateSync();
         }
 
@@ -815,15 +986,7 @@
                 showToast('Bitte einen Betrag eingeben.', 'warning');
                 return;
             }
-            
-            const customTariff = {
-                id: 'custom-' + Date.now(),
-                name: 'Sonderbuchung / Spende',
-                price: price,
-                qty: 1
-            };
-            
-            window.appState.cart.push(customTariff);
+            window.appState.cart.push({ id: 'custom-' + Date.now(), name: 'Sonderbuchung / Spende', price: price, qty: 1 });
             input.value = '';
             triggerStateSync();
             showToast(`Sonderbuchung (${price.toFixed(2)} €) hinzugefügt`, 'success');
@@ -832,19 +995,11 @@
         // Numpad Actions
         function pressNumpad(key) {
             let current = window.appState.givenCash;
-            
-            if (key === 'C') {
-                window.appState.givenCash = '';
-            } else if (key === '.') {
-                if (!current.includes('.')) {
-                    window.appState.givenCash = current === '' ? '0.' : current + '.';
-                }
+            if (key === 'C') window.appState.givenCash = '';
+            else if (key === '.') {
+                if (!current.includes('.')) window.appState.givenCash = current === '' ? '0.' : current + '.';
             } else {
-                if (current === '0') {
-                    window.appState.givenCash = key;
-                } else {
-                    window.appState.givenCash = current + key;
-                }
+                window.appState.givenCash = current === '0' ? key : current + key;
             }
             triggerStateSync();
         }
@@ -855,28 +1010,18 @@
             showToast(`${amount} € gewählt`, 'info');
         }
 
-        // Complete checkout with record storing in history
         function completeSale() {
-            if (window.appState.cart.length === 0) {
-                showToast('Warenkorb ist leer!', 'warning');
-                return;
-            }
-            
-            if (window.appState.paid < window.appState.total) {
-                showToast('Betrag reicht nicht aus!', 'warning');
-                return;
-            }
+            if (window.appState.cart.length === 0) return showToast('Warenkorb ist leer!', 'warning');
+            if (window.appState.paid < window.appState.total) return showToast('Betrag reicht nicht aus!', 'warning');
 
-            const currentSale = {
+            window.appState.salesHistory.unshift({
                 id: 'sale-' + Date.now(),
                 timestamp: Date.now(),
                 items: JSON.parse(JSON.stringify(window.appState.cart)),
                 total: window.appState.total,
                 paid: window.appState.paid,
                 change: window.appState.change
-            };
-
-            window.appState.salesHistory.unshift(currentSale); 
+            }); 
             showToast('Verkauf erfolgreich abgeschlossen!', 'success');
             
             window.appState.cart = [];
@@ -889,9 +1034,7 @@
 
         function triggerStateSync() {
             updateSellerUI();
-            if (window.syncToFirebase) {
-                window.syncToFirebase();
-            }
+            if (window.syncToFirebase) window.syncToFirebase();
         }
 
         function deleteSaleEntry(saleId) {
@@ -932,15 +1075,17 @@
             const total = window.appState.total || 0;
             const paid = window.appState.paid || 0;
             const change = window.appState.change || 0;
+            
+            const formatStr = (val) => (val || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
             document.getElementById('customer-total-price').innerText = `${total.toFixed(2)} €`;
-            document.getElementById('customer-given').innerText = formatEuroDisplay(paid);
-            document.getElementById('customer-change').innerText = formatEuroDisplay(change);
+            document.getElementById('customer-given').innerText = formatStr(paid);
+            document.getElementById('customer-change').innerText = formatStr(change);
 
             const banner = document.getElementById('customer-status-banner');
             if (change > 0) {
                 banner.className = "mt-1 p-2.5 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-100 text-center font-bold text-[10px] flex items-center justify-center gap-1";
-                banner.innerHTML = `<i class="fa-solid fa-coins animate-bounce text-emerald-500 text-sm"></i> Bitte entnimm dein Rückgeld: ${formatEuroDisplay(change)} €`;
+                banner.innerHTML = `<i class="fa-solid fa-coins animate-bounce text-emerald-500 text-sm"></i> Bitte entnimm dein Rückgeld: ${formatStr(change)} €`;
             } else if (total > 0 && paid === total) {
                 banner.className = "mt-1 p-2.5 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-100 text-center font-bold text-[10px] flex items-center justify-center gap-1";
                 banner.innerHTML = `<i class="fa-solid fa-heart animate-pulse text-rose-500 text-sm"></i> Passend bezahlt. Vielen Dank!`;
@@ -960,9 +1105,7 @@
                 itemEl.className = "flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100 shadow-sm";
                 itemEl.innerHTML = `
                     <div class="flex items-center gap-2">
-                        <div class="bg-gradient-to-tr from-orange-400 to-amber-400 text-white w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[11px]">
-                            ${item.qty}x
-                        </div>
+                        <div class="bg-gradient-to-tr from-orange-400 to-amber-400 text-white w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[11px]">${item.qty}x</div>
                         <div>
                             <h4 class="font-bold text-slate-800 text-[10px] leading-tight">${item.name}</h4>
                             <p class="text-[8px] text-slate-400 mt-0.5">${item.price.toFixed(2)} € pro Person</p>
@@ -1022,16 +1165,12 @@
             });
         }
 
-        // Exponiere Rendering-Funktionen global für das Firebase-Modul
-        window.updateCustomerUI = updateCustomerUI;
-        window.updateSellerUI = updateSellerUI;
-        window.showToast = showToast;
-
         function openConfigModal() {
             document.getElementById('modal-config').classList.remove('hidden');
             renderConfigTariffList();
         }
 
+        // Config Management
         function closeConfigModal() {
             document.getElementById('modal-config').classList.add('hidden');
         }
@@ -1071,19 +1210,9 @@
             const price = parseFloat(priceInput.value);
             const icon = iconSelect.value;
 
-            if (!name || isNaN(price) || price < 0) {
-                showToast('Bitte gültigen Namen und Preis eingeben.', 'warning');
-                return;
-            }
+            if (!name || isNaN(price) || price < 0) return showToast('Bitte gültigen Namen und Preis eingeben.', 'warning');
 
-            const newTariff = {
-                id: 't-' + Date.now(),
-                name: name,
-                price: price,
-                icon: icon
-            };
-
-            window.appState.tariffs.push(newTariff);
+            window.appState.tariffs.push({ id: 't-' + Date.now(), name: name, price: price, icon: icon });
             
             nameInput.value = '';
             priceInput.value = '';
@@ -1100,262 +1229,12 @@
             showToast(`Tarif "${removed[0].name}" gelöscht`, 'info');
         }
 
-        // Global Event bindings for DOM interactions
-        window.selectRole = selectRole;
-        window.changeRole = changeRole;
-        window.addToCart = addToCart;
-        window.changeCartQty = changeCartQty;
-        window.clearCart = clearCart;
-        window.addCustomPrice = addCustomPrice;
-        window.pressNumpad = pressNumpad;
-        window.setQuickCash = setQuickCash;
-        window.completeSale = completeSale;
-        window.deleteSaleEntry = deleteSaleEntry;
-        window.clearAllSalesHistory = clearAllSalesHistory;
-        window.openHistoryModal = openHistoryModal;
-        window.closeHistoryModal = closeHistoryModal;
-        window.openConfigModal = openConfigModal;
-        window.closeConfigModal = closeConfigModal;
-        window.addNewTariff = addNewTariff;
-        window.deleteTariff = deleteTariff;
-    </script>
-
-    <!-- Firebase Async Module Block - runs quietly, upgrades capabilities when successfully loaded -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sommerfest-buffet-pos';
+        // Global Bindings
+        window.selectRole = selectRole; window.changeRole = changeRole; window.addToCart = addToCart; window.changeCartQty = changeCartQty; window.clearCart = clearCart; window.addCustomPrice = addCustomPrice; window.pressNumpad = pressNumpad; window.setQuickCash = setQuickCash; window.completeSale = completeSale; window.deleteSaleEntry = deleteSaleEntry; window.clearAllSalesHistory = clearAllSalesHistory; window.openHistoryModal = openHistoryModal; window.closeHistoryModal = closeHistoryModal; window.openConfigModal = openConfigModal; window.closeConfigModal = closeConfigModal; window.addNewTariff = addNewTariff; window.deleteTariff = deleteTariff;
         
-        // 👇 ========================================================= 👇
-        // 👇 HIER DEINE EIGENE FIREBASE CONFIG EINFÜGEN                👇
-        // 👇 (Überschreibe einfach das "null" mit deinem Config-Block) 👇
-        
-        const firebaseConfig = {
-  apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
-  authDomain: "sommerfest-kasse.firebaseapp.com",
-  projectId: "sommerfest-kasse",
-  storageBucket: "sommerfest-kasse.firebasestorage.app",
-  messagingSenderId: "899854905140",
-  appId: "1:899854905140:web:94be886a048356c7fb3f61"
-};
-        
-        let firebaseConfig = null;
-        try {
-            if (MEINE_FIREBASE_CONFIG) {
-                firebaseConfig = MEINE_FIREBASE_CONFIG; // Nutzt deine eingetragene Config
-            } else {
-                firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-            }
-        } catch (e) {
-            console.error("Failed to parse __firebase_config JSON:", e);
-        }
-        
-        let db = null;
-        let auth = null;
-        let unsubscribeSync = null;
+        // Start Initialization
+        document.addEventListener("DOMContentLoaded", initFirebase);
 
-        // Get the specific code input element value securely
-        function getSyncRoomCodeValue() {
-            const inputs = document.querySelectorAll('.sync-room-code-input');
-            let code = 'SOMMER-2026';
-            if (inputs && inputs.length > 0) {
-                code = inputs[0].value || 'SOMMER-2026';
-            }
-            return code.trim().toUpperCase();
-        }
-
-        function getTargetDocRef() {
-            if (!db) return null;
-            const syncCode = getSyncRoomCodeValue();
-            return doc(db, 'artifacts', appId, 'public', 'data', 'pos_sync', `state_${syncCode}`);
-        }
-
-        function setupFirebaseSync() {
-            const startSync = () => {
-                if (!db) return;
-                if (!auth || !auth.currentUser) return; 
-                
-                if (unsubscribeSync) {
-                    unsubscribeSync();
-                }
-                
-                const docRef = getTargetDocRef();
-                if (!docRef) return;
-                
-                unsubscribeSync = onSnapshot(docRef, (docSnap) => {
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        
-                        // Keep raw cache in memory
-                        window.appState.lastSyncedData = data;
-                        
-                        // Keep stats and tariffs always up-to-date
-                        window.appState.salesHistory = data.salesHistory || [];
-                        window.appState.tariffs = data.tariffs || window.appState.tariffs;
-                        
-                        if (window.appState.role === 'customer') {
-                            window.appState.cart = data.cart || [];
-                            window.appState.total = data.total || 0;
-                            window.appState.paid = data.paid || 0;
-                            window.appState.change = data.change || 0;
-                            window.appState.givenCash = data.givenCash || '';
-                            if (window.updateCustomerUI) {
-                                window.updateCustomerUI();
-                            }
-                        } else if (window.appState.role === 'seller') {
-                            if (window.updateSellerUI) {
-                                window.updateSellerUI();
-                            }
-                        }
-                    }
-                }, (error) => {
-                    console.error("Firestore Listen Error:", error);
-                    if (window.showToast) {
-                        if (error.code === 'permission-denied') {
-                            window.showToast('Fehlende Rechte! Prüfe deine Firestore Security Rules.', 'error');
-                        } else {
-                            window.showToast('Firebase-Fehler: ' + error.message, 'error');
-                        }
-                    }
-                });
-            };
-
-            startSync();
-
-            // Synchronize the room code inputs and reload firestore sync seamlessly
-            const roomInputs = document.querySelectorAll('.sync-room-code-input');
-            roomInputs.forEach(input => {
-                input.addEventListener('input', (e) => {
-                    const newVal = e.target.value.toUpperCase();
-                    roomInputs.forEach(ri => { ri.value = newVal; });
-                    
-                    if (db) {
-                        startSync();
-                        if (window.showToast) {
-                            window.showToast('Kopplungs-ID geändert!', 'info');
-                        }
-                        
-                        const docRef = getTargetDocRef();
-                        if (docRef) {
-                            getDoc(docRef).then((docSnap) => {
-                                if (docSnap.exists()) {
-                                    const data = docSnap.data();
-                                    window.appState.lastSyncedData = data;
-                                    window.appState.tariffs = data.tariffs || window.appState.tariffs;
-                                    window.appState.salesHistory = data.salesHistory || [];
-                                    
-                                    if (window.appState.role === 'seller') {
-                                        if (window.updateSellerUI) window.updateSellerUI();
-                                    } else if (window.appState.role === 'customer') {
-                                        window.appState.cart = data.cart || [];
-                                        window.appState.total = data.total || 0;
-                                        window.appState.paid = data.paid || 0;
-                                        window.appState.change = data.change || 0;
-                                        window.appState.givenCash = data.givenCash || '';
-                                        if (window.updateCustomerUI) window.updateCustomerUI();
-                                    }
-                                }
-                            }).catch(err => {
-                                console.error("Error pre-fetching document:", err);
-                            });
-                        }
-                    }
-                });
-            });
-            
-            // Override window.syncToFirebase dynamically
-            window.syncToFirebase = async () => {
-                if (!db || !auth || !auth.currentUser) return;
-                const docRef = getTargetDocRef();
-                if (!docRef) return;
-                try {
-                    await setDoc(docRef, {
-                        cart: window.appState.cart,
-                        total: window.appState.total,
-                        paid: window.appState.paid,
-                        change: window.appState.change,
-                        givenCash: window.appState.givenCash,
-                        tariffs: window.appState.tariffs,
-                        salesHistory: window.appState.salesHistory,
-                        lastUpdated: Date.now()
-                    });
-                } catch (e) {
-                    console.error("Error updating Firestore state:", e);
-                    if (window.showToast) {
-                        if (e.code === 'permission-denied') {
-                            window.showToast('Firebase-Schreibfehler! Datenbankregeln (Rules) prüfen.', 'error');
-                        } else {
-                            window.showToast('Schreibfehler: ' + e.message, 'error');
-                        }
-                    }
-                }
-            };
-
-            // Load initial state
-            const docRef = getTargetDocRef();
-            if (docRef) {
-                getDoc(docRef).then((docSnap) => {
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        window.appState.lastSyncedData = data;
-                        if (data.tariffs) window.appState.tariffs = data.tariffs;
-                        if (data.salesHistory) window.appState.salesHistory = data.salesHistory;
-                        if (window.appState.role === 'seller' && window.updateSellerUI) {
-                            window.updateSellerUI();
-                        }
-                    }
-                }).catch(err => {
-                    console.error("Error fetching initial state:", err);
-                });
-            }
-        }
-
-        // Initialize Firebase quietly
-        async function initFirebase() {
-            try {
-                if (!firebaseConfig) {
-                    console.log("No Firebase config found. Running in offline fallback mode.");
-                    return;
-                }
-
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                try {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                } catch (authError) {
-                    console.error("Auth error:", authError);
-                    if (window.showToast) {
-                        window.showToast('Anonyme Anmeldung fehlt in Firebase Console!', 'error');
-                    }
-                }
-
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        if (window.showToast) {
-                            window.showToast('Firebase Cloud-Synchronisation aktiv ☁️', 'success');
-                        }
-                        setupFirebaseSync();
-                    }
-                });
-
-            } catch (err) {
-                console.error("Firebase Initialization Error:", err);
-                if (window.showToast) {
-                    window.showToast('Verbindung fehlgeschlagen. Offline-Modus aktiv.', 'error');
-                }
-            }
-        }
-
-        // Kick off initialization
-        initFirebase();
     </script>
 </body>
 </html>
