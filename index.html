@@ -160,9 +160,11 @@
             .tariff-card { min-height: 100px; }
         }
 
+        /* iPad & Touch-Kompatibilitäts-Fixes */
         button {
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            cursor: pointer; /* Zwingend erforderlich für iOS WebKit Touch-Erkennung */
         }
     </style>
 </head>
@@ -396,12 +398,12 @@
             </div>
         </section>
 
-        <!-- CUSTOMER VIEW -->
-        <section id="view-customer" class="hidden flex-grow relative overflow-hidden animate-fade-in min-h-0">
+        <!-- CUSTOMER VIEW (Vollbildmodus ohne Ränder) -->
+        <section id="view-customer" class="hidden fixed inset-0 z-40 bg-gradient-to-br from-amber-50 via-orange-50 to-sky-50 overflow-hidden animate-fade-in">
             
             <!-- SCREENSAVER OVERLAY -->
-            <div id="customer-screensaver" class="absolute inset-0 bg-gradient-to-br from-amber-400 via-orange-400 to-sky-300 overflow-hidden flex flex-col justify-between p-5 md:p-10 text-white z-40 transition-opacity duration-500">
-                <button onclick="changeRole()" class="absolute top-4 right-4 z-[60] bg-white/20 hover:bg-white/30 active:scale-95 text-white/95 hover:text-white px-4 py-2.5 rounded-xl text-[10px] md:text-xs font-bold border border-white/30 transition-all flex items-center gap-1.5 shadow-md">
+            <div id="customer-screensaver" class="absolute inset-0 bg-gradient-to-br from-amber-400 via-orange-400 to-sky-300 overflow-hidden flex flex-col justify-between p-6 md:p-12 text-white z-40 transition-opacity duration-500">
+                <button onclick="changeRole()" class="absolute top-5 right-5 z-[60] bg-white/20 hover:bg-white/30 active:scale-95 text-white/95 hover:text-white px-5 py-3 rounded-xl text-xs md:text-sm font-bold border border-white/30 transition-all flex items-center gap-2 shadow-md">
                     <i class="fa-solid fa-arrow-left"></i> Beenden
                 </button>
 
@@ -414,32 +416,32 @@
                 <div class="wave-bg pointer-events-none"></div>
                 <div class="wave-bg-2 pointer-events-none"></div>
 
-                <div class="flex justify-between items-center z-20 flex-wrap gap-2 pt-1">
-                    <span class="font-summer text-base md:text-xl font-bold tracking-wide text-amber-50 drop-shadow-sm flex items-center gap-2">
+                <div class="flex justify-between items-center z-20 flex-wrap gap-2 pt-2">
+                    <span class="font-summer text-xl md:text-3xl font-bold tracking-wide text-amber-50 drop-shadow-sm flex items-center gap-3">
                         ☀️ Ess-Zone Buffet
                     </span>
-                    <div class="flex items-center bg-white/20 backdrop-blur-md rounded-xl px-3 py-1 border border-white/20 text-white shadow-sm">
-                        <span class="text-[9px] md:text-[10px] font-black uppercase mr-1.5 tracking-wider">ID:</span>
-                        <input type="text" value="SOMMER-2026" class="bg-transparent border-none text-[10px] md:text-xs font-black text-white uppercase focus:outline-none w-20 md:w-24 text-center sync-room-code-input transition-all" title="Nutze dieselbe ID wie am Verkäufer-Terminal">
+                    <div class="flex items-center bg-white/20 backdrop-blur-md rounded-xl px-4 py-2 border border-white/20 text-white shadow-sm">
+                        <span class="text-[10px] md:text-xs font-black uppercase mr-2 tracking-wider">ID:</span>
+                        <input type="text" value="SOMMER-2026" class="bg-transparent border-none text-[11px] md:text-sm font-black text-white uppercase focus:outline-none w-20 md:w-28 text-center sync-room-code-input transition-all" title="Nutze dieselbe ID wie am Verkäufer-Terminal">
                     </div>
                 </div>
 
                 <div class="text-center my-auto z-20 flex flex-col items-center justify-center">
-                    <div class="bg-white/10 p-4 md:p-6 rounded-full border border-white/20 animate-pulse-soft mb-2.5 shadow-lg backdrop-blur-sm">
-                        <span class="text-5xl md:text-6xl block transform hover:rotate-45 transition-transform duration-1000">☀️</span>
+                    <div class="bg-white/10 p-6 md:p-8 rounded-full border border-white/20 animate-pulse-soft mb-4 shadow-lg backdrop-blur-sm">
+                        <span class="text-6xl md:text-8xl block transform hover:rotate-45 transition-transform duration-1000">☀️</span>
                     </div>
-                    <h2 class="font-summer text-3xl md:text-5xl font-black tracking-wide drop-shadow-md mb-2">Genießer-Oase</h2>
-                    <p class="text-[11px] md:text-sm text-orange-50 font-medium max-w-sm drop-shadow-sm leading-relaxed mb-6">
+                    <h2 class="font-summer text-4xl md:text-7xl font-black tracking-wide drop-shadow-md mb-3">Genießer-Oase</h2>
+                    <p class="text-[13px] md:text-xl text-orange-50 font-medium max-w-lg drop-shadow-sm leading-relaxed mb-8">
                         Dein All-You-Can-Eat Buffet. Hol dir dein Einlassbändchen direkt an der Kasse!
                     </p>
 
-                    <div class="bg-orange-600/40 border-2 border-dashed border-white/40 px-6 py-3.5 rounded-2xl transform -rotate-1 shadow-md max-w-xs md:max-w-md backdrop-blur-sm animate-pulse-soft">
-                        <span class="text-[10px] md:text-xs font-bold block text-amber-200">ℹ️ ZUTRITT NUR MIT STEMPEL:</span>
-                        <p class="text-[11px] md:text-sm font-black tracking-wide mt-1 text-white uppercase">Hier bezahlen &amp; direkt Einlassstempel abholen!</p>
+                    <div class="bg-orange-600/40 border-2 border-dashed border-white/40 px-8 py-5 rounded-3xl transform -rotate-1 shadow-xl max-w-sm md:max-w-lg backdrop-blur-sm animate-pulse-soft">
+                        <span class="text-[11px] md:text-sm font-bold block text-amber-200">ℹ️ ZUTRITT NUR MIT STEMPEL:</span>
+                        <p class="text-[13px] md:text-lg font-black tracking-wide mt-1.5 text-white uppercase">Hier bezahlen &amp; direkt Einlassstempel abholen!</p>
                     </div>
                 </div>
 
-                <div class="text-center z-20 text-[9px] md:text-[10px] text-sky-900/80 font-bold bg-white/45 backdrop-blur-md py-2 px-4 rounded-xl max-w-lg mx-auto border border-white/40 shadow-sm leading-tight mb-2">
+                <div class="text-center z-20 text-[10px] md:text-sm text-sky-900/80 font-bold bg-white/45 backdrop-blur-md py-3 px-5 rounded-2xl max-w-2xl mx-auto border border-white/40 shadow-sm leading-tight mb-4">
                     ⚠️ Wichtige Regel: Speisen & Getränke bitte ausschließlich innerhalb der abgegrenzten Ess-Zone verzehren.
                 </div>
             </div>
@@ -447,75 +449,75 @@
             <!-- SUCCESS OVERLAY (ANIMATED CHECKMARK) -->
             <div id="customer-success-overlay" class="hidden absolute inset-0 bg-gradient-to-br from-emerald-400 to-teal-500 z-50 flex flex-col items-center justify-center text-white transition-opacity duration-500 overflow-hidden">
                 <div class="scale-in-center flex flex-col items-center">
-                    <div class="bg-white/20 p-6 md:p-8 rounded-full mb-4 md:mb-6 backdrop-blur-sm border border-white/30 shadow-xl">
-                        <svg class="w-24 h-24 md:w-32 md:h-32 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <div class="bg-white/20 p-8 md:p-10 rounded-full mb-6 md:mb-8 backdrop-blur-sm border border-white/30 shadow-xl">
+                        <svg class="w-32 h-32 md:w-40 md:h-40 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path class="animate-check" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
                         </svg>
                     </div>
-                    <h2 class="font-summer text-3xl md:text-5xl font-black mb-3 drop-shadow-lg text-center leading-tight">Bezahlung<br>erfolgreich!</h2>
-                    <p class="text-emerald-50 font-bold text-base md:text-xl drop-shadow-md text-center bg-black/10 px-5 py-2 rounded-full">Vielen Dank und guten Appetit!</p>
+                    <h2 class="font-summer text-4xl md:text-6xl font-black mb-4 drop-shadow-lg text-center leading-tight">Bezahlung<br>erfolgreich!</h2>
+                    <p class="text-emerald-50 font-bold text-lg md:text-2xl drop-shadow-md text-center bg-black/10 px-6 py-2.5 rounded-full">Vielen Dank und guten Appetit!</p>
                 </div>
             </div>
 
-            <!-- ACTIVE TRANSACTION CONTENT -->
-            <div id="customer-active-view" class="hidden absolute inset-0 flex flex-row gap-3 md:gap-5 items-stretch transition-opacity duration-300 min-h-0 overflow-hidden animate-fade-in z-30">
+            <!-- ACTIVE TRANSACTION CONTENT (Nutzt den gesamten Randbereich mit sicherem Padding) -->
+            <div id="customer-active-view" class="hidden absolute inset-0 p-4 md:p-6 lg:p-8 flex flex-row gap-4 md:gap-6 items-stretch transition-opacity duration-300 min-h-0 overflow-hidden animate-fade-in z-30">
                 
                 <!-- Left panel: Rechnungsübersicht -->
-                <div class="w-[54%] bg-white p-4 md:p-5 rounded-3xl border border-orange-100 shadow-xl flex flex-col min-h-0 overflow-hidden">
+                <div class="w-[55%] bg-white p-5 md:p-6 rounded-3xl border border-orange-100 shadow-xl flex flex-col min-h-0 overflow-hidden">
                     <div class="shrink-0">
-                        <div class="flex items-center gap-3 mb-3 bg-orange-50 p-3 rounded-2xl border border-orange-100 shadow-sm">
-                            <span class="text-2xl md:text-3xl">🌴</span>
+                        <div class="flex items-center gap-4 mb-4 bg-orange-50 p-4 rounded-2xl border border-orange-100 shadow-sm">
+                            <span class="text-3xl md:text-4xl">🌴</span>
                             <div>
-                                <h2 class="font-summer text-base md:text-xl font-bold text-slate-800 leading-none">Deine Auswahl</h2>
+                                <h2 class="font-summer text-lg md:text-2xl font-bold text-slate-800 leading-none">Deine Auswahl</h2>
                                 <p class="text-[10px] md:text-xs text-slate-500 font-bold tracking-wide mt-1.5">Eintritt in die Ess-Zone</p>
                             </div>
                         </div>
-                        <h3 class="text-[9px] md:text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Auf der Rechnung:</h3>
+                        <h3 class="text-[10px] md:text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2.5">Auf der Rechnung:</h3>
                     </div>
 
                     <!-- Scrollable customer items list -->
-                    <div id="customer-live-items" class="space-y-2 md:space-y-3 flex-grow overflow-y-auto pr-2 min-h-0"></div>
+                    <div id="customer-live-items" class="space-y-2.5 md:space-y-3 flex-grow overflow-y-auto pr-2 min-h-0"></div>
 
                     <!-- Rule Reminder -->
-                    <div class="mt-3 border-t border-slate-100 pt-3 flex items-center gap-3 text-[10px] md:text-xs text-amber-800 bg-amber-50/50 p-3 md:p-4 rounded-xl leading-relaxed shrink-0">
-                        <i class="fa-solid fa-circle-info text-lg md:text-xl text-amber-600 shrink-0"></i>
+                    <div class="mt-4 border-t border-slate-100 pt-4 flex items-center gap-3 text-[10px] md:text-xs text-amber-800 bg-amber-50/50 p-4 rounded-xl leading-relaxed shrink-0">
+                        <i class="fa-solid fa-circle-info text-xl md:text-2xl text-amber-600 shrink-0"></i>
                         <p><strong>Regel:</strong> Bitte genieß dein Essen innerhalb der Ess-Zone. Keine Tellerweitergabe.</p>
                     </div>
                 </div>
 
                 <!-- Right panel: Totals & Change -->
-                <div class="w-[46%] flex flex-col gap-3 md:gap-5 min-h-0 overflow-hidden">
-                    <div class="bg-gradient-to-tr from-orange-500 to-amber-400 text-white p-5 md:p-6 rounded-[2rem] shadow-xl flex flex-col justify-between shrink-0 relative overflow-hidden">
-                        <div class="absolute -right-10 -top-10 w-32 h-32 md:w-40 md:h-40 bg-white/10 rounded-full"></div>
+                <div class="w-[45%] flex flex-col gap-4 md:gap-6 min-h-0 overflow-hidden">
+                    <div class="bg-gradient-to-tr from-orange-500 to-amber-400 text-white p-6 md:p-8 rounded-[2rem] shadow-xl flex flex-col justify-between shrink-0 relative overflow-hidden">
+                        <div class="absolute -right-10 -top-10 w-40 h-40 md:w-56 md:h-56 bg-white/10 rounded-full"></div>
                         <div>
-                            <span class="text-[10px] md:text-xs font-black uppercase tracking-widest text-orange-100 drop-shadow-sm">Zu zahlen</span>
-                            <h2 class="font-summer text-4xl md:text-5xl font-black mt-1 drop-shadow-md transition-all duration-300" id="customer-total-price">0.00 €</h2>
+                            <span class="text-[11px] md:text-sm font-black uppercase tracking-widest text-orange-100 drop-shadow-sm">Zu zahlen</span>
+                            <h2 class="font-summer text-5xl md:text-6xl font-black mt-1.5 drop-shadow-md transition-all duration-300" id="customer-total-price">0.00 €</h2>
                         </div>
-                        <div class="flex items-center gap-1.5 mt-3 text-[9px] md:text-[11px] bg-white/20 px-3 py-1 rounded-lg backdrop-blur-sm self-start font-bold border border-white/20">
-                            <i class="fa-solid fa-shield-halved text-[9px]"></i> Flatrate Ticket
+                        <div class="flex items-center gap-2 mt-4 text-[10px] md:text-xs bg-white/20 px-3.5 py-1.5 rounded-lg backdrop-blur-sm self-start font-bold border border-white/20">
+                            <i class="fa-solid fa-shield-halved text-[10px]"></i> Flatrate Ticket
                         </div>
                     </div>
 
-                    <div class="bg-white p-5 md:p-6 rounded-[2rem] shadow-xl border border-orange-100 flex-grow flex flex-col justify-center gap-3 md:gap-5 min-h-0">
+                    <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-xl border border-orange-100 flex-grow flex flex-col justify-center gap-4 md:gap-6 min-h-0">
                         <div>
-                            <span class="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-wider block mb-1">Gegebenes Bargeld:</span>
-                            <div class="flex items-baseline gap-1.5">
-                                <span class="font-mono text-3xl md:text-4xl font-extrabold text-slate-700 transition-all duration-300" id="customer-given">0,00</span>
-                                <span class="text-lg md:text-xl font-bold text-slate-400">€</span>
+                            <span class="text-[11px] md:text-sm font-black text-slate-400 uppercase tracking-wider block mb-1.5">Gegebenes Bargeld:</span>
+                            <div class="flex items-baseline gap-2">
+                                <span class="font-mono text-4xl md:text-5xl font-extrabold text-slate-700 transition-all duration-300" id="customer-given">0,00</span>
+                                <span class="text-xl md:text-2xl font-bold text-slate-400">€</span>
                             </div>
                         </div>
 
                         <hr class="border-slate-100 border-2 rounded-full">
 
                         <div>
-                            <span class="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-wider block mb-1">Dein Rückgeld:</span>
-                            <div class="flex items-baseline gap-1.5">
-                                <span class="font-mono text-4xl md:text-5xl font-black text-emerald-600 animate-pulse-soft transition-all duration-300" id="customer-change">0,00</span>
-                                <span class="text-xl md:text-2xl font-bold text-emerald-600">€</span>
+                            <span class="text-[11px] md:text-sm font-black text-slate-400 uppercase tracking-wider block mb-1.5">Dein Rückgeld:</span>
+                            <div class="flex items-baseline gap-2">
+                                <span class="font-mono text-5xl md:text-6xl font-black text-emerald-600 animate-pulse-soft transition-all duration-300" id="customer-change">0,00</span>
+                                <span class="text-2xl md:text-3xl font-bold text-emerald-600">€</span>
                             </div>
                         </div>
 
-                        <div id="customer-status-banner" class="mt-2 p-3 md:p-4 rounded-xl text-center font-bold text-[10px] md:text-xs flex items-center justify-center gap-2 transition-all duration-300 shadow-sm"></div>
+                        <div id="customer-status-banner" class="mt-3 p-3.5 rounded-xl text-center font-bold text-[11px] md:text-sm flex items-center justify-center gap-2 transition-all duration-300 shadow-sm"></div>
                     </div>
                 </div>
             </div>
@@ -625,6 +627,7 @@
 
     <!-- MAIN JAVASCRIPT BLOCK -->
     <script>
+        // Deine Firebase Config wurde hier eingefügt
         const MEINE_FIREBASE_CONFIG = {
             apiKey: "AIzaSyCTMGml_KKj1wjmtzTJNubWyMvSaPU3cB8",
             authDomain: "sommerfest-kasse.firebaseapp.com",
@@ -902,6 +905,13 @@
                     finalConfig = MEINE_FIREBASE_CONFIG;
                 } else if (typeof __firebase_config !== 'undefined') {
                     finalConfig = JSON.parse(__firebase_config);
+                }
+
+                // Falls die Firebase-Ressource blockiert wird oder nicht vorhanden ist
+                if (typeof firebase === 'undefined') {
+                    console.warn("Firebase SDK nicht geladen oder geblockt.");
+                    setupOfflineFallback();
+                    return;
                 }
 
                 if (!finalConfig) {
@@ -1281,9 +1291,9 @@
             const givenEl = document.getElementById('customer-given');
             if (givenEl.innerText !== formatStr(paid)) {
                 givenEl.innerText = formatStr(paid);
-                givenEl.classList.remove('animate-pop');
-                void givenEl.offsetWidth;
-                givenEl.classList.add('animate-pop');
+                givenEl.className = "font-mono text-3xl md:text-4xl font-extrabold text-slate-700"; // Reset classes
+                void givenEl.offsetWidth; // Force Reflow
+                givenEl.className = "font-mono text-3xl md:text-4xl font-extrabold text-slate-700 animate-fade-in";
             }
             document.getElementById('customer-change').innerText = formatStr(change);
 
@@ -1308,14 +1318,14 @@
             cart.forEach((item, idx) => {
                 const itemEl = document.createElement('div');
                 const delay = idx * 0.05; 
-                itemEl.className = "flex items-center justify-between p-2 md:p-3 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm animate-slide-in-right opacity-0 shrink-0";
+                itemEl.className = "flex items-center justify-between p-2 md:p-3 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm animate-slide-in-right shrink-0";
                 itemEl.style.animationDelay = `${delay}s`;
                 itemEl.innerHTML = `
                     <div class="flex items-center gap-2 md:gap-3">
                         <div class="bg-gradient-to-tr from-orange-400 to-amber-400 text-white w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center font-black text-xs md:text-sm shadow-sm">${item.qty}x</div>
                         <div>
                             <h4 class="font-bold text-slate-800 text-[10px] md:text-[13px] leading-tight">${item.name}</h4>
-                            <p class="text-[8px] md:text-[10px] text-slate-500 mt-0.5">${item.price.toFixed(2)} € pro Person</p>
+                            <p class="text-[8px] md:text-[9px] text-slate-500 mt-0.5">${item.price.toFixed(2)} € pro Person</p>
                         </div>
                     </div>
                     <span class="font-mono font-black text-slate-800 text-[11px] md:text-sm">${(item.price * item.qty).toFixed(2)} €</span>
@@ -1334,4 +1344,133 @@
             document.getElementById('modal-history').classList.add('hidden');
         }
 
-        // ... rest of scripts unchanged ...
+        function renderHistorySalesList() {
+            const container = document.getElementById('history-sales-list');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const sales = window.appState.salesHistory || [];
+            if (sales.length === 0) {
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-6 text-slate-400">
+                        <i class="fa-solid fa-box-open text-2xl md:text-3xl mb-1.5 text-slate-300"></i>
+                        <p class="text-[10px] md:text-xs font-semibold">Bisher wurden keine Buchungen erfasst.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            sales.forEach(sale => {
+                const timeString = new Date(sale.timestamp).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const itemsList = sale.items.map(item => `${item.qty}x ${item.name}`).join(', ');
+
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "bg-slate-50 p-2.5 md:p-3 rounded-2xl border border-slate-200/60 flex items-center justify-between gap-2 shadow-sm shrink-0";
+                itemDiv.innerHTML = `
+                    <div class="min-w-0 flex-grow">
+                        <div class="flex items-center gap-1.5">
+                            <span class="bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded-lg text-[8px] md:text-[10px]">${timeString} Uhr</span>
+                            <span class="font-mono font-bold text-[10px] md:text-[12px] text-slate-700">${sale.total.toFixed(2)} €</span>
+                        </div>
+                        <p class="text-[9px] md:text-[10px] text-slate-500 truncate mt-1">${itemsList}</p>
+                    </div>
+                    <button onclick="deleteSaleEntry('${sale.id}')" class="text-red-500 hover:text-red-700 p-1.5 rounded-xl hover:bg-red-50 transition-colors" title="Diese Buchung löschen">
+                        <i class="fa-solid fa-trash-can text-sm"></i>
+                    </button>
+                `;
+                container.appendChild(itemDiv);
+            });
+        }
+
+        function openConfigModal() {
+            document.getElementById('modal-config').classList.remove('hidden');
+            renderConfigTariffList();
+        }
+
+        function closeConfigModal() {
+            document.getElementById('modal-config').classList.add('hidden');
+        }
+
+        function renderConfigTariffList() {
+            const container = document.getElementById('config-tariffs-list');
+            if (!container) return;
+            container.innerHTML = '';
+
+            window.appState.tariffs.forEach((tariff, index) => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between bg-slate-50 p-2.5 md:p-3 rounded-2xl border border-slate-200/60 shadow-sm shrink-0";
+                div.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="bg-slate-200 text-slate-600 w-6 h-6 rounded-lg flex items-center justify-center text-xs">
+                            <i class="fa-solid ${tariff.icon || 'fa-user'}"></i>
+                        </span>
+                        <div>
+                            <span class="font-bold text-[10px] md:text-xs text-slate-800 block leading-tight">${tariff.name}</span>
+                            <span class="text-[9px] md:text-[10px] font-semibold text-orange-600">${tariff.price.toFixed(2)} €</span>
+                        </div>
+                    </div>
+                    <button onclick="deleteTariff(${index})" class="text-rose-500 hover:text-rose-600 p-1.5 rounded-xl hover:bg-rose-50 transition-all">
+                        <i class="fa-solid fa-trash-can text-sm"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addNewTariff() {
+            const nameInput = document.getElementById('new-tariff-name');
+            const priceInput = document.getElementById('new-tariff-price');
+            const iconSelect = document.getElementById('new-tariff-icon');
+
+            const name = nameInput.value.trim();
+            const price = parseFloat(priceInput.value);
+            const icon = iconSelect.value;
+
+            if (!name || isNaN(price) || price < 0) return showToast('Bitte gültigen Namen und Preis eingeben.', 'warning');
+
+            window.appState.tariffs.push({ id: 't-' + Date.now(), name: name, price: price, icon: icon });
+            
+            nameInput.value = '';
+            priceInput.value = '';
+            
+            renderConfigTariffList();
+            triggerStateSync();
+            showToast(`Tarif "${name}" hinzugefügt`, 'success');
+        }
+
+        function deleteTariff(index) {
+            const removed = window.appState.tariffs.splice(index, 1);
+            renderConfigTariffList();
+            triggerStateSync();
+            showToast(`Tarif "${removed[0].name}" gelöscht`, 'info');
+        }
+
+        // Global Bindings
+        window.selectRole = selectRole; 
+        window.changeRole = changeRole; 
+        window.addToCart = addToCart; 
+        window.changeCartQty = changeCartQty; 
+        window.clearCart = clearCart; 
+        window.addCustomPrice = addCustomPrice; 
+        window.pressNumpad = pressNumpad; 
+        window.setQuickCash = setQuickCash; 
+        window.completeSale = completeSale; 
+        window.deleteSaleEntry = deleteSaleEntry; 
+        window.clearAllSalesHistory = clearAllSalesHistory; 
+        window.openHistoryModal = openHistoryModal; 
+        window.closeHistoryModal = closeHistoryModal; 
+        window.openConfigModal = openConfigModal; 
+        window.closeConfigModal = closeConfigModal; 
+        window.addNewTariff = addNewTariff; 
+        window.deleteTariff = deleteTariff;
+        
+        // Passcode bindings
+        window.pressPasscodeDigit = pressPasscodeDigit;
+        window.clearPasscode = clearPasscode;
+
+        // Start Initialization
+        document.addEventListener("DOMContentLoaded", initFirebase);
+
+    </script>
+</body>
+</html>
