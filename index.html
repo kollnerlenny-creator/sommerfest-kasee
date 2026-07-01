@@ -397,8 +397,8 @@
                         </button>
                     </div>
 
-                    <!-- Scrollable Cart Items List -->
-                    <div id="seller-cart-items" class="flex-1 overflow-y-auto space-y-1.5 pr-1 min-h-0"></div>
+                    <!-- Cart Items List (2-spaltig, damit man i.d.R. nicht scrollen muss) -->
+                    <div id="seller-cart-items" class="flex-1 overflow-y-auto grid grid-cols-2 content-start gap-1.5 pr-1 min-h-0"></div>
 
                     <!-- Cart Total display -->
                     <div class="border-t border-slate-100 pt-1.5 mt-1.5 flex items-center justify-between shrink-0">
@@ -408,10 +408,10 @@
                 </div>
 
                 <!-- Cash Numpad Card (Fixed Height at bottom) -->
-                <div class="bg-white p-2 md:p-3 rounded-2xl shadow-lg border border-orange-100 flex flex-col gap-1.5 shrink-0">
+                <div class="bg-white p-1.5 md:p-2 rounded-2xl shadow-lg border border-orange-100 flex flex-col gap-1 shrink-0">
                     
                     <!-- KOMPAKTE ANZEIGE FÜR GESAMT, GEGEBEN UND RÜCKGELD -->
-                    <div class="grid grid-cols-3 gap-1 bg-slate-50 p-1.5 rounded-xl border border-slate-100 shrink-0">
+                    <div class="grid grid-cols-3 gap-1 bg-slate-50 p-1 rounded-xl border border-slate-100 shrink-0">
                         <div>
                             <span class="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase block leading-none mb-0.5">Gesamt:</span>
                             <span id="seller-total-price-2" class="font-summer text-xs md:text-sm font-extrabold text-orange-600 truncate block transition-all duration-300">0.00 €</span>
@@ -434,14 +434,14 @@
 
                     <!-- Quick Cash -->
                     <div class="grid grid-cols-4 gap-1 shrink-0">
-                        <button onclick="setQuickCash(5)" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-[9px] md:text-[10px] transition-all border border-slate-200">5 €</button>
-                        <button onclick="setQuickCash(10)" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-[9px] md:text-[10px] transition-all border border-slate-200">10 €</button>
-                        <button onclick="setQuickCash(20)" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-[9px] md:text-[10px] transition-all border border-slate-200">20 €</button>
-                        <button onclick="setQuickCash(50)" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 active:scale-95 text-slate-700 font-bold py-1.5 rounded-lg text-[9px] md:text-[10px] transition-all border border-slate-200">50 €</button>
+                        <button onclick="setQuickCash(5)" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 active:scale-95 text-slate-700 font-bold py-1 rounded-lg text-[9px] md:text-[10px] transition-all border border-slate-200">5 €</button>
+                        <button onclick="setQuickCash(10)" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 active:scale-95 text-slate-700 font-bold py-1 rounded-lg text-[9px] md:text-[10px] transition-all border border-slate-200">10 €</button>
+                        <button onclick="setQuickCash(20)" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 active:scale-95 text-slate-700 font-bold py-1 rounded-lg text-[9px] md:text-[10px] transition-all border border-slate-200">20 €</button>
+                        <button onclick="setQuickCash(50)" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 active:scale-95 text-slate-700 font-bold py-1 rounded-lg text-[9px] md:text-[10px] transition-all border border-slate-200">50 €</button>
                     </div>
 
                     <!-- Numpad Grid -->
-                    <div class="grid grid-cols-3 gap-1 md:gap-1.5 shrink-0">
+                    <div class="grid grid-cols-3 gap-1 shrink-0">
                         <button onclick="pressNumpad('7')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-lg text-sm md:text-base transition-all border border-slate-200 shadow-sm">7</button>
                         <button onclick="pressNumpad('8')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-lg text-sm md:text-base transition-all border border-slate-200 shadow-sm">8</button>
                         <button onclick="pressNumpad('9')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-lg text-sm md:text-base transition-all border border-slate-200 shadow-sm">9</button>
@@ -459,7 +459,7 @@
                         <button onclick="pressNumpad('.')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-lg text-sm md:text-base transition-all border border-slate-200 shadow-sm">,</button>
                     </div>
 
-                    <button onclick="completeSale()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-95 text-white py-1.5 md:py-2.5 rounded-xl font-bold text-[10px] md:text-sm transition-all shadow-md flex items-center justify-center gap-1.5 shrink-0">
+                    <button onclick="completeSale()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-95 text-white py-1.5 md:py-2 rounded-xl font-bold text-[10px] md:text-sm transition-all shadow-md flex items-center justify-center gap-1.5 shrink-0">
                         <i class="fa-solid fa-circle-check text-xs md:text-base"></i> Verkauf abschließen
                     </button>
                 </div>
@@ -1185,7 +1185,7 @@
             
             if (window.appState.cart.length === 0) {
                 container.innerHTML = `
-                    <div class="flex flex-col items-center justify-center py-4 text-slate-400 animate-fade-in">
+                    <div class="col-span-2 flex flex-col items-center justify-center py-4 text-slate-400 animate-fade-in">
                         <i class="fa-solid fa-cookie text-lg mb-1 text-slate-300"></i>
                         <p class="text-[9px] font-semibold">Der Warenkorb ist leer.</p>
                     </div>
@@ -1195,21 +1195,20 @@
             
             window.appState.cart.forEach((item, index) => {
                 const row = document.createElement('div');
-                row.className = "flex items-center justify-between bg-slate-50 p-1.5 md:p-2 rounded-xl border border-slate-100/60 transition-all shrink-0 animate-slide-in-right";
+                row.className = "flex flex-col justify-between bg-slate-50 p-1.5 md:p-2 rounded-xl border border-slate-100/60 transition-all shrink-0 animate-slide-in-right gap-1";
                 row.innerHTML = `
-                    <div class="flex items-center gap-1 min-w-0">
+                    <div class="flex items-start gap-1 min-w-0">
                         <span class="text-[10px] md:text-[11px] shrink-0">🍽️</span>
-                        <div class="min-w-0">
-                            <h5 class="font-bold text-[9px] md:text-[10px] text-slate-800 truncate max-w-[70px] leading-tight">${item.name}</h5>
-                            <p class="text-[7px] md:text-[8px] text-slate-500 leading-none mt-0.5">${item.price.toFixed(2)} €</p>
+                        <div class="min-w-0 flex-1">
+                            <h5 class="font-bold text-[9px] md:text-[10px] text-slate-800 truncate leading-tight">${item.name}</h5>
+                            <p class="text-[7px] md:text-[8px] text-slate-500 leading-none mt-0.5">${item.price.toFixed(2)} € · Summe: ${(item.price * item.qty).toFixed(2)} €</p>
                         </div>
                     </div>
                     
-                    <div class="flex items-center gap-1 shrink-0">
-                        <button onclick="changeCartQty(${index}, -1)" class="w-9 h-9 md:w-11 md:h-11 bg-white border border-slate-200 text-slate-700 rounded-lg font-bold text-base flex items-center justify-center transition-colors active:scale-90 active:bg-slate-200 shrink-0">-</button>
-                        <span class="font-bold text-[10px] md:text-xs text-slate-800 w-3 md:w-4 text-center">${item.qty}</span>
-                        <button onclick="changeCartQty(${index}, 1)" class="w-9 h-9 md:w-11 md:h-11 bg-white border border-slate-200 text-slate-700 rounded-lg font-bold text-base flex items-center justify-center transition-colors active:scale-90 active:bg-slate-200 shrink-0">+</button>
-                        <span class="font-mono font-bold text-[9px] md:text-[10px] text-slate-800 w-10 text-right">${(item.price * item.qty).toFixed(2)} €</span>
+                    <div class="flex items-center justify-between gap-1 shrink-0">
+                        <button onclick="changeCartQty(${index}, -1)" class="w-8 h-8 md:w-9 md:h-9 bg-white border border-slate-200 text-slate-700 rounded-lg font-bold text-sm flex items-center justify-center transition-colors active:scale-90 active:bg-slate-200 shrink-0">-</button>
+                        <span class="font-bold text-[10px] md:text-xs text-slate-800 text-center">${item.qty}x</span>
+                        <button onclick="changeCartQty(${index}, 1)" class="w-8 h-8 md:w-9 md:h-9 bg-white border border-slate-200 text-slate-700 rounded-lg font-bold text-sm flex items-center justify-center transition-colors active:scale-90 active:bg-slate-200 shrink-0">+</button>
                     </div>
                 `;
                 container.appendChild(row);
