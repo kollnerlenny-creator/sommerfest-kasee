@@ -670,6 +670,7 @@
                 { id: 't3', name: 'Kinder (7-12 Jahre)', price: 7.50, icon: 'fa-child', color: 'bg-sky-500' }
             ],
             lastSyncedData: null,
+            lastAppliedTimestamp: 0,
             enteredPasscode: '', 
             correctPasscode: '5657' 
         };
@@ -857,6 +858,17 @@
                 unsubscribeSync = docRef.onSnapshot((docSnap) => {
                     if (docSnap.exists) {
                         const data = docSnap.data();
+                        const incomingTs = data.lastUpdated || 0;
+
+                        // Schutz gegen veraltete/verspätete Updates (z.B. bei wackeliger
+                        // Verbindung oder schnell aufeinanderfolgenden Schreibvorgängen).
+                        // Ein Snapshot, der älter ist als der zuletzt angewendete Stand,
+                        // wird ignoriert, damit Kasse und Kundendisplay nicht "zurückspringen".
+                        if (incomingTs && incomingTs < window.appState.lastAppliedTimestamp) {
+                            return;
+                        }
+                        window.appState.lastAppliedTimestamp = incomingTs;
+
                         window.appState.lastSyncedData = data;
                         window.appState.salesHistory = data.salesHistory || [];
                         window.appState.tariffs = data.tariffs || window.appState.tariffs;
@@ -923,10 +935,11 @@
                 });
             });
             
-            window.syncToFirebase = async () => {
+            const doFirebaseWrite = async () => {
                 if (!db || !auth || !auth.currentUser) return;
                 const docRef = getTargetDocRef();
                 if (!docRef) return;
+                const writeTimestamp = Date.now();
                 try {
                     await docRef.set({
                         cart: window.appState.cart,
@@ -937,11 +950,23 @@
                         tariffs: window.appState.tariffs,
                         salesHistory: window.appState.salesHistory,
                         showSuccess: window.appState.showSuccess || false,
-                        lastUpdated: Date.now()
+                        lastUpdated: writeTimestamp
                     });
+                    // Eigener Schreibstand direkt merken, damit ein leicht verspätetes
+                    // eigenes onSnapshot-Echo nicht als "älter" verworfen wird.
+                    window.appState.lastAppliedTimestamp = writeTimestamp;
                 } catch (e) {
                     console.error("Error updating Firestore state:", e);
                 }
+            };
+
+            // Debounce: mehrere schnelle Änderungen (z.B. Numpad-Tippen) werden zu
+            // einem einzigen Schreibvorgang gebündelt, statt die Kasse mit vielen
+            // parallelen Requests zu überlasten und das Kundendisplay flackern zu lassen.
+            let syncDebounceTimer = null;
+            window.syncToFirebase = async () => {
+                if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+                syncDebounceTimer = setTimeout(doFirebaseWrite, 120);
             };
         }
 
@@ -1243,7 +1268,7 @@
             
             triggerStateSync();
             
-            // 4. Nach 3 Sekunden nur noch den Success-Screen abschalten (fadet aus)
+            // 4. Nach 2 Sekunden nur noch den Success-Screen abschalten (fadet aus)
             setTimeout(() => {
                 const overlay = document.getElementById('customer-success-overlay');
                 if (overlay && !overlay.classList.contains('hidden')) {
@@ -1253,12 +1278,12 @@
                         window.appState.showSuccess = false;
                         triggerStateSync();
                         overlay.classList.remove('animate-fade-out-soft');
-                    }, 500); 
+                    }, 300); 
                 } else {
                     window.appState.showSuccess = false;
                     triggerStateSync();
                 }
-            }, 3000);
+            }, 2000);
         }
 
         function triggerStateSync() {
