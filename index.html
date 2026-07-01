@@ -188,6 +188,32 @@
         }
 
         /* Extrem optimierte Skalierung für kleine Tablet-Bildschirmhöhen (Flexbox-Rettung!) */
+        /* --- LIQUID GLASS --- */
+        .glass-panel {
+            background: linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0.42));
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255,255,255,0.65);
+            box-shadow: 0 8px 32px rgba(120, 80, 20, 0.10), inset 0 1px 0 rgba(255,255,255,0.6);
+        }
+        .glass-panel-soft {
+            background: rgba(255,255,255,0.38);
+            backdrop-filter: blur(14px) saturate(160%);
+            -webkit-backdrop-filter: blur(14px) saturate(160%);
+            border: 1px solid rgba(255,255,255,0.55);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+        }
+        .glass-key {
+            background: linear-gradient(160deg, rgba(255,255,255,0.65), rgba(255,255,255,0.30));
+            backdrop-filter: blur(10px) saturate(160%);
+            -webkit-backdrop-filter: blur(10px) saturate(160%);
+            border: 1px solid rgba(255,255,255,0.7);
+            box-shadow: 0 2px 8px rgba(120, 80, 20, 0.06), inset 0 1px 0 rgba(255,255,255,0.7);
+        }
+        .glass-key:active {
+            background: linear-gradient(160deg, rgba(251,191,36,0.35), rgba(249,115,22,0.20));
+        }
+
         .numpad-btn {
             min-height: 44px;
             min-width: 44px;
@@ -197,6 +223,16 @@
         }
         .tariff-card {
             min-height: 50px;
+        }
+        /* Eigenständig größeres, aber FLUIDES Zahlenfeld für die Kasse (Bargeld-Eingabe) —
+           skaliert mit der tatsächlich verfügbaren Höhe, damit der "Verkauf abschließen"
+           Button dabei nie aus dem sichtbaren Bereich rutscht. */
+        .cash-numpad-btn {
+            min-height: clamp(42px, 7.5vh, 76px);
+            min-width: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         @media (min-height: 600px) {
@@ -259,6 +295,7 @@
                             <span id="header-guests-count" class="font-black text-[10px] md:text-sm transition-all duration-300">0</span>
                         </div>
                     </div>
+                    <p class="text-[7px] md:text-[9px] text-slate-400 font-semibold leading-none mt-0.5">© 2026 Lenny Köllner</p>
                 </div>
             </div>
             
@@ -268,12 +305,12 @@
                     <span id="cloud-status-text">Kasse</span>
                 </div>
 
-                <div class="flex items-center bg-white/90 border border-orange-100 rounded-xl px-2 py-1 shadow-sm">
+                <div class="flex items-center glass-panel-soft rounded-xl px-2 py-1">
                     <span class="text-[9px] md:text-xs font-black text-orange-400 uppercase mr-1 tracking-wider"><i class="fa-solid fa-wifi"></i> ID:</span>
                     <input type="text" value="SOMMER-2026" class="bg-transparent border-none text-[10px] md:text-xs font-black text-slate-700 uppercase focus:outline-none w-16 md:w-24 text-center sync-room-code-input transition-all" title="Nutze dieselbe ID für die Live-Sync">
                 </div>
 
-                <div id="role-badge-container" class="hidden flex items-center gap-1 bg-white/80 backdrop-blur-md px-2 py-1 rounded-2xl border border-orange-100 shadow-sm transition-all duration-300">
+                <div id="role-badge-container" class="hidden flex items-center gap-1 glass-panel-soft px-2 py-1 rounded-2xl transition-all duration-300">
                     <span id="role-badge-text" class="text-[9px] font-black text-slate-500 uppercase leading-none">Aktiv</span>
                     <button onclick="changeRole()" class="text-[9px] text-orange-500 hover:text-orange-600 font-bold ml-1 underline transition-colors">Wechseln</button>
                 </div>
@@ -314,6 +351,7 @@
                     <button class="numpad-btn opacity-0 cursor-default pointer-events-none"></button>
                 </div>
             </div>
+            <p class="text-[9px] md:text-[10px] text-slate-400 font-semibold mt-3">© 2026 Lenny Köllner</p>
         </section>
 
         <!-- ROLE SELECTION VIEW -->
@@ -350,7 +388,7 @@
             <!-- Left Panel (Tariffs) -->
             <div class="w-[55%] flex flex-col gap-2 overflow-hidden min-h-0">
                 <!-- Header Controls -->
-                <div class="bg-white/70 backdrop-blur-md p-2 rounded-2xl border border-orange-100 shadow-sm flex items-center justify-between gap-1 shrink-0">
+                <div class="glass-panel p-2 rounded-2xl flex items-center justify-between gap-1 shrink-0">
                     <div class="flex items-center gap-1">
                         <span class="bg-orange-100 text-orange-600 px-2 py-0.5 rounded-md font-bold text-[9px] md:text-[10px]">Tarife</span>
                         <h2 class="font-summer text-xs md:text-sm font-bold text-slate-700">Auswahl</h2>
@@ -370,7 +408,7 @@
                 <div id="seller-tariffs-grid" class="grid grid-cols-2 gap-1.5 md:gap-2 overflow-y-auto pr-1 flex-grow content-start min-h-0"></div>
 
                 <!-- Custom Price (Fixed at bottom) -->
-                <div class="bg-white/80 backdrop-blur-md p-2 rounded-2xl border border-dashed border-orange-300 flex flex-row items-center justify-between gap-1 shrink-0">
+                <div class="glass-panel p-2 rounded-2xl border-dashed !border-2 !border-orange-300/70 flex flex-row items-center justify-between gap-1 shrink-0">
                     <div class="flex items-center gap-1.5">
                         <div class="bg-amber-100 text-amber-600 p-1.5 rounded-lg text-[9px] md:text-xs">
                             <i class="fa-solid fa-tag"></i>
@@ -390,80 +428,83 @@
             <!-- Right Panel (Cart & Numpad) -->
             <div class="w-[45%] flex flex-col gap-2 overflow-hidden min-h-0">
                 
-                <!-- Live Cart Card (Takes remaining vertical space, scrolls inside itself) -->
-                <div class="bg-white p-2 md:p-3 rounded-2xl shadow-md border border-orange-100 flex flex-col flex-1 overflow-hidden min-h-[80px]">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-1 mb-1 shrink-0">
+                <!-- Live Cart Card: nimmt übrigen Platz, darf aber bis auf ein Minimum
+                     schrumpfen und intern scrollen — die Zahlungs-Karte darunter hat
+                     Vorrang und bleibt dadurch immer komplett sichtbar. -->
+                <div class="glass-panel p-2 md:p-3 rounded-2xl flex flex-col flex-1 overflow-hidden min-h-[44px]">
+                    <div class="flex items-center justify-between border-b border-white/50 pb-1 mb-1 shrink-0">
                         <h3 class="font-summer text-[10px] md:text-xs font-bold text-slate-800 flex items-center gap-1">
                             <i class="fa-solid fa-shopping-basket text-orange-500"></i> Bestellung
                         </h3>
-                        <button onclick="clearCart()" class="text-[9px] md:text-[10px] text-red-500 hover:text-red-600 font-bold flex items-center gap-0.5 bg-red-50 hover:bg-red-100 px-1.5 py-0.5 rounded-md transition-colors">
+                        <button onclick="clearCart()" class="text-[9px] md:text-[10px] text-red-500 hover:text-red-600 font-bold flex items-center gap-0.5 bg-red-50/80 hover:bg-red-100 px-1.5 py-0.5 rounded-md transition-colors">
                             Leeren
                         </button>
                     </div>
 
                     <!-- Cart Items List (2-spaltig, damit man i.d.R. nicht scrollen muss) -->
-                    <div id="seller-cart-items" class="flex-1 overflow-y-auto grid grid-cols-2 content-start gap-1.5 pr-1 min-h-0"></div>
+                    <div id="seller-cart-items" class="flex-1 overflow-y-auto flex flex-col gap-1 pr-1 min-h-0"></div>
 
                     <!-- Cart Total display -->
-                    <div class="border-t border-slate-100 pt-1.5 mt-1.5 flex items-center justify-between shrink-0">
+                    <div class="border-t border-white/50 pt-1.5 mt-1.5 flex items-center justify-between shrink-0">
                         <span class="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-wider">Gesamt:</span>
                         <span id="seller-total-price" class="font-summer text-base md:text-2xl font-extrabold text-orange-600 transition-all duration-300">0.00 €</span>
                     </div>
                 </div>
 
-                <!-- Cash Numpad Card (Fixed Height at bottom) -->
-                <div class="bg-white p-1.5 md:p-2 rounded-2xl shadow-lg border border-orange-100 flex flex-col gap-1 shrink-0">
+                <!-- Zahlungs-Karte (Bargeld + Zahlenfeld): shrink-0 = wird NIE abgeschnitten,
+                     der Warenkorb darüber weicht bei Platzmangel stattdessen aus. -->
+                <div class="glass-panel p-1.5 md:p-2 rounded-2xl flex flex-col gap-1 shrink-0">
                     
                     <!-- KOMPAKTE ANZEIGE FÜR GESAMT, GEGEBEN UND RÜCKGELD -->
-                    <div class="grid grid-cols-3 gap-1 bg-slate-50 p-1 rounded-xl border border-slate-100 shrink-0">
+                    <div class="grid grid-cols-3 gap-1.5 glass-panel-soft p-2 md:p-2.5 rounded-xl shrink-0">
                         <div>
-                            <span class="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase block leading-none mb-0.5">Gesamt:</span>
-                            <span id="seller-total-price-2" class="font-summer text-xs md:text-sm font-extrabold text-orange-600 truncate block transition-all duration-300">0.00 €</span>
+                            <span class="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase block leading-none mb-1">Gesamt:</span>
+                            <span id="seller-total-price-2" class="font-summer text-base md:text-xl font-extrabold text-orange-600 truncate block transition-all duration-300">0.00 €</span>
                         </div>
-                        <div class="border-l border-slate-200 pl-1.5 md:pl-2">
-                            <span class="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase block leading-none mb-0.5">Gegeben:</span>
+                        <div class="border-l border-white/60 pl-2 md:pl-3">
+                            <span class="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase block leading-none mb-1">Gegeben:</span>
                             <div class="flex items-baseline gap-0.5">
-                                <span id="display-given-cash" class="font-mono text-xs md:text-sm font-black text-slate-700 truncate block transition-all duration-200">0,00</span>
-                                <span class="text-[8px] md:text-[9px] text-slate-400 font-bold">€</span>
+                                <span id="display-given-cash" class="font-mono text-base md:text-xl font-black text-slate-700 truncate block transition-all duration-200">0,00</span>
+                                <span class="text-[9px] md:text-[11px] text-slate-400 font-bold">€</span>
                             </div>
                         </div>
-                        <div class="border-l border-slate-200 pl-1.5 md:pl-2 text-right">
-                            <span class="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase block leading-none mb-0.5">Rückgeld:</span>
+                        <div class="border-l border-white/60 pl-2 md:pl-3 text-right">
+                            <span class="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase block leading-none mb-1">Rückgeld:</span>
                             <div class="flex items-baseline justify-end gap-0.5">
-                                <span id="display-change" class="font-mono text-xs md:text-sm font-black text-emerald-600 truncate block transition-all duration-200">0,00</span>
-                                <span class="text-[8px] md:text-[9px] text-emerald-600 font-bold">€</span>
+                                <span id="display-change" class="font-mono text-base md:text-xl font-black text-emerald-600 truncate block transition-all duration-200">0,00</span>
+                                <span class="text-[9px] md:text-[11px] text-emerald-600 font-bold">€</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Quick Cash -->
                     <div class="grid grid-cols-4 gap-1 shrink-0">
-                        <button onclick="setQuickCash(5)" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 active:scale-95 text-slate-700 font-bold py-1 rounded-lg text-[9px] md:text-[10px] transition-all border border-slate-200">5 €</button>
-                        <button onclick="setQuickCash(10)" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 active:scale-95 text-slate-700 font-bold py-1 rounded-lg text-[9px] md:text-[10px] transition-all border border-slate-200">10 €</button>
-                        <button onclick="setQuickCash(20)" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 active:scale-95 text-slate-700 font-bold py-1 rounded-lg text-[9px] md:text-[10px] transition-all border border-slate-200">20 €</button>
-                        <button onclick="setQuickCash(50)" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 active:scale-95 text-slate-700 font-bold py-1 rounded-lg text-[9px] md:text-[10px] transition-all border border-slate-200">50 €</button>
+                        <button onclick="setQuickCash(5)" class="glass-key hover:bg-white/60 active:scale-95 text-slate-700 font-bold py-1 rounded-lg text-[9px] md:text-[10px] transition-all">5 €</button>
+                        <button onclick="setQuickCash(10)" class="glass-key hover:bg-white/60 active:scale-95 text-slate-700 font-bold py-1 rounded-lg text-[9px] md:text-[10px] transition-all">10 €</button>
+                        <button onclick="setQuickCash(20)" class="glass-key hover:bg-white/60 active:scale-95 text-slate-700 font-bold py-1 rounded-lg text-[9px] md:text-[10px] transition-all">20 €</button>
+                        <button onclick="setQuickCash(50)" class="glass-key hover:bg-white/60 active:scale-95 text-slate-700 font-bold py-1 rounded-lg text-[9px] md:text-[10px] transition-all">50 €</button>
                     </div>
 
                     <!-- Numpad Grid -->
-                    <div class="grid grid-cols-3 gap-1 shrink-0">
-                        <button onclick="pressNumpad('7')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-lg text-sm md:text-base transition-all border border-slate-200 shadow-sm">7</button>
-                        <button onclick="pressNumpad('8')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-lg text-sm md:text-base transition-all border border-slate-200 shadow-sm">8</button>
-                        <button onclick="pressNumpad('9')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-lg text-sm md:text-base transition-all border border-slate-200 shadow-sm">9</button>
+                    <div class="grid grid-cols-3 gap-1.5 md:gap-2 shrink-0">
+                        <button onclick="pressNumpad('7')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">7</button>
+                        <button onclick="pressNumpad('8')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">8</button>
+                        <button onclick="pressNumpad('9')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">9</button>
                         
-                        <button onclick="pressNumpad('4')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-lg text-sm md:text-base transition-all border border-slate-200 shadow-sm">4</button>
-                        <button onclick="pressNumpad('5')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-lg text-sm md:text-base transition-all border border-slate-200 shadow-sm">5</button>
-                        <button onclick="pressNumpad('6')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-lg text-sm md:text-base transition-all border border-slate-200 shadow-sm">6</button>
+                        <button onclick="pressNumpad('4')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">4</button>
+                        <button onclick="pressNumpad('5')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">5</button>
+                        <button onclick="pressNumpad('6')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">6</button>
                         
-                        <button onclick="pressNumpad('1')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-lg text-sm md:text-base transition-all border border-slate-200 shadow-sm">1</button>
-                        <button onclick="pressNumpad('2')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-lg text-sm md:text-base transition-all border border-slate-200 shadow-sm">2</button>
-                        <button onclick="pressNumpad('3')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-lg text-sm md:text-base transition-all border border-slate-200 shadow-sm">3</button>
+                        <button onclick="pressNumpad('1')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">1</button>
+                        <button onclick="pressNumpad('2')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">2</button>
+                        <button onclick="pressNumpad('3')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">3</button>
                         
-                        <button onclick="pressNumpad('C')" class="numpad-btn bg-red-50 hover:bg-red-100 active:bg-red-200 active:scale-95 text-red-600 font-bold rounded-lg text-[10px] md:text-xs transition-all border border-red-200 shadow-sm">C</button>
-                        <button onclick="pressNumpad('0')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-lg text-sm md:text-base transition-all border border-slate-200 shadow-sm">0</button>
-                        <button onclick="pressNumpad('.')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:bg-amber-200/50 active:scale-95 text-slate-800 font-black rounded-lg text-sm md:text-base transition-all border border-slate-200 shadow-sm">,</button>
+                        <button onclick="pressNumpad('C')" class="cash-numpad-btn glass-key hover:bg-red-100/40 active:scale-95 text-red-600 font-bold rounded-lg text-sm md:text-base transition-all">C</button>
+                        <button onclick="pressNumpad('0')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">0</button>
+                        <button onclick="pressNumpad('.')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">,</button>
                     </div>
 
-                    <button onclick="completeSale()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-95 text-white py-1.5 md:py-2 rounded-xl font-bold text-[10px] md:text-sm transition-all shadow-md flex items-center justify-center gap-1.5 shrink-0">
+                    <button onclick="completeSale()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-95 text-white py-1.5 md:py-2 rounded-xl font-bold text-[10px] md:text-sm transition-all shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-1.5 shrink-0" style="box-shadow: 0 6px 20px rgba(5,150,105,0.25), inset 0 1px 0 rgba(255,255,255,0.35);">
                         <i class="fa-solid fa-circle-check text-xs md:text-base"></i> Verkauf abschließen
                     </button>
                 </div>
@@ -492,29 +533,21 @@
                     <span class="font-summer text-xl md:text-3xl font-bold tracking-wide text-amber-50 drop-shadow-sm flex items-center gap-3">
                         ☀️ Ess-Zone Buffet
                     </span>
-                    <div class="flex items-center bg-white/20 backdrop-blur-md rounded-xl px-4 py-2 border border-white/20 text-white shadow-sm">
-                        <span class="text-[10px] md:text-xs font-black uppercase mr-2 tracking-wider">ID:</span>
-                        <input type="text" value="SOMMER-2026" class="bg-transparent border-none text-[11px] md:text-sm font-black text-white uppercase focus:outline-none w-20 md:w-28 text-center sync-room-code-input transition-all" title="Nutze dieselbe ID wie am Verkäufer-Terminal">
-                    </div>
+                </div>
+
+                <div class="text-center z-20 text-base md:text-2xl text-sky-900/80 font-bold bg-white/45 backdrop-blur-md py-4 px-6 rounded-2xl max-w-3xl mx-auto border border-white/40 shadow-sm leading-snug mt-10 md:mt-16">
+                    ⚠️ Wichtige Regel: Speisen & Getränke bitte ausschließlich innerhalb der abgegrenzten Ess-Zone verzehren.
                 </div>
 
                 <div class="text-center m-auto z-20 flex flex-col items-center justify-center">
                     <div class="bg-white/10 p-6 md:p-8 rounded-full border border-white/20 animate-pulse-soft mb-4 shadow-lg backdrop-blur-sm">
                         <span class="text-6xl md:text-8xl block transform hover:rotate-45 transition-transform duration-1000">☀️</span>
                     </div>
-                    <h2 class="font-summer text-4xl md:text-7xl font-black tracking-wide drop-shadow-md mb-3">Genießer-Oase</h2>
-                    <p class="text-[13px] md:text-xl text-orange-50 font-medium max-w-lg drop-shadow-sm leading-relaxed mb-8">
-                        Dein All-You-Can-Eat Buffet. Hol dir dein Einlassbändchen direkt an der Kasse!
-                    </p>
-
-                    <div class="bg-orange-600/40 border-2 border-dashed border-white/40 px-8 py-5 rounded-3xl transform -rotate-1 shadow-xl max-w-sm md:max-w-lg backdrop-blur-sm animate-pulse-soft">
-                        <span class="text-[11px] md:text-sm font-bold block text-amber-200">ℹ️ ZUTRITT NUR MIT STEMPEL:</span>
-                        <p class="text-[13px] md:text-lg font-black tracking-wide mt-1.5 text-white uppercase">Hier bezahlen &amp; direkt Einlassstempel abholen!</p>
-                    </div>
+                    <h2 class="font-summer text-4xl md:text-7xl font-black tracking-wide drop-shadow-md mb-8">Genießer-Oase</h2>
                 </div>
 
-                <div class="text-center z-20 text-[10px] md:text-sm text-sky-900/80 font-bold bg-white/45 backdrop-blur-md py-3 px-5 rounded-2xl max-w-2xl mx-auto border border-white/40 shadow-sm leading-tight mb-4">
-                    ⚠️ Wichtige Regel: Speisen & Getränke bitte ausschließlich innerhalb der abgegrenzten Ess-Zone verzehren.
+                <div class="text-center z-20 text-lg md:text-2xl text-white font-bold pb-2 mb-8 md:mb-12 drop-shadow-sm tracking-wide">
+                    © 2026 Lenny Köllner
                 </div>
             </div>
 
@@ -1167,7 +1200,7 @@
             window.appState.tariffs.forEach(tariff => {
                 const card = document.createElement('button');
                 card.onclick = () => addToCart(tariff);
-                card.className = "bg-white hover:bg-gradient-to-br hover:from-white hover:to-orange-50/20 p-2.5 md:p-3 rounded-2xl border-2 border-slate-100 hover:border-orange-300 text-left transition-all duration-200 shadow-sm hover:shadow-md flex flex-col justify-between tariff-card relative overflow-hidden group active:scale-95 shrink-0";
+                card.className = "glass-panel-soft hover:bg-white/60 p-2.5 md:p-3 rounded-2xl border-2 !border-white/50 hover:!border-orange-300 text-left transition-all duration-200 hover:shadow-md flex flex-col justify-between tariff-card relative overflow-hidden group active:scale-95 shrink-0";
                 card.innerHTML = `
                     <div class="flex items-center justify-between w-full">
                         <div class="bg-orange-100 text-orange-600 p-1 md:p-1.5 rounded-lg group-hover:bg-orange-500 group-hover:text-white transition-all duration-300">
@@ -1192,7 +1225,7 @@
             if (window.appState.cart.length === 0) {
                 previousCartItemIds = new Set();
                 container.innerHTML = `
-                    <div class="col-span-2 flex flex-col items-center justify-center py-4 text-slate-400 animate-fade-in">
+                    <div class="flex flex-col items-center justify-center py-4 text-slate-400 animate-fade-in">
                         <i class="fa-solid fa-cookie text-lg mb-1 text-slate-300"></i>
                         <p class="text-[9px] font-semibold">Der Warenkorb ist leer.</p>
                     </div>
@@ -1207,20 +1240,18 @@
                 // Artikel sollen bei einer Mengenänderung nicht erneut mit-animieren.
                 const isNewItem = !previousCartItemIds.has(item.id);
                 const row = document.createElement('div');
-                row.className = `flex flex-col justify-between bg-slate-50 p-1.5 md:p-2 rounded-xl border border-slate-100/60 transition-all shrink-0 gap-1 ${isNewItem ? 'animate-slide-in-right' : ''}`;
+                row.className = `flex items-center justify-between glass-panel-soft px-2 py-1 md:py-1.5 rounded-lg transition-all shrink-0 gap-1.5 ${isNewItem ? 'animate-slide-in-right' : ''}`;
                 row.innerHTML = `
-                    <div class="flex items-start gap-1 min-w-0">
-                        <span class="text-[10px] md:text-[11px] shrink-0">🍽️</span>
-                        <div class="min-w-0 flex-1">
-                            <h5 class="font-bold text-[9px] md:text-[10px] text-slate-800 truncate leading-tight">${item.name}</h5>
-                            <p class="text-[7px] md:text-[8px] text-slate-500 leading-none mt-0.5">${item.price.toFixed(2)} € · Summe: ${(item.price * item.qty).toFixed(2)} €</p>
-                        </div>
+                    <div class="flex items-center gap-1.5 min-w-0 flex-1">
+                        <span class="font-bold text-[9px] md:text-[10px] text-orange-600 shrink-0">${item.qty}x</span>
+                        <h5 class="font-bold text-[9px] md:text-[10px] text-slate-800 truncate leading-tight">${item.name}</h5>
                     </div>
-                    
-                    <div class="flex items-center justify-between gap-1 shrink-0">
-                        <button onclick="changeCartQty(${index}, -1)" class="w-8 h-8 md:w-9 md:h-9 bg-white border border-slate-200 text-slate-700 rounded-lg font-bold text-sm flex items-center justify-center transition-colors active:scale-90 active:bg-slate-200 shrink-0">-</button>
-                        <span class="font-bold text-[10px] md:text-xs text-slate-800 text-center">${item.qty}x</span>
-                        <button onclick="changeCartQty(${index}, 1)" class="w-8 h-8 md:w-9 md:h-9 bg-white border border-slate-200 text-slate-700 rounded-lg font-bold text-sm flex items-center justify-center transition-colors active:scale-90 active:bg-slate-200 shrink-0">+</button>
+
+                    <span class="font-mono font-bold text-[9px] md:text-[10px] text-slate-600 shrink-0">${(item.price * item.qty).toFixed(2)} €</span>
+
+                    <div class="flex items-center gap-1 shrink-0">
+                        <button onclick="changeCartQty(${index}, -1)" class="w-6 h-6 md:w-7 md:h-7 glass-key text-slate-700 rounded-md font-bold text-xs flex items-center justify-center transition-colors active:scale-90 shrink-0">-</button>
+                        <button onclick="changeCartQty(${index}, 1)" class="w-6 h-6 md:w-7 md:h-7 glass-key text-slate-700 rounded-md font-bold text-xs flex items-center justify-center transition-colors active:scale-90 shrink-0">+</button>
                     </div>
                 `;
                 container.appendChild(row);
