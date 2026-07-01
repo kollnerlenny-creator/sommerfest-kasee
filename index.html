@@ -1611,10 +1611,18 @@
         document.addEventListener('gesturestart', (e) => e.preventDefault());
         document.addEventListener('gesturechange', (e) => e.preventDefault());
         let lastTouchEnd = 0;
+        let lastTouchTarget = null;
         document.addEventListener('touchend', (e) => {
             const now = Date.now();
-            if (now - lastTouchEnd <= 300) e.preventDefault();
+            const target = e.target.closest('button, a, [onclick]') || e.target;
+            // Nur blockieren, wenn wirklich zweimal SCHNELL auf dasselbe Element getippt
+            // wurde (= Zoom-Geste). Schnelles Tippen auf unterschiedliche Buttons
+            // (z.B. Zahlencode eingeben) darf dadurch nicht blockiert werden.
+            if (now - lastTouchEnd <= 300 && target === lastTouchTarget) {
+                e.preventDefault();
+            }
             lastTouchEnd = now;
+            lastTouchTarget = target;
         }, { passive: false });
 
         // 3. Pull-to-Refresh / Rubber-Band-Scrolling des gesamten Bildschirms verhindern,
