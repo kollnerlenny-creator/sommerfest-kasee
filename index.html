@@ -733,6 +733,8 @@
         let db = null;
         let auth = null;
         let unsubscribeSync = null;
+        let previousCartItemIds = new Set(); // Für die "Rein-rutsch"-Animation neuer Warenkorb-Artikel (Verkäufer-Ansicht)
+        let previousCustomerItemIds = new Set(); // Dasselbe für das Kunden-Display
 
         // --- NEU: IDLE TIMER (Ruhemodus für Verkäufer nach 10 Sekunden) ---
         let sellerIdleTimer = null;
@@ -1188,6 +1190,7 @@
             container.innerHTML = '';
             
             if (window.appState.cart.length === 0) {
+                previousCartItemIds = new Set();
                 container.innerHTML = `
                     <div class="col-span-2 flex flex-col items-center justify-center py-4 text-slate-400 animate-fade-in">
                         <i class="fa-solid fa-cookie text-lg mb-1 text-slate-300"></i>
@@ -1197,9 +1200,14 @@
                 return;
             }
             
+            const currentCartItemIds = new Set();
             window.appState.cart.forEach((item, index) => {
+                currentCartItemIds.add(item.id);
+                // Nur wirklich neue Artikel sollen reinrutschen; bereits vorhandene
+                // Artikel sollen bei einer Mengenänderung nicht erneut mit-animieren.
+                const isNewItem = !previousCartItemIds.has(item.id);
                 const row = document.createElement('div');
-                row.className = "flex flex-col justify-between bg-slate-50 p-1.5 md:p-2 rounded-xl border border-slate-100/60 transition-all shrink-0 animate-slide-in-right gap-1";
+                row.className = `flex flex-col justify-between bg-slate-50 p-1.5 md:p-2 rounded-xl border border-slate-100/60 transition-all shrink-0 gap-1 ${isNewItem ? 'animate-slide-in-right' : ''}`;
                 row.innerHTML = `
                     <div class="flex items-start gap-1 min-w-0">
                         <span class="text-[10px] md:text-[11px] shrink-0">🍽️</span>
@@ -1217,6 +1225,7 @@
                 `;
                 container.appendChild(row);
             });
+            previousCartItemIds = currentCartItemIds;
         }
 
         function renderNumpadAndTotals() {
@@ -1396,6 +1405,7 @@
             // 2. Normale Ansicht: Warenkorb leer -> Screensaver
             const cart = window.appState.cart || [];
             if (cart.length === 0) {
+                previousCustomerItemIds = new Set();
                 if (screensaverEl.classList.contains('hidden')) {
                     activeViewEl.classList.add('hidden');
                     screensaverEl.classList.remove('hidden');
@@ -1444,11 +1454,17 @@
             const list = document.getElementById('customer-live-items');
             list.innerHTML = '';
 
+            const currentCustomerItemIds = new Set();
+            let newItemCount = 0;
             cart.forEach((item, idx) => {
+                currentCustomerItemIds.add(item.id);
+                const isNewItem = !previousCustomerItemIds.has(item.id);
                 const itemEl = document.createElement('div');
-                const delay = idx * 0.05; 
-                itemEl.className = "flex items-center justify-between p-2 md:p-3 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm animate-slide-in-right shrink-0";
-                itemEl.style.animationDelay = `${delay}s`;
+                itemEl.className = `flex items-center justify-between p-2 md:p-3 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm shrink-0 ${isNewItem ? 'animate-slide-in-right' : ''}`;
+                if (isNewItem) {
+                    itemEl.style.animationDelay = `${newItemCount * 0.05}s`;
+                    newItemCount++;
+                }
                 itemEl.innerHTML = `
                     <div class="flex items-center gap-2 md:gap-3">
                         <div class="bg-gradient-to-tr from-orange-400 to-amber-400 text-white w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center font-black text-xs md:text-sm shadow-sm">${item.qty}x</div>
@@ -1461,6 +1477,7 @@
                 `;
                 list.appendChild(itemEl);
             });
+            previousCustomerItemIds = currentCustomerItemIds;
         }
 
         // MODALS & CONFIGURATION MANAGEMENT
