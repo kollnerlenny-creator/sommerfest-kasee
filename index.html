@@ -2,7 +2,12 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="theme-color" content="#f97316">
     <title>Sommerfest Buffet - Bezahlsystem & Ess-Zone</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -19,10 +24,54 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
     <style>
+        html {
+            height: 100%;
+            /* iOS Safari Adress-/Werkzeugleisten-Höhe ausgleichen */
+            height: -webkit-fill-available;
+            overscroll-behavior: none;
+        }
         body {
             font-family: 'Inter', sans-serif;
             touch-action: manipulation; /* Optimiert Touch-Reaktionszeiten */
             overflow: hidden; /* Verhindert das Scrollen der gesamten Seite komplett */
+            height: 100vh;
+            height: calc(var(--vh, 1vh) * 100); /* Zuverlässige Höhe auf iPadOS Safari */
+            height: -webkit-fill-available;
+            overscroll-behavior: none; /* Kein Rubber-Band-Scrolling der gesamten Seite */
+            -webkit-overflow-scrolling: touch;
+            -webkit-touch-callout: none; /* Kein Kontextmenü bei Long-Press */
+            -webkit-user-select: none;
+            user-select: none; /* Kiosk-Modus: kein versehentliches Markieren von Text */
+            -webkit-tap-highlight-color: transparent;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            box-sizing: border-box;
+        }
+        /* Texteingaben müssen wählbar bleiben */
+        input, textarea {
+            -webkit-user-select: text;
+            user-select: text;
+            -webkit-touch-callout: default;
+            font-size: 16px; /* Verhindert automatisches Zoomen bei Fokus auf iOS */
+        }
+        /* Kein versehentliches Ziehen von Icons/Emojis/Bildern */
+        img, svg, span, i {
+            -webkit-touch-callout: none;
+            -webkit-user-drag: none;
+            user-drag: none;
+        }
+        /* Größere, zuverlässigere Touch-Flächen + kein Highlight-Flackern */
+        button, [onclick], select {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            -webkit-touch-callout: none;
+        }
+        /* Scrollbare Container: sanftes, natives Momentum-Scrolling auf iPadOS */
+        .overflow-y-auto, .overflow-y-scroll {
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain; /* Scroll bleibt im Container, kein Body-Bounce */
         }
         .font-summer {
             font-family: 'Fredoka', sans-serif;
@@ -136,7 +185,8 @@
 
         /* Extrem optimierte Skalierung für kleine Tablet-Bildschirmhöhen (Flexbox-Rettung!) */
         .numpad-btn {
-            min-height: 35px;
+            min-height: 44px;
+            min-width: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -146,7 +196,7 @@
         }
 
         @media (min-height: 600px) {
-            .numpad-btn { min-height: 42px; }
+            .numpad-btn { min-height: 46px; }
             .tariff-card { min-height: 60px; }
         }
 
@@ -168,7 +218,7 @@
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-amber-50 via-orange-50 to-sky-50 h-screen w-screen overflow-hidden text-slate-800 flex flex-col antialiased selection:bg-orange-200 transition-colors duration-500">
+<body class="bg-gradient-to-br from-amber-50 via-orange-50 to-sky-50 w-full overflow-hidden text-slate-800 flex flex-col antialiased selection:bg-orange-200 transition-colors duration-500" style="overscroll-behavior: none;">
 
     <!-- SELLER SCREENSAVER (Idle nach 10 Sekunden) -->
     <div id="seller-screensaver" class="hidden fixed inset-0 bg-gradient-to-br from-amber-400 via-orange-400 to-sky-300 overflow-hidden flex flex-col justify-between p-6 md:p-12 text-white z-[80] transition-opacity duration-500 animate-fade-in">
@@ -551,7 +601,7 @@
                     <i class="fa-solid fa-receipt text-lg"></i>
                     <h3 class="font-summer text-base md:text-lg font-bold">Verkaufsverlauf &amp; Umsatz</h3>
                 </div>
-                <button onclick="closeHistoryModal()" class="text-white/80 hover:text-white text-xl transition-colors">
+                <button onclick="closeHistoryModal()" class="text-white/80 hover:text-white text-xl transition-colors w-11 h-11 flex items-center justify-center -mr-2 active:scale-90">
                     <i class="fa-solid fa-times"></i>
                 </button>
             </div>
@@ -593,7 +643,7 @@
                     <i class="fa-solid fa-sliders text-lg"></i>
                     <h3 class="font-summer text-base md:text-lg font-bold">Buffet-Tarife verwalten</h3>
                 </div>
-                <button onclick="closeConfigModal()" class="text-white/80 hover:text-white text-xl transition-colors">
+                <button onclick="closeConfigModal()" class="text-white/80 hover:text-white text-xl transition-colors w-11 h-11 flex items-center justify-center -mr-2 active:scale-90">
                     <i class="fa-solid fa-times"></i>
                 </button>
             </div>
@@ -1156,9 +1206,9 @@
                     </div>
                     
                     <div class="flex items-center gap-1 shrink-0">
-                        <button onclick="changeCartQty(${index}, -1)" class="w-6 h-6 md:w-8 md:h-8 bg-white border border-slate-200 text-slate-700 rounded-lg font-bold text-sm flex items-center justify-center transition-colors active:scale-90 active:bg-slate-200">-</button>
+                        <button onclick="changeCartQty(${index}, -1)" class="w-9 h-9 md:w-11 md:h-11 bg-white border border-slate-200 text-slate-700 rounded-lg font-bold text-base flex items-center justify-center transition-colors active:scale-90 active:bg-slate-200 shrink-0">-</button>
                         <span class="font-bold text-[10px] md:text-xs text-slate-800 w-3 md:w-4 text-center">${item.qty}</span>
-                        <button onclick="changeCartQty(${index}, 1)" class="w-6 h-6 md:w-8 md:h-8 bg-white border border-slate-200 text-slate-700 rounded-lg font-bold text-sm flex items-center justify-center transition-colors active:scale-90 active:bg-slate-200">+</button>
+                        <button onclick="changeCartQty(${index}, 1)" class="w-9 h-9 md:w-11 md:h-11 bg-white border border-slate-200 text-slate-700 rounded-lg font-bold text-base flex items-center justify-center transition-colors active:scale-90 active:bg-slate-200 shrink-0">+</button>
                         <span class="font-mono font-bold text-[9px] md:text-[10px] text-slate-800 w-10 text-right">${(item.price * item.qty).toFixed(2)} €</span>
                     </div>
                 `;
@@ -1450,7 +1500,7 @@
                         </div>
                         <p class="text-[9px] md:text-[10px] text-slate-500 truncate mt-1">${itemsList}</p>
                     </div>
-                    <button onclick="deleteSaleEntry('${sale.id}')" class="text-red-500 hover:text-red-700 p-1.5 rounded-xl hover:bg-red-50 transition-colors" title="Diese Buchung löschen">
+                    <button onclick="deleteSaleEntry('${sale.id}')" class="text-red-500 hover:text-red-700 w-11 h-11 flex items-center justify-center rounded-xl hover:bg-red-50 active:scale-90 transition-all shrink-0" title="Diese Buchung löschen">
                         <i class="fa-solid fa-trash-can text-sm"></i>
                     </button>
                 `;
@@ -1485,7 +1535,7 @@
                             <span class="text-[9px] md:text-[10px] font-semibold text-orange-600">${tariff.price.toFixed(2)} €</span>
                         </div>
                     </div>
-                    <button onclick="deleteTariff(${index})" class="text-rose-500 hover:text-rose-600 p-1.5 rounded-xl hover:bg-rose-50 transition-all">
+                    <button onclick="deleteTariff(${index})" class="text-rose-500 hover:text-rose-600 w-11 h-11 flex items-center justify-center rounded-xl hover:bg-rose-50 active:scale-90 transition-all shrink-0">
                         <i class="fa-solid fa-trash-can text-sm"></i>
                     </button>
                 `;
@@ -1545,6 +1595,39 @@
         window.clearPasscode = clearPasscode;
 
         // Start Initialization
+        // --- iPad / Touch OPTIMIERUNG ---
+
+        // 1. Zuverlässige Viewport-Höhe auf iPadOS Safari (Adressleiste etc.)
+        function setRealViewportHeight() {
+            document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+        }
+        setRealViewportHeight();
+        window.addEventListener('resize', setRealViewportHeight);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(setRealViewportHeight, 100);
+        });
+
+        // 2. Pinch-to-Zoom & Doppeltipp-Zoom vollständig unterbinden (Kiosk-Verhalten)
+        document.addEventListener('gesturestart', (e) => e.preventDefault());
+        document.addEventListener('gesturechange', (e) => e.preventDefault());
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) e.preventDefault();
+            lastTouchEnd = now;
+        }, { passive: false });
+
+        // 3. Pull-to-Refresh / Rubber-Band-Scrolling des gesamten Bildschirms verhindern,
+        //    ohne das gewollte Scrollen INNERHALB von .overflow-y-auto Bereichen zu blockieren.
+        document.addEventListener('touchmove', (e) => {
+            if (!e.target.closest('.overflow-y-auto, .overflow-y-scroll, [contenteditable="true"]')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // 4. Kontextmenü bei Long-Press auf Buttons/Icons unterdrücken
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+
         document.addEventListener("DOMContentLoaded", initFirebase);
 
     </script>
