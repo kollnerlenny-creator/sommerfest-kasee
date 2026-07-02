@@ -446,65 +446,88 @@
                     </div>
                 </div>
 
-                <!-- Zahlungs-Karte (Bargeld + Zahlenfeld): shrink-0 = wird NIE abgeschnitten,
-                     der Warenkorb darüber weicht bei Platzmangel stattdessen aus. -->
-                <div class="glass-panel p-1.5 md:p-2 rounded-2xl flex flex-col gap-1 shrink-0">
-                    
-                    <!-- KOMPAKTE ANZEIGE FÜR GESAMT, GEGEBEN UND RÜCKGELD -->
-                    <div class="grid grid-cols-3 gap-1.5 glass-panel-soft p-2 md:p-2.5 rounded-xl shrink-0">
+                <!-- Kassieren-Button: öffnet das große Zahlen-Popup -->
+                <button onclick="openCheckoutModal()" class="glass-panel hover:bg-white/60 active:scale-95 p-3 md:p-4 rounded-2xl flex items-center justify-between gap-2 shrink-0 transition-all duration-200 w-full text-left">
+                    <div>
+                        <span class="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase block leading-none mb-1">Gesamt:</span>
+                        <span id="seller-total-price-2" class="font-summer text-xl md:text-3xl font-extrabold text-orange-600 truncate block transition-all duration-300">0.00 €</span>
+                    </div>
+                    <span class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-5 md:px-7 py-3 md:py-4 rounded-xl font-bold text-sm md:text-base transition-all shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 shrink-0" style="box-shadow: 0 6px 20px rgba(5,150,105,0.25), inset 0 1px 0 rgba(255,255,255,0.35);">
+                        <i class="fa-solid fa-cash-register text-sm md:text-lg"></i> Kassieren
+                    </span>
+                </button>
+            </div>
+        </section>
+
+        <!-- CHECKOUT MODAL (großes Zahlen-Popup) -->
+        <div id="modal-checkout" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-opacity duration-300">
+            <div class="glass-panel rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden transform transition-all duration-300 flex flex-col bg-gradient-to-br from-amber-50/80 via-orange-50/80 to-sky-50/80 max-h-[92vh]">
+                <div class="bg-gradient-to-r from-orange-500 to-amber-400 text-white px-5 py-3.5 flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-cash-register text-base"></i>
+                        <h3 class="font-summer text-base md:text-lg font-bold">Kassieren</h3>
+                    </div>
+                    <button onclick="closeCheckoutModal()" class="text-white/80 hover:text-white text-xl transition-colors w-11 h-11 flex items-center justify-center -mr-2 active:scale-90">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="p-4 md:p-5 flex flex-col gap-2.5 overflow-y-auto">
+                    <!-- ANZEIGE FÜR GESAMT, GEGEBEN UND RÜCKGELD -->
+                    <div class="grid grid-cols-3 gap-1.5 glass-panel-soft p-3 md:p-4 rounded-2xl shrink-0">
                         <div>
-                            <span class="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase block leading-none mb-1">Gesamt:</span>
-                            <span id="seller-total-price-2" class="font-summer text-base md:text-xl font-extrabold text-orange-600 truncate block transition-all duration-300">0.00 €</span>
+                            <span class="text-[10px] md:text-xs font-bold text-slate-500 uppercase block leading-none mb-1.5">Gesamt:</span>
+                            <span id="checkout-total-price" class="font-summer text-lg md:text-2xl font-extrabold text-orange-600 truncate block transition-all duration-300">0.00 €</span>
                         </div>
                         <div class="border-l border-white/60 pl-2 md:pl-3">
-                            <span class="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase block leading-none mb-1">Gegeben:</span>
+                            <span class="text-[10px] md:text-xs font-bold text-slate-500 uppercase block leading-none mb-1.5">Gegeben:</span>
                             <div class="flex items-baseline gap-0.5">
-                                <span id="display-given-cash" class="font-mono text-base md:text-xl font-black text-slate-700 truncate block transition-all duration-200">0,00</span>
-                                <span class="text-[9px] md:text-[11px] text-slate-400 font-bold">€</span>
+                                <span id="display-given-cash" class="font-mono text-lg md:text-2xl font-black text-slate-700 truncate block transition-all duration-200">0,00</span>
+                                <span class="text-[10px] md:text-xs text-slate-400 font-bold">€</span>
                             </div>
                         </div>
                         <div class="border-l border-white/60 pl-2 md:pl-3 text-right">
-                            <span class="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase block leading-none mb-1">Rückgeld:</span>
+                            <span class="text-[10px] md:text-xs font-bold text-slate-500 uppercase block leading-none mb-1.5">Rückgeld:</span>
                             <div class="flex items-baseline justify-end gap-0.5">
-                                <span id="display-change" class="font-mono text-base md:text-xl font-black text-emerald-600 truncate block transition-all duration-200">0,00</span>
-                                <span class="text-[9px] md:text-[11px] text-emerald-600 font-bold">€</span>
+                                <span id="display-change" class="font-mono text-lg md:text-2xl font-black text-emerald-600 truncate block transition-all duration-200">0,00</span>
+                                <span class="text-[10px] md:text-xs text-emerald-600 font-bold">€</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Quick Cash -->
-                    <div class="grid grid-cols-4 gap-1.5 md:gap-2 shrink-0">
-                        <button onclick="setQuickCash(5)" class="glass-key hover:bg-white/60 active:scale-95 text-slate-700 font-bold py-2.5 md:py-3 rounded-xl text-sm md:text-base transition-all">5 €</button>
-                        <button onclick="setQuickCash(10)" class="glass-key hover:bg-white/60 active:scale-95 text-slate-700 font-bold py-2.5 md:py-3 rounded-xl text-sm md:text-base transition-all">10 €</button>
-                        <button onclick="setQuickCash(20)" class="glass-key hover:bg-white/60 active:scale-95 text-slate-700 font-bold py-2.5 md:py-3 rounded-xl text-sm md:text-base transition-all">20 €</button>
-                        <button onclick="setQuickCash(50)" class="glass-key hover:bg-white/60 active:scale-95 text-slate-700 font-bold py-2.5 md:py-3 rounded-xl text-sm md:text-base transition-all">50 €</button>
+                    <div class="grid grid-cols-4 gap-2 shrink-0">
+                        <button onclick="setQuickCash(5)" class="glass-key hover:bg-white/60 active:scale-95 text-slate-700 font-bold py-3 md:py-3.5 rounded-xl text-base md:text-lg transition-all">5 €</button>
+                        <button onclick="setQuickCash(10)" class="glass-key hover:bg-white/60 active:scale-95 text-slate-700 font-bold py-3 md:py-3.5 rounded-xl text-base md:text-lg transition-all">10 €</button>
+                        <button onclick="setQuickCash(20)" class="glass-key hover:bg-white/60 active:scale-95 text-slate-700 font-bold py-3 md:py-3.5 rounded-xl text-base md:text-lg transition-all">20 €</button>
+                        <button onclick="setQuickCash(50)" class="glass-key hover:bg-white/60 active:scale-95 text-slate-700 font-bold py-3 md:py-3.5 rounded-xl text-base md:text-lg transition-all">50 €</button>
                     </div>
 
                     <!-- Numpad Grid -->
-                    <div class="grid grid-cols-3 gap-1.5 md:gap-2 shrink-0">
-                        <button onclick="pressNumpad('7')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">7</button>
-                        <button onclick="pressNumpad('8')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">8</button>
-                        <button onclick="pressNumpad('9')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">9</button>
-                        
-                        <button onclick="pressNumpad('4')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">4</button>
-                        <button onclick="pressNumpad('5')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">5</button>
-                        <button onclick="pressNumpad('6')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">6</button>
-                        
-                        <button onclick="pressNumpad('1')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">1</button>
-                        <button onclick="pressNumpad('2')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">2</button>
-                        <button onclick="pressNumpad('3')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">3</button>
-                        
-                        <button onclick="pressNumpad('C')" class="cash-numpad-btn glass-key hover:bg-red-100/40 active:scale-95 text-red-600 font-bold rounded-lg text-sm md:text-base transition-all">C</button>
-                        <button onclick="pressNumpad('0')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">0</button>
-                        <button onclick="pressNumpad('.')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-xl md:text-3xl transition-all">,</button>
+                    <div class="grid grid-cols-3 gap-2 md:gap-2.5 shrink-0">
+                        <button onclick="pressNumpad('7')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl md:text-3xl transition-all">7</button>
+                        <button onclick="pressNumpad('8')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl md:text-3xl transition-all">8</button>
+                        <button onclick="pressNumpad('9')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl md:text-3xl transition-all">9</button>
+
+                        <button onclick="pressNumpad('4')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl md:text-3xl transition-all">4</button>
+                        <button onclick="pressNumpad('5')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl md:text-3xl transition-all">5</button>
+                        <button onclick="pressNumpad('6')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl md:text-3xl transition-all">6</button>
+
+                        <button onclick="pressNumpad('1')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl md:text-3xl transition-all">1</button>
+                        <button onclick="pressNumpad('2')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl md:text-3xl transition-all">2</button>
+                        <button onclick="pressNumpad('3')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl md:text-3xl transition-all">3</button>
+
+                        <button onclick="pressNumpad('C')" class="cash-numpad-btn glass-key hover:bg-red-100/40 active:scale-95 text-red-600 font-bold rounded-xl text-lg md:text-xl transition-all">C</button>
+                        <button onclick="pressNumpad('0')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl md:text-3xl transition-all">0</button>
+                        <button onclick="pressNumpad('.')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl md:text-3xl transition-all">,</button>
                     </div>
 
-                    <button onclick="completeSale()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-95 text-white py-1.5 md:py-2 rounded-xl font-bold text-[10px] md:text-sm transition-all shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-1.5 shrink-0" style="box-shadow: 0 6px 20px rgba(5,150,105,0.25), inset 0 1px 0 rgba(255,255,255,0.35);">
-                        <i class="fa-solid fa-circle-check text-xs md:text-base"></i> Verkauf abschließen
+                    <button onclick="completeSale()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-95 text-white py-3 md:py-3.5 rounded-xl font-bold text-sm md:text-base transition-all shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-1.5 shrink-0" style="box-shadow: 0 6px 20px rgba(5,150,105,0.25), inset 0 1px 0 rgba(255,255,255,0.35);">
+                        <i class="fa-solid fa-circle-check text-base"></i> Verkauf abschließen
                     </button>
                 </div>
             </div>
-        </section>
+        </div>
 
         <!-- CUSTOMER VIEW (Vollbildmodus ohne Ränder) -->
         <section id="view-customer" class="hidden fixed inset-0 z-40 bg-gradient-to-br from-amber-50 via-orange-50 to-sky-50 overflow-hidden animate-fade-in">
@@ -1323,6 +1346,8 @@
             const totalVal = window.appState.total || 0;
             document.getElementById('seller-total-price').innerText = `${totalVal.toFixed(2)} €`;
             document.getElementById('seller-total-price-2').innerText = `${totalVal.toFixed(2)} €`;
+            const checkoutTotalEl = document.getElementById('checkout-total-price');
+            if (checkoutTotalEl) checkoutTotalEl.innerText = `${totalVal.toFixed(2)} €`;
             
             const rawCash = window.appState.givenCash || '0';
             const parsedCash = parseFloat(rawCash);
@@ -1437,6 +1462,17 @@
             triggerStateSync();
         }
 
+        function openCheckoutModal() {
+            if (window.appState.cart.length === 0) return showToast('Warenkorb ist leer!', 'warning');
+            window.appState.givenCash = '';
+            triggerStateSync();
+            document.getElementById('modal-checkout').classList.remove('hidden');
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('modal-checkout').classList.add('hidden');
+        }
+
         function completeSale() {
             if (window.appState.cart.length === 0) return showToast('Warenkorb ist leer!', 'warning');
             if (window.appState.paid < window.appState.total) return showToast('Betrag reicht nicht aus!', 'warning');
@@ -1459,6 +1495,7 @@
             window.appState.givenCash = '';
             window.appState.paid = 0;
             window.appState.change = 0;
+            closeCheckoutModal();
             
             triggerStateSync();
             
@@ -1736,6 +1773,8 @@
         window.closeDonationNumpad = closeDonationNumpad;
         window.pressDonationNumpad = pressDonationNumpad;
         window.confirmDonation = confirmDonation;
+        window.openCheckoutModal = openCheckoutModal;
+        window.closeCheckoutModal = closeCheckoutModal;
         window.setQuickCash = setQuickCash; 
         window.completeSale = completeSale; 
         window.deleteSaleEntry = deleteSaleEntry; 
