@@ -679,6 +679,9 @@
                 <button onclick="clearAllSalesHistory()" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-3 py-1.5 rounded-lg text-[10px] transition-all flex items-center gap-1.5 mr-auto active:scale-95">
                     <i class="fa-solid fa-triangle-exclamation"></i> Alles löschen
                 </button>
+                <button onclick="exportSalesHistoryAsReceipt()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-3.5 py-1.5 rounded-lg text-[10px] transition-all flex items-center gap-1.5 active:scale-95 shadow-sm">
+                    <i class="fa-solid fa-file-arrow-down"></i> Als Kassenzettel exportieren
+                </button>
                 <button onclick="closeHistoryModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-5 py-1.5 rounded-xl text-xs transition-all active:scale-95">
                     Schließen
                 </button>
@@ -1693,6 +1696,55 @@
             });
         }
 
+        function exportSalesHistoryAsReceipt() {
+            const sales = window.appState.salesHistory || [];
+            if (sales.length === 0) {
+                showToast('Keine Verkäufe zum Exportieren vorhanden.', 'warning');
+                return;
+            }
+
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('de-DE');
+            const line = '----------------------------------------';
+            let receipt = '';
+            receipt += `        SOMMERFEST KASSENZETTEL\n`;
+            receipt += `        Erstellt am: ${dateStr}\n`;
+            receipt += line + '\n\n';
+
+            let grandTotal = 0;
+
+            // Älteste zuerst, damit der Zettel chronologisch lesbar ist
+            [...sales].reverse().forEach((sale, idx) => {
+                const time = new Date(sale.timestamp).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                receipt += `Beleg #${idx + 1}   ${time} Uhr\n`;
+                sale.items.forEach(item => {
+                    const namePart = `${item.qty}x ${item.name}`;
+                    const pricePart = `${(item.price * item.qty).toFixed(2)} €`;
+                    const spacing = Math.max(1, 34 - namePart.length);
+                    receipt += `  ${namePart}${' '.repeat(spacing)}${pricePart}\n`;
+                });
+                receipt += `  Gegeben: ${sale.paid.toFixed(2)} €   Rückgeld: ${sale.change.toFixed(2)} €\n`;
+                receipt += `  Summe: ${sale.total.toFixed(2)} €\n`;
+                receipt += line + '\n';
+                grandTotal += sale.total;
+            });
+
+            receipt += `\nGESAMTUMSATZ: ${grandTotal.toFixed(2)} €\n`;
+            receipt += `Anzahl Verkäufe: ${sales.length}\n`;
+
+            const blob = new Blob([receipt], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Kassenzettel_${now.toISOString().slice(0, 10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showToast('Kassenzettel wurde exportiert.', 'success');
+        }
+
         function openConfigModal() {
             document.getElementById('modal-config').classList.remove('hidden');
             renderConfigTariffList();
@@ -1774,6 +1826,7 @@
         window.completeSale = completeSale; 
         window.deleteSaleEntry = deleteSaleEntry; 
         window.clearAllSalesHistory = clearAllSalesHistory; 
+        window.exportSalesHistoryAsReceipt = exportSalesHistoryAsReceipt;
         window.openHistoryModal = openHistoryModal; 
         window.closeHistoryModal = closeHistoryModal; 
         window.openConfigModal = openConfigModal; 
