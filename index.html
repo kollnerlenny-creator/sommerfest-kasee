@@ -386,7 +386,7 @@
         <section id="view-seller" class="hidden flex-grow flex flex-row gap-2 md:gap-4 items-stretch min-h-0 overflow-hidden animate-fade-in">
             
             <!-- Left Panel (Tariffs) -->
-            <div class="w-[55%] flex flex-col gap-2 overflow-hidden min-h-0">
+            <div class="w-[52%] flex flex-col gap-2 overflow-hidden min-h-0">
                 <!-- Header Controls -->
                 <div class="glass-panel p-2 rounded-2xl flex items-center justify-between gap-1 shrink-0">
                     <div class="flex items-center gap-1">
@@ -421,7 +421,7 @@
             </div>
 
             <!-- Right Panel (Cart & Numpad) -->
-            <div class="w-[45%] flex flex-col gap-2 overflow-hidden min-h-0">
+            <div class="w-[48%] flex flex-col gap-2 overflow-hidden min-h-0">
                 
                 <!-- Live Cart Card: nimmt übrigen Platz, darf aber bis auf ein Minimum
                      schrumpfen und intern scrollen — die Zahlungs-Karte darunter hat
@@ -437,13 +437,7 @@
                     </div>
 
                     <!-- Cart Items List (2-spaltig, damit man i.d.R. nicht scrollen muss) -->
-                    <div id="seller-cart-items" class="flex-1 overflow-y-auto flex flex-col gap-1 pr-1 min-h-0"></div>
-
-                    <!-- Cart Total display -->
-                    <div class="border-t border-white/50 pt-1.5 mt-1.5 flex items-center justify-between shrink-0">
-                        <span class="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-wider">Gesamt:</span>
-                        <span id="seller-total-price" class="font-summer text-base md:text-2xl font-extrabold text-orange-600 transition-all duration-300">0.00 €</span>
-                    </div>
+                    <div id="seller-cart-items" class="flex-1 overflow-y-auto flex flex-col gap-2 pr-1 min-h-0"></div>
                 </div>
 
                 <!-- Kassieren-Button: öffnet das große Zahlen-Popup -->
@@ -1321,18 +1315,18 @@
                 // Artikel sollen bei einer Mengenänderung nicht erneut mit-animieren.
                 const isNewItem = !previousCartItemIds.has(item.id);
                 const row = document.createElement('div');
-                row.className = `flex items-center justify-between glass-panel-soft px-2 py-1 md:py-1.5 rounded-lg transition-all shrink-0 gap-1.5 ${isNewItem ? 'animate-slide-in-right' : ''}`;
+                row.className = `flex items-center justify-between glass-panel-soft px-3 py-2.5 md:py-3 rounded-xl transition-all shrink-0 gap-2 ${isNewItem ? 'animate-slide-in-right' : ''}`;
                 row.innerHTML = `
-                    <div class="flex items-center gap-1.5 min-w-0 flex-1">
-                        <span class="font-bold text-[9px] md:text-[10px] text-orange-600 shrink-0">${item.qty}x</span>
-                        <h5 class="font-bold text-[9px] md:text-[10px] text-slate-800 truncate leading-tight">${item.name}</h5>
+                    <div class="flex items-center gap-2 min-w-0 flex-1">
+                        <span class="font-bold text-xs md:text-sm text-orange-600 shrink-0">${item.qty}x</span>
+                        <h5 class="font-bold text-xs md:text-sm text-slate-800 truncate leading-tight">${item.name}</h5>
                     </div>
 
-                    <span class="font-mono font-bold text-[9px] md:text-[10px] text-slate-600 shrink-0">${(item.price * item.qty).toFixed(2)} €</span>
+                    <span class="font-mono font-bold text-xs md:text-sm text-slate-600 shrink-0">${(item.price * item.qty).toFixed(2)} €</span>
 
-                    <div class="flex items-center gap-1 shrink-0">
-                        <button onclick="changeCartQty(${index}, -1)" class="w-6 h-6 md:w-7 md:h-7 glass-key text-slate-700 rounded-md font-bold text-xs flex items-center justify-center transition-colors active:scale-90 shrink-0">-</button>
-                        <button onclick="changeCartQty(${index}, 1)" class="w-6 h-6 md:w-7 md:h-7 glass-key text-slate-700 rounded-md font-bold text-xs flex items-center justify-center transition-colors active:scale-90 shrink-0">+</button>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button onclick="changeCartQty(${index}, -1)" class="w-8 h-8 md:w-9 md:h-9 glass-key text-slate-700 rounded-lg font-bold text-sm flex items-center justify-center transition-colors active:scale-90 shrink-0">-</button>
+                        <button onclick="changeCartQty(${index}, 1)" class="w-8 h-8 md:w-9 md:h-9 glass-key text-slate-700 rounded-lg font-bold text-sm flex items-center justify-center transition-colors active:scale-90 shrink-0">+</button>
                     </div>
                 `;
                 container.appendChild(row);
@@ -1344,7 +1338,8 @@
             window.appState.total = window.appState.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             
             const totalVal = window.appState.total || 0;
-            document.getElementById('seller-total-price').innerText = `${totalVal.toFixed(2)} €`;
+            const sellerTotalEl = document.getElementById('seller-total-price');
+            if (sellerTotalEl) sellerTotalEl.innerText = `${totalVal.toFixed(2)} €`;
             document.getElementById('seller-total-price-2').innerText = `${totalVal.toFixed(2)} €`;
             const checkoutTotalEl = document.getElementById('checkout-total-price');
             if (checkoutTotalEl) checkoutTotalEl.innerText = `${totalVal.toFixed(2)} €`;
