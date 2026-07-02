@@ -190,25 +190,25 @@
         /* Extrem optimierte Skalierung für kleine Tablet-Bildschirmhöhen (Flexbox-Rettung!) */
         /* --- LIQUID GLASS --- */
         .glass-panel {
-            background: linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0.42));
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255,255,255,0.65);
-            box-shadow: 0 8px 32px rgba(120, 80, 20, 0.10), inset 0 1px 0 rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.45);
+            backdrop-filter: blur(16px) saturate(160%);
+            -webkit-backdrop-filter: blur(16px) saturate(160%);
+            border: 1px solid rgba(255,255,255,0.55);
+            box-shadow: 0 8px 32px rgba(120, 80, 20, 0.10), inset 0 1px 0 rgba(255,255,255,0.5);
         }
         .glass-panel-soft {
-            background: rgba(255,255,255,0.38);
-            backdrop-filter: blur(14px) saturate(160%);
-            -webkit-backdrop-filter: blur(14px) saturate(160%);
+            background: rgba(255,255,255,0.45);
+            backdrop-filter: blur(16px) saturate(160%);
+            -webkit-backdrop-filter: blur(16px) saturate(160%);
             border: 1px solid rgba(255,255,255,0.55);
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
         }
         .glass-key {
-            background: linear-gradient(160deg, rgba(255,255,255,0.65), rgba(255,255,255,0.30));
-            backdrop-filter: blur(10px) saturate(160%);
-            -webkit-backdrop-filter: blur(10px) saturate(160%);
-            border: 1px solid rgba(255,255,255,0.7);
-            box-shadow: 0 2px 8px rgba(120, 80, 20, 0.06), inset 0 1px 0 rgba(255,255,255,0.7);
+            background: rgba(255,255,255,0.45);
+            backdrop-filter: blur(16px) saturate(160%);
+            -webkit-backdrop-filter: blur(16px) saturate(160%);
+            border: 1px solid rgba(255,255,255,0.55);
+            box-shadow: 0 2px 8px rgba(120, 80, 20, 0.05), inset 0 1px 0 rgba(255,255,255,0.5);
         }
         .glass-key:active {
             background: linear-gradient(160deg, rgba(251,191,36,0.35), rgba(249,115,22,0.20));
@@ -258,7 +258,7 @@
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-amber-50 via-orange-50 to-sky-50 w-full overflow-hidden text-slate-800 flex flex-col antialiased selection:bg-orange-200 transition-colors duration-500" style="overscroll-behavior: none;">
+<body class="bg-gradient-to-br from-amber-300 via-orange-300 to-sky-200 w-full overflow-hidden text-slate-800 flex flex-col antialiased selection:bg-orange-200 transition-colors duration-500" style="overscroll-behavior: none;">
 
     <!-- SELLER SCREENSAVER (Idle nach 10 Sekunden) -->
     <div id="seller-screensaver" class="hidden fixed inset-0 bg-gradient-to-br from-amber-400 via-orange-400 to-sky-300 overflow-hidden flex flex-col justify-between p-6 md:p-12 text-white z-[80] transition-opacity duration-500 animate-fade-in">
@@ -319,7 +319,7 @@
 
         <!-- SECURITY PASSCODE LOCK SCREEN -->
         <section id="view-passcode-lock" class="flex-grow flex flex-col items-center justify-center py-2 animate-fade-in z-[100] min-h-0 overflow-y-auto">
-            <div id="passcode-card" class="bg-white p-5 md:p-8 rounded-[2rem] shadow-xl border border-orange-100 w-full max-w-xs flex flex-col items-center text-center transition-all duration-300">
+            <div id="passcode-card" class="glass-panel p-5 md:p-8 rounded-[2rem] shadow-xl w-full max-w-xs flex flex-col items-center text-center transition-all duration-300">
                 <div class="bg-amber-100 text-amber-600 p-3 md:p-4 rounded-full mb-2.5 shadow-inner">
                     <i class="fa-solid fa-lock text-xl md:text-3xl animate-pulse-soft"></i>
                 </div>
@@ -334,20 +334,20 @@
                 </div>
 
                 <div class="grid grid-cols-3 gap-2 w-full">
-                    <button onclick="pressPasscodeDigit('1')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:scale-90 text-slate-800 font-black rounded-xl text-base transition-all border border-slate-100">1</button>
-                    <button onclick="pressPasscodeDigit('2')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:scale-90 text-slate-800 font-black rounded-xl text-base transition-all border border-slate-100">2</button>
-                    <button onclick="pressPasscodeDigit('3')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:scale-90 text-slate-800 font-black rounded-xl text-base transition-all border border-slate-100">3</button>
+                    <button onclick="pressPasscodeDigit('1')" class="numpad-btn glass-key hover:bg-white/60 active:scale-90 text-slate-800 font-black rounded-xl text-base transition-all">1</button>
+                    <button onclick="pressPasscodeDigit('2')" class="numpad-btn glass-key hover:bg-white/60 active:scale-90 text-slate-800 font-black rounded-xl text-base transition-all">2</button>
+                    <button onclick="pressPasscodeDigit('3')" class="numpad-btn glass-key hover:bg-white/60 active:scale-90 text-slate-800 font-black rounded-xl text-base transition-all">3</button>
                     
-                    <button onclick="pressPasscodeDigit('4')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:scale-90 text-slate-800 font-black rounded-xl text-base transition-all border border-slate-100">4</button>
-                    <button onclick="pressPasscodeDigit('5')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:scale-90 text-slate-800 font-black rounded-xl text-base transition-all border border-slate-100">5</button>
-                    <button onclick="pressPasscodeDigit('6')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:scale-90 text-slate-800 font-black rounded-xl text-base transition-all border border-slate-100">6</button>
+                    <button onclick="pressPasscodeDigit('4')" class="numpad-btn glass-key hover:bg-white/60 active:scale-90 text-slate-800 font-black rounded-xl text-base transition-all">4</button>
+                    <button onclick="pressPasscodeDigit('5')" class="numpad-btn glass-key hover:bg-white/60 active:scale-90 text-slate-800 font-black rounded-xl text-base transition-all">5</button>
+                    <button onclick="pressPasscodeDigit('6')" class="numpad-btn glass-key hover:bg-white/60 active:scale-90 text-slate-800 font-black rounded-xl text-base transition-all">6</button>
                     
-                    <button onclick="pressPasscodeDigit('7')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:scale-90 text-slate-800 font-black rounded-xl text-base transition-all border border-slate-100">7</button>
-                    <button onclick="pressPasscodeDigit('8')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:scale-90 text-slate-800 font-black rounded-xl text-base transition-all border border-slate-100">8</button>
-                    <button onclick="pressPasscodeDigit('9')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:scale-90 text-slate-800 font-black rounded-xl text-base transition-all border border-slate-100">9</button>
+                    <button onclick="pressPasscodeDigit('7')" class="numpad-btn glass-key hover:bg-white/60 active:scale-90 text-slate-800 font-black rounded-xl text-base transition-all">7</button>
+                    <button onclick="pressPasscodeDigit('8')" class="numpad-btn glass-key hover:bg-white/60 active:scale-90 text-slate-800 font-black rounded-xl text-base transition-all">8</button>
+                    <button onclick="pressPasscodeDigit('9')" class="numpad-btn glass-key hover:bg-white/60 active:scale-90 text-slate-800 font-black rounded-xl text-base transition-all">9</button>
                     
-                    <button onclick="clearPasscode()" class="numpad-btn bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-xl text-xs transition-all border border-red-200">C</button>
-                    <button onclick="pressPasscodeDigit('0')" class="numpad-btn bg-slate-50 hover:bg-amber-100/50 active:scale-90 text-slate-800 font-black rounded-xl text-base transition-all border border-slate-100">0</button>
+                    <button onclick="clearPasscode()" class="numpad-btn glass-key hover:bg-red-100/40 active:scale-90 text-red-600 font-bold rounded-xl text-xs transition-all">C</button>
+                    <button onclick="pressPasscodeDigit('0')" class="numpad-btn glass-key hover:bg-white/60 active:scale-90 text-slate-800 font-black rounded-xl text-base transition-all">0</button>
                     <button class="numpad-btn opacity-0 cursor-default pointer-events-none"></button>
                 </div>
             </div>
@@ -358,7 +358,7 @@
         <section id="view-role-selection" class="hidden flex-grow flex items-center justify-center py-2 animate-fade-in min-h-0 overflow-y-auto">
             <div class="max-w-2xl w-full flex flex-col sm:flex-row gap-4 px-4">
                 
-                <button onclick="selectRole('seller')" class="w-full sm:w-1/2 group relative bg-white hover:bg-gradient-to-b hover:from-white hover:to-amber-50/30 p-5 md:p-6 rounded-3xl border-2 border-slate-100 hover:border-amber-400 text-left transition-all duration-300 shadow-md hover:shadow-lg flex flex-col justify-between h-48 md:h-56 overflow-hidden transform hover:-translate-y-1">
+                <button onclick="selectRole('seller')" class="w-full sm:w-1/2 group relative glass-panel hover:bg-white/60 p-5 md:p-6 rounded-3xl border-2 !border-white/50 hover:!border-amber-400 text-left transition-all duration-300 shadow-md hover:shadow-lg flex flex-col justify-between h-48 md:h-56 overflow-hidden transform hover:-translate-y-1">
                     <div class="absolute -right-10 -top-10 w-24 h-24 bg-amber-100 rounded-full opacity-30 group-hover:scale-125 transition-transform duration-500"></div>
                     <div class="bg-amber-100 group-hover:bg-amber-500 text-amber-600 group-hover:text-white p-2.5 rounded-2xl inline-block transition-colors duration-300 self-start">
                         <i class="fa-solid fa-cash-register text-xl"></i>
@@ -369,7 +369,7 @@
                     </div>
                 </button>
 
-                <button onclick="selectRole('customer')" class="w-full sm:w-1/2 group relative bg-white hover:bg-gradient-to-b hover:from-white hover:to-sky-50/30 p-5 md:p-6 rounded-3xl border-2 border-slate-100 hover:border-sky-400 text-left transition-all duration-300 shadow-md hover:shadow-lg flex flex-col justify-between h-48 md:h-56 overflow-hidden transform hover:-translate-y-1">
+                <button onclick="selectRole('customer')" class="w-full sm:w-1/2 group relative glass-panel hover:bg-white/60 p-5 md:p-6 rounded-3xl border-2 !border-white/50 hover:!border-sky-400 text-left transition-all duration-300 shadow-md hover:shadow-lg flex flex-col justify-between h-48 md:h-56 overflow-hidden transform hover:-translate-y-1">
                     <div class="absolute -right-10 -top-10 w-24 h-24 bg-sky-100 rounded-full opacity-30 group-hover:scale-125 transition-transform duration-500"></div>
                     <div class="bg-sky-100 group-hover:bg-sky-500 text-sky-600 group-hover:text-white p-2.5 rounded-2xl inline-block transition-colors duration-300 self-start">
                         <i class="fa-solid fa-desktop text-xl"></i>
@@ -408,21 +408,16 @@
                 <div id="seller-tariffs-grid" class="grid grid-cols-2 gap-1.5 md:gap-2 overflow-y-auto pr-1 flex-grow content-start min-h-0"></div>
 
                 <!-- Custom Price (Fixed at bottom) -->
-                <div class="glass-panel p-2 rounded-2xl border-dashed !border-2 !border-orange-300/70 flex flex-row items-center justify-between gap-1 shrink-0">
-                    <div class="flex items-center gap-1.5">
-                        <div class="bg-amber-100 text-amber-600 p-1.5 rounded-lg text-[9px] md:text-xs">
-                            <i class="fa-solid fa-tag"></i>
-                        </div>
-                        <h4 class="font-bold text-[10px] md:text-xs text-slate-800 leading-none">Spende</h4>
+                <button onclick="openDonationNumpad()" class="glass-panel-soft !border-white/50 hover:!border-orange-300 hover:bg-white/60 p-2.5 md:p-3 rounded-2xl flex items-center gap-2.5 shrink-0 transition-all duration-200 active:scale-95 text-left w-full">
+                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-tag text-xs md:text-sm"></i>
                     </div>
-                    <div class="flex items-center gap-1">
-                        <input id="input-custom-price" type="number" step="0.50" placeholder="0.00" class="bg-white border border-slate-200 px-2 py-1 rounded-lg text-right font-bold text-slate-700 w-16 md:w-20 text-[10px] md:text-xs focus:outline-none focus:ring-1 focus:ring-orange-400 transition-all">
-                        <span class="font-bold text-[10px] md:text-xs text-slate-500">€</span>
-                        <button onclick="addCustomPrice()" class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-3 py-1 rounded-lg font-bold text-[10px] md:text-xs transition-all shadow-md active:scale-95">
-                            <i class="fa-solid fa-plus"></i>
-                        </button>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-[10px] md:text-xs font-bold text-slate-700 leading-tight">Spende</p>
+                        <p id="donation-display-price" class="font-summer text-sm md:text-lg font-black text-orange-600 leading-tight">Betrag eingeben</p>
                     </div>
-                </div>
+                    <i class="fa-solid fa-chevron-right text-slate-300 text-xs shrink-0"></i>
+                </button>
             </div>
 
             <!-- Right Panel (Cart & Numpad) -->
@@ -478,11 +473,11 @@
                     </div>
 
                     <!-- Quick Cash -->
-                    <div class="grid grid-cols-4 gap-1 shrink-0">
-                        <button onclick="setQuickCash(5)" class="glass-key hover:bg-white/60 active:scale-95 text-slate-700 font-bold py-1 rounded-lg text-[9px] md:text-[10px] transition-all">5 €</button>
-                        <button onclick="setQuickCash(10)" class="glass-key hover:bg-white/60 active:scale-95 text-slate-700 font-bold py-1 rounded-lg text-[9px] md:text-[10px] transition-all">10 €</button>
-                        <button onclick="setQuickCash(20)" class="glass-key hover:bg-white/60 active:scale-95 text-slate-700 font-bold py-1 rounded-lg text-[9px] md:text-[10px] transition-all">20 €</button>
-                        <button onclick="setQuickCash(50)" class="glass-key hover:bg-white/60 active:scale-95 text-slate-700 font-bold py-1 rounded-lg text-[9px] md:text-[10px] transition-all">50 €</button>
+                    <div class="grid grid-cols-4 gap-1.5 md:gap-2 shrink-0">
+                        <button onclick="setQuickCash(5)" class="glass-key hover:bg-white/60 active:scale-95 text-slate-700 font-bold py-2.5 md:py-3 rounded-xl text-sm md:text-base transition-all">5 €</button>
+                        <button onclick="setQuickCash(10)" class="glass-key hover:bg-white/60 active:scale-95 text-slate-700 font-bold py-2.5 md:py-3 rounded-xl text-sm md:text-base transition-all">10 €</button>
+                        <button onclick="setQuickCash(20)" class="glass-key hover:bg-white/60 active:scale-95 text-slate-700 font-bold py-2.5 md:py-3 rounded-xl text-sm md:text-base transition-all">20 €</button>
+                        <button onclick="setQuickCash(50)" class="glass-key hover:bg-white/60 active:scale-95 text-slate-700 font-bold py-2.5 md:py-3 rounded-xl text-sm md:text-base transition-all">50 €</button>
                     </div>
 
                     <!-- Numpad Grid -->
@@ -543,7 +538,9 @@
                     <div class="bg-white/10 p-6 md:p-8 rounded-full border border-white/20 animate-pulse-soft mb-4 shadow-lg backdrop-blur-sm">
                         <span class="text-6xl md:text-8xl block transform hover:rotate-45 transition-transform duration-1000">☀️</span>
                     </div>
-                    <h2 class="font-summer text-4xl md:text-7xl font-black tracking-wide drop-shadow-md mb-8">Genießer-Oase</h2>
+                    <h2 class="font-summer text-4xl md:text-7xl font-black tracking-wide drop-shadow-md mb-6 md:mb-8">Genießer-Oase</h2>
+
+                    <div id="screensaver-tariffs-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 md:gap-3 z-20 max-w-3xl w-full px-2"></div>
                 </div>
 
                 <div class="text-center z-20 text-lg md:text-2xl text-white font-bold pb-2 mb-8 md:mb-12 drop-shadow-sm tracking-wide">
@@ -568,7 +565,7 @@
             <div id="customer-active-view" class="hidden absolute inset-0 p-4 md:p-6 lg:p-8 flex flex-row gap-4 md:gap-6 items-stretch transition-opacity duration-300 min-h-0 overflow-hidden animate-fade-in z-30">
                 
                 <!-- Left panel: Rechnungsübersicht -->
-                <div class="w-[55%] bg-white p-5 md:p-6 rounded-3xl border border-orange-100 shadow-xl flex flex-col min-h-0 overflow-hidden">
+                <div class="w-[55%] glass-panel p-5 md:p-6 rounded-3xl shadow-xl flex flex-col min-h-0 overflow-hidden">
                     <div class="shrink-0">
                         <div class="flex items-center gap-4 mb-4 bg-orange-50 p-4 rounded-2xl border border-orange-100 shadow-sm">
                             <span class="text-3xl md:text-4xl">🌴</span>
@@ -603,7 +600,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-xl border border-orange-100 flex-grow flex flex-col justify-center gap-4 md:gap-6 min-h-0">
+                    <div class="glass-panel p-6 md:p-8 rounded-[2rem] shadow-xl flex-grow flex flex-col justify-center gap-4 md:gap-6 min-h-0">
                         <div>
                             <span class="text-[11px] md:text-sm font-black text-slate-400 uppercase tracking-wider block mb-1.5">Gegebenes Bargeld:</span>
                             <div class="flex items-baseline gap-2">
@@ -632,7 +629,7 @@
 
     <!-- SALES HISTORY MODAL -->
     <div id="modal-history" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-opacity duration-300">
-        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg border border-slate-100 overflow-hidden transform transition-all duration-300 flex flex-col max-h-[85vh]">
+        <div class="glass-panel rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all duration-300 flex flex-col max-h-[85vh] bg-gradient-to-br from-amber-100 via-orange-50 to-sky-50">
             <div class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-5 py-3.5 flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-3">
                     <i class="fa-solid fa-receipt text-lg"></i>
@@ -661,7 +658,7 @@
                 </div>
             </div>
 
-            <div class="bg-slate-50 px-5 py-3.5 flex justify-end gap-2.5 border-t border-slate-100 shrink-0">
+            <div class="glass-panel-soft px-5 py-3.5 flex justify-end gap-2.5 shrink-0">
                 <button onclick="clearAllSalesHistory()" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-3 py-1.5 rounded-lg text-[10px] transition-all flex items-center gap-1.5 mr-auto active:scale-95">
                     <i class="fa-solid fa-triangle-exclamation"></i> Alles löschen
                 </button>
@@ -674,7 +671,7 @@
 
     <!-- CONFIG MODAL -->
     <div id="modal-config" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-opacity duration-300">
-        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg border border-slate-100 overflow-hidden transform transition-all duration-300 flex flex-col max-h-[85vh]">
+        <div class="glass-panel rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all duration-300 flex flex-col max-h-[85vh] bg-gradient-to-br from-amber-100 via-orange-50 to-sky-50">
             <div class="bg-gradient-to-r from-orange-500 to-amber-400 text-white px-5 py-3.5 flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-3">
                     <i class="fa-solid fa-sliders text-lg"></i>
@@ -694,8 +691,8 @@
                 <div class="bg-orange-50/50 p-3.5 rounded-xl border border-orange-100/60">
                     <h4 class="text-[10px] font-extrabold text-orange-700 uppercase tracking-wider mb-2">Neuen Tarif hinzufügen</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
-                        <input id="new-tariff-name" type="text" placeholder="z.B. Jugendliche (12-16)" class="bg-white border border-slate-200 px-3.5 py-2 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-orange-400 font-medium transition-all">
-                        <div class="flex items-center gap-1.5 bg-white border border-slate-200 px-3.5 py-2 rounded-xl focus-within:ring-2 focus-within:ring-orange-400 transition-all">
+                        <input id="new-tariff-name" type="text" placeholder="z.B. Jugendliche (12-16)" class="bg-white/60 backdrop-blur-sm border border-white/60 px-3.5 py-2 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-orange-400 font-medium transition-all">
+                        <div class="flex items-center gap-1.5 bg-white/60 backdrop-blur-sm border border-white/60 px-3.5 py-2 rounded-xl focus-within:ring-2 focus-within:ring-orange-400 transition-all">
                             <input id="new-tariff-price" type="number" step="0.10" placeholder="Preis" class="w-full text-right text-xs focus:outline-none font-bold">
                             <span class="text-xs font-bold text-slate-400">€</span>
                         </div>
@@ -703,7 +700,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <div class="flex items-center gap-1.5">
                             <span class="text-xs font-bold text-slate-500 shrink-0">Icon:</span>
-                            <select id="new-tariff-icon" class="bg-white border border-slate-200 px-2 py-2 rounded-xl text-xs w-full font-medium">
+                            <select id="new-tariff-icon" class="bg-white/60 backdrop-blur-sm border border-white/60 px-2 py-2 rounded-xl text-xs w-full font-medium">
                                 <option value="fa-user">Standard Gast 👤</option>
                                 <option value="fa-child">Kind 👶</option>
                                 <option value="fa-user-graduate">Jugendlicher 🎒</option>
@@ -719,9 +716,52 @@
                 </div>
             </div>
 
-            <div class="bg-slate-50 px-5 py-3 flex justify-end gap-2.5 border-t border-slate-100 shrink-0">
+            <div class="glass-panel-soft px-5 py-3 flex justify-end gap-2.5 shrink-0">
                 <button onclick="closeConfigModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-5 py-1.5 rounded-xl text-xs transition-all active:scale-95">
                     Schließen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DONATION NUMPAD MODAL -->
+    <div id="modal-donation" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-opacity duration-300">
+        <div class="glass-panel rounded-[2rem] shadow-2xl w-full max-w-xs overflow-hidden transform transition-all duration-300 flex flex-col bg-gradient-to-br from-amber-100 via-orange-100 to-sky-50">
+            <div class="bg-gradient-to-r from-orange-500 to-amber-400 text-white px-5 py-3.5 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-tag text-base"></i>
+                    <h3 class="font-summer text-base md:text-lg font-bold">Spende eingeben</h3>
+                </div>
+                <button onclick="closeDonationNumpad()" class="text-white/80 hover:text-white text-xl transition-colors w-11 h-11 flex items-center justify-center -mr-2 active:scale-90">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-4 md:p-5 flex flex-col gap-3">
+                <div class="glass-panel-soft !border-white/50 rounded-2xl py-4 px-4 text-center">
+                    <span id="donation-amount-display" class="font-mono text-3xl md:text-4xl font-black text-slate-800">0,00 €</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 md:gap-2.5">
+                    <button onclick="pressDonationNumpad('7')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl transition-all">7</button>
+                    <button onclick="pressDonationNumpad('8')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl transition-all">8</button>
+                    <button onclick="pressDonationNumpad('9')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl transition-all">9</button>
+
+                    <button onclick="pressDonationNumpad('4')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl transition-all">4</button>
+                    <button onclick="pressDonationNumpad('5')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl transition-all">5</button>
+                    <button onclick="pressDonationNumpad('6')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl transition-all">6</button>
+
+                    <button onclick="pressDonationNumpad('1')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl transition-all">1</button>
+                    <button onclick="pressDonationNumpad('2')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl transition-all">2</button>
+                    <button onclick="pressDonationNumpad('3')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl transition-all">3</button>
+
+                    <button onclick="pressDonationNumpad('C')" class="cash-numpad-btn glass-key hover:bg-red-100/40 active:scale-95 text-red-600 font-bold rounded-xl text-base transition-all">C</button>
+                    <button onclick="pressDonationNumpad('0')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl transition-all">0</button>
+                    <button onclick="pressDonationNumpad('.')" class="cash-numpad-btn glass-key hover:bg-white/60 active:scale-95 text-slate-800 font-black rounded-xl text-2xl transition-all">,</button>
+                </div>
+
+                <button onclick="confirmDonation()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-95 text-white py-3 rounded-xl font-bold text-sm transition-all shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-1.5 shrink-0" style="box-shadow: 0 6px 20px rgba(5,150,105,0.25), inset 0 1px 0 rgba(255,255,255,0.35);">
+                    <i class="fa-solid fa-plus"></i> Zum Warenkorb hinzufügen
                 </button>
             </div>
         </div>
@@ -1192,6 +1232,27 @@
             if (badgeEl) badgeEl.innerText = totalGuests;
         }
 
+        function renderScreensaverTariffs() {
+            const container = document.getElementById('screensaver-tariffs-grid');
+            if (!container) return;
+            container.innerHTML = '';
+
+            (window.appState.tariffs || []).forEach(tariff => {
+                const card = document.createElement('div');
+                card.className = "glass-panel-soft !border-white/50 rounded-2xl px-3 py-2.5 md:px-4 md:py-3 flex items-center gap-2.5 shadow-sm";
+                card.innerHTML = `
+                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/40 flex items-center justify-center shrink-0 border border-white/50">
+                        <i class="fa-solid ${tariff.icon || 'fa-user'} text-sky-900/70 text-xs md:text-sm"></i>
+                    </div>
+                    <div class="text-left min-w-0">
+                        <p class="text-[10px] md:text-xs font-bold text-sky-900/80 leading-tight truncate">${tariff.name}</p>
+                        <p class="font-summer text-sm md:text-lg font-black text-sky-900/90 leading-tight">${tariff.price.toFixed(2)} <span class="text-[9px] md:text-[10px] font-bold">€</span></p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
         function renderSellerTariffs() {
             const container = document.getElementById('seller-tariffs-grid');
             if (!container) return;
@@ -1200,15 +1261,12 @@
             window.appState.tariffs.forEach(tariff => {
                 const card = document.createElement('button');
                 card.onclick = () => addToCart(tariff);
-                card.className = "glass-panel-soft hover:bg-white/60 p-2.5 md:p-3 rounded-2xl border-2 !border-white/50 hover:!border-orange-300 text-left transition-all duration-200 hover:shadow-md flex flex-col justify-between tariff-card relative overflow-hidden group active:scale-95 shrink-0";
+                card.className = "glass-panel-soft hover:bg-white/60 !border-white/50 hover:!border-orange-300 p-2.5 md:p-3 rounded-2xl border-2 text-left transition-all duration-200 hover:shadow-md flex items-center gap-2.5 tariff-card relative overflow-hidden group active:scale-95 shrink-0";
                 card.innerHTML = `
-                    <div class="flex items-center justify-between w-full">
-                        <div class="bg-orange-100 text-orange-600 p-1 md:p-1.5 rounded-lg group-hover:bg-orange-500 group-hover:text-white transition-all duration-300">
-                            <i class="fa-solid ${tariff.icon || 'fa-user'} text-[9px] md:text-[11px]"></i>
-                        </div>
-                        <span class="text-[7px] md:text-[8px] bg-slate-100 font-extrabold text-slate-400 px-1 py-0.5 rounded">Flatrate</span>
+                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shrink-0 group-hover:bg-orange-500 group-hover:text-white transition-all duration-300">
+                        <i class="fa-solid ${tariff.icon || 'fa-user'} text-xs md:text-sm"></i>
                     </div>
-                    <div>
+                    <div class="min-w-0">
                         <h4 class="font-bold text-slate-700 text-[9px] md:text-[11px] group-hover:text-slate-900 transition-colors line-clamp-1 leading-tight">${tariff.name}</h4>
                         <p class="font-summer text-sm md:text-base font-black text-orange-600 mt-0.5">${tariff.price.toFixed(2)} <span class="text-[8px] md:text-[9px] font-bold">€</span></p>
                     </div>
@@ -1307,8 +1365,51 @@
             triggerStateSync();
         }
 
+        // Spenden-Nummernfeld
+        let donationAmount = '';
+
+        function openDonationNumpad() {
+            donationAmount = '';
+            updateDonationDisplay();
+            document.getElementById('modal-donation').classList.remove('hidden');
+        }
+
+        function closeDonationNumpad() {
+            document.getElementById('modal-donation').classList.add('hidden');
+        }
+
+        function pressDonationNumpad(key) {
+            if (key === 'C') donationAmount = '';
+            else if (key === '.') {
+                if (!donationAmount.includes('.')) donationAmount = donationAmount === '' ? '0.' : donationAmount + '.';
+            } else {
+                donationAmount = donationAmount === '0' ? key : donationAmount + key;
+            }
+            updateDonationDisplay();
+        }
+
+        function updateDonationDisplay() {
+            const el = document.getElementById('donation-amount-display');
+            if (!el) return;
+            const value = parseFloat(donationAmount || '0') || 0;
+            el.innerText = value.toFixed(2).replace('.', ',') + ' €';
+        }
+
+        function confirmDonation() {
+            const price = parseFloat(donationAmount);
+            if (isNaN(price) || price <= 0) {
+                showToast('Bitte einen Betrag eingeben.', 'warning');
+                return;
+            }
+            window.appState.cart.push({ id: 'custom-' + Date.now(), name: 'Spende', price: price, qty: 1 });
+            donationAmount = '';
+            closeDonationNumpad();
+            triggerStateSync();
+        }
+
         function addCustomPrice() {
             const input = document.getElementById('input-custom-price');
+            if (!input) return;
             const price = parseFloat(input.value);
             if (isNaN(price) || price <= 0) {
                 showToast('Bitte einen Betrag eingeben.', 'warning');
@@ -1406,6 +1507,7 @@
         // CUSTOMER UI RENDERER
         function updateCustomerUI() {
             updateGuestsBadge();
+            renderScreensaverTariffs();
             const screensaverEl = document.getElementById('customer-screensaver');
             const activeViewEl = document.getElementById('customer-active-view');
             const successOverlayEl = document.getElementById('customer-success-overlay');
@@ -1491,7 +1593,7 @@
                 currentCustomerItemIds.add(item.id);
                 const isNewItem = !previousCustomerItemIds.has(item.id);
                 const itemEl = document.createElement('div');
-                itemEl.className = `flex items-center justify-between p-2 md:p-3 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm shrink-0 ${isNewItem ? 'animate-slide-in-right' : ''}`;
+                itemEl.className = `flex items-center justify-between p-2 md:p-3 rounded-2xl glass-panel-soft !border-white/50 shadow-sm shrink-0 ${isNewItem ? 'animate-slide-in-right' : ''}`;
                 if (isNewItem) {
                     itemEl.style.animationDelay = `${newItemCount * 0.05}s`;
                     newItemCount++;
@@ -1542,7 +1644,7 @@
                 const itemsList = sale.items.map(item => `${item.qty}x ${item.name}`).join(', ');
 
                 const itemDiv = document.createElement('div');
-                itemDiv.className = "bg-slate-50 p-2.5 md:p-3 rounded-2xl border border-slate-200/60 flex items-center justify-between gap-2 shadow-sm shrink-0";
+                itemDiv.className = "glass-panel-soft !border-white/50 p-2.5 md:p-3 rounded-2xl flex items-center justify-between gap-2 shadow-sm shrink-0";
                 itemDiv.innerHTML = `
                     <div class="min-w-0 flex-grow">
                         <div class="flex items-center gap-1.5">
@@ -1575,10 +1677,10 @@
 
             window.appState.tariffs.forEach((tariff, index) => {
                 const div = document.createElement('div');
-                div.className = "flex items-center justify-between bg-slate-50 p-2.5 md:p-3 rounded-2xl border border-slate-200/60 shadow-sm shrink-0";
+                div.className = "flex items-center justify-between glass-panel-soft !border-white/60 p-2.5 md:p-3 rounded-2xl shadow-sm shrink-0";
                 div.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <span class="bg-slate-200 text-slate-600 w-6 h-6 rounded-lg flex items-center justify-center text-xs">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs md:text-sm shrink-0">
                             <i class="fa-solid ${tariff.icon || 'fa-user'}"></i>
                         </span>
                         <div>
@@ -1630,6 +1732,10 @@
         window.clearCart = clearCart; 
         window.addCustomPrice = addCustomPrice; 
         window.pressNumpad = pressNumpad; 
+        window.openDonationNumpad = openDonationNumpad;
+        window.closeDonationNumpad = closeDonationNumpad;
+        window.pressDonationNumpad = pressDonationNumpad;
+        window.confirmDonation = confirmDonation;
         window.setQuickCash = setQuickCash; 
         window.completeSale = completeSale; 
         window.deleteSaleEntry = deleteSaleEntry; 
