@@ -15,6 +15,7 @@
     <title>Sommerfest Buffet - Bezahlsystem & Ess-Zone</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- Google Fonts (Inter & Fredoka für sommerlichen Vibe) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -680,7 +681,7 @@
                     <i class="fa-solid fa-triangle-exclamation"></i> Alles löschen
                 </button>
                 <button onclick="exportSalesHistoryAsReceipt()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-3.5 py-1.5 rounded-lg text-[10px] transition-all flex items-center gap-1.5 active:scale-95 shadow-sm">
-                    <i class="fa-solid fa-file-arrow-down"></i> Als Kassenzettel exportieren
+                    <i class="fa-solid fa-file-pdf"></i> Als PDF exportieren
                 </button>
                 <button onclick="closeHistoryModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-5 py-1.5 rounded-xl text-xs transition-all active:scale-95">
                     Schließen
@@ -1702,47 +1703,94 @@
                 showToast('Keine Verkäufe zum Exportieren vorhanden.', 'warning');
                 return;
             }
+            if (!window.jspdf) {
+                showToast('PDF-Bibliothek konnte nicht geladen werden.', 'error');
+                return;
+            }
 
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ unit: 'mm', format: 'a4' });
             const now = new Date();
             const dateStr = now.toLocaleDateString('de-DE');
-            const line = '----------------------------------------';
-            let receipt = '';
-            receipt += `        SOMMERFEST KASSENZETTEL\n`;
-            receipt += `        Erstellt am: ${dateStr}\n`;
-            receipt += line + '\n\n';
+            const marginX = 15;
+            const pageHeight = doc.internal.pageSize.getHeight();
+            let y = 20;
+
+            function ensureSpace(lines) {
+                if (y + lines * 5 > pageHeight - 15) {
+                    doc.addPage();
+                    y = 20;
+                }
+            }
+
+            // Kopf
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.text('Sommerfest Kassenzettel', marginX, y);
+            y += 7;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            doc.setTextColor(120);
+            doc.text(`Erstellt am: ${dateStr}`, marginX, y);
+            doc.setTextColor(0);
+            y += 4;
+            doc.setDrawColor(230, 150, 60);
+            doc.line(marginX, y, 195, y);
+            y += 8;
 
             let grandTotal = 0;
 
-            // Älteste zuerst, damit der Zettel chronologisch lesbar ist
             [...sales].reverse().forEach((sale, idx) => {
+                ensureSpace(4 + sale.items.length);
                 const time = new Date(sale.timestamp).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                receipt += `Beleg #${idx + 1}   ${time} Uhr\n`;
+
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(11);
+                doc.text(`Beleg #${idx + 1}`, marginX, y);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(120);
+                doc.text(`${time} Uhr`, marginX + 30, y);
+                doc.setTextColor(0);
+                y += 6;
+
+                doc.setFontSize(10);
                 sale.items.forEach(item => {
+                    ensureSpace(1);
                     const namePart = `${item.qty}x ${item.name}`;
                     const pricePart = `${(item.price * item.qty).toFixed(2)} €`;
-                    const spacing = Math.max(1, 34 - namePart.length);
-                    receipt += `  ${namePart}${' '.repeat(spacing)}${pricePart}\n`;
+                    doc.text(namePart, marginX + 3, y);
+                    doc.text(pricePart, 195, y, { align: 'right' });
+                    y += 5;
                 });
-                receipt += `  Gegeben: ${sale.paid.toFixed(2)} €   Rückgeld: ${sale.change.toFixed(2)} €\n`;
-                receipt += `  Summe: ${sale.total.toFixed(2)} €\n`;
-                receipt += line + '\n';
+
+                ensureSpace(3);
+                doc.setTextColor(90);
+                doc.text(`Gegeben: ${sale.paid.toFixed(2)} €   Rückgeld: ${sale.change.toFixed(2)} €`, marginX + 3, y);
+                y += 5;
+                doc.setTextColor(0);
+                doc.setFont('helvetica', 'bold');
+                doc.text(`Summe: ${sale.total.toFixed(2)} €`, marginX + 3, y);
+                doc.setFont('helvetica', 'normal');
+                y += 4;
+                doc.setDrawColor(220);
+                doc.line(marginX, y, 195, y);
+                y += 6;
+
                 grandTotal += sale.total;
             });
 
-            receipt += `\nGESAMTUMSATZ: ${grandTotal.toFixed(2)} €\n`;
-            receipt += `Anzahl Verkäufe: ${sales.length}\n`;
+            ensureSpace(4);
+            y += 2;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(12);
+            doc.text(`Gesamtumsatz: ${grandTotal.toFixed(2)} €`, marginX, y);
+            y += 6;
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Anzahl Verkäufe: ${sales.length}`, marginX, y);
 
-            const blob = new Blob([receipt], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Kassenzettel_${now.toISOString().slice(0, 10)}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            showToast('Kassenzettel wurde exportiert.', 'success');
+            doc.save(`Kassenzettel_${now.toISOString().slice(0, 10)}.pdf`);
+            showToast('Kassenzettel wurde als PDF exportiert.', 'success');
         }
 
         function openConfigModal() {
